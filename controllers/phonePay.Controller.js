@@ -15,8 +15,8 @@ const newPayment = async (req, res) => {
             merchantUserId: req.body.merchantUserId,
             name: req.body.name,
             amount: req.body.amount * 100,
-            callbackUrl: `https://h2inspire.onrender.com/api/phone-pay/status`,
-            redirectUrl: `https://h2inspire.onrender.com/api/phone-pay/status`,
+            callbackUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
+            redirectUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectMode: 'POST',
             mobileNumber: req.body.mobileNumber,
             paymentInstrument: {
@@ -91,18 +91,18 @@ const checkStatus = async(req, res) => {
         console.log(response.data, "datatesting 2", page)
         if (page != 'transaction') {
             if (response.data.success === true) {
-                const url = "http://localhost:5173/showPrice/success"
+                const url = "http://hire2inspire-4guju.kinsta.page/showPrice/success"
                 return res.redirect(url)
             } else {
-                const url = "http://localhost:5173/showPrice/failed"
+                const url = "http://hire2inspire-4guju.kinsta.page/showPrice/failed"
                 return res.redirect(url)
             }
         } else {
             if (response.data.success === true) {
-                const url = "http://localhost:5173/employer/transactionamount/success"
+                const url = "http://hire2inspire-4guju.kinsta.page/employer/transactionamount/success"
                 return res.redirect(url)
             } else {
-                const url = "http://localhost:5173/employer/transactionamount/failed"
+                const url = "http://hire2inspire-4guju.kinsta.page/employer/transactionamount/failed"
                 return res.redirect(url)
             }
         }
@@ -111,10 +111,10 @@ const checkStatus = async(req, res) => {
     .catch((error) => {
         console.error(error?.data, "err")
         if (page != 'transaction') {
-            const url = "http://localhost:5173/showPrice/failed"
+            const url = "http://hire2inspire-4guju.kinsta.page/showPrice/failed"
             return res.redirect(url)
         } else {
-            const url = "http://localhost:5173/employer/transactionamount/failed"
+            const url = "http://hire2inspire-4guju.kinsta.page/employer/transactionamount/failed"
             return res.redirect(url)
         }
     }
