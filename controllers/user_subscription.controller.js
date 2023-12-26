@@ -174,10 +174,10 @@ module.exports = {
                 host: "hire2inspire.com",
                 port: 465,
                 auth: {
-                  user: "info@hire2inspire.com",
-                  pass: "h2I@2023"
+                    user: "info@hire2inspire.com",
+                    pass: "h2I@2023"
                 }
-              });
+            });
 
             var mailOptions = {
                 from: 'info@hire2inspire.com',
