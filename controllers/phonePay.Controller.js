@@ -18,7 +18,7 @@ const newPayment = async (req, res) => {
             callbackUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectMode: 'POST',
-            mobileNumber: req.body.mobileNumber,
+            mobileNumber: 7431860572,
             paymentInstrument: {
                 type: 'PAY_PAGE'
             }
