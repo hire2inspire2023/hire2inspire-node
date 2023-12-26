@@ -1,0 +1,1 @@
+[Tue, 26 Dec 2023 13:23:17 GMT] - ::1 - - "POST /api/employer/login HTTP/1.1" code - 400 58 "http://localhost:5173/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36" request {"email":"employer4@h2i.com","password":"employer@123"} response {"error":true,"status":400,"message":"Password not valid"}

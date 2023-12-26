@@ -10,8 +10,8 @@ const newPayment = async (req, res) => {
         const { merchantTransactionId, name, amount, merchantUserId, mobileNumber, pagetype } = req.body;
         page = pagetype;
         const data = {
-            //merchantId: 'PGTESTPAYUAT',
-            merchantId: 'M22UKH0NQ4M7L',
+            merchantId: 'PGTESTPAYUAT',
+            // merchantId: 'M22UKH0NQ4M7L',
             merchantTransactionId: merchantTransactionId,
             merchantUserId: req.body.merchantUserId,
             name: req.body.name,
@@ -26,15 +26,15 @@ const newPayment = async (req, res) => {
         };
         const payload = JSON.stringify(data);
         const payloadMain = Buffer.from(payload).toString('base64');
-        // const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
-        const key = '22743b48-6e95-4685-bb40-cb9760b00beb'
+        const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+        // const key = '22743b48-6e95-4685-bb40-cb9760b00beb'
         const keyIndex = 1;
         const string = payloadMain + '/pg/v1/pay' + key;
         const sha256 = crypto.createHash('sha256').update(string).digest('hex');
         const checksum = sha256 + '###' + keyIndex;
 
-        //const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
-        const prod_URL = "https://api.phonepe.com/apis/hermes"
+        const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+        // const prod_URL = "https://api.phonepe.com/apis/hermes"
         const options = {
             method: 'POST',
             url: prod_URL,
