@@ -1,4 +1,4 @@
-const crypto =  require('crypto');
+const crypto = require('crypto');
 const axios = require('axios');
 //const {salt_key, merchant_id} = require('./secret');
 const Transaction = require("../models/transaction.model");
@@ -7,10 +7,11 @@ let page = '';
 
 const newPayment = async (req, res) => {
     try {
-        const {merchantTransactionId,name,amount,merchantUserId,mobileNumber,pagetype} = req.body;
+        const { merchantTransactionId, name, amount, merchantUserId, mobileNumber, pagetype } = req.body;
         page = pagetype;
         const data = {
-            merchantId: 'PGTESTPAYUAT',
+            //merchantId: 'PGTESTPAYUAT',
+            merchantId: 'M22UKH0NQ4M7L',
             merchantTransactionId: merchantTransactionId,
             merchantUserId: req.body.merchantUserId,
             name: req.body.name,
@@ -25,13 +26,15 @@ const newPayment = async (req, res) => {
         };
         const payload = JSON.stringify(data);
         const payloadMain = Buffer.from(payload).toString('base64');
-        const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+        // const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+        const key = '22743b48-6e95-4685-bb40-cb9760b00beb'
         const keyIndex = 1;
         const string = payloadMain + '/pg/v1/pay' + key;
         const sha256 = crypto.createHash('sha256').update(string).digest('hex');
         const checksum = sha256 + '###' + keyIndex;
 
-        const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+        //const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+        const prod_URL = "https://api.phonepe.com/apis/hermes"
         const options = {
             method: 'POST',
             url: prod_URL,
@@ -49,9 +52,9 @@ const newPayment = async (req, res) => {
             // console.log(response.data.data.instrumentResponse.redirectInfo.url)
             return res.send(response.data.data.instrumentResponse.redirectInfo.url)
         })
-        .catch(function (error) {
-            console.error(error);
-        });
+            .catch(function (error) {
+                console.error(error);
+            });
 
     } catch (error) {
         res.status(500).send({
@@ -61,12 +64,12 @@ const newPayment = async (req, res) => {
     }
 }
 
-const checkStatus = async(req, res) => {
+const checkStatus = async (req, res) => {
     console.log("hdkjhdejh");
     const merchantTransactionId = res.req.body.transactionId;
     const merchantId = res.req.body.merchantId;
 
-    console.log(res.req.body,"result");
+    console.log(res.req.body, "result");
     const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
     const keyIndex = 1;
     const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + key;
@@ -74,82 +77,82 @@ const checkStatus = async(req, res) => {
     const checksum = sha256 + "###" + keyIndex;
 
     const options = {
-    method: 'GET',
-    url: `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/${merchantId}/${merchantTransactionId}`,
-    headers: {
-        accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-VERIFY': checksum,
-        'X-MERCHANT-ID': `${merchantId}`
-    }
+        method: 'GET',
+        url: `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/${merchantId}/${merchantTransactionId}`,
+        headers: {
+            accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-VERIFY': checksum,
+            'X-MERCHANT-ID': `${merchantId}`
+        }
     };
 
     // CHECK PAYMENT STATUS
     axios
-    .request(options)
-    .then(async (response) => {
-        console.log(response.data, "datatesting 2", page)
-        if (page != 'transaction') {
-            if (response.data.success === true) {
-                const url = "http://hire2inspire.com/showPrice/success"
-                return res.redirect(url)
+        .request(options)
+        .then(async (response) => {
+            console.log(response.data, "datatesting 2", page)
+            if (page != 'transaction') {
+                if (response.data.success === true) {
+                    const url = "http://hire2inspire.com/showPrice/success"
+                    return res.redirect(url)
+                } else {
+                    const url = "http://hire2inspire.com/showPrice/failed"
+                    return res.redirect(url)
+                }
             } else {
-                const url = "http://hire2inspire.com/showPrice/failed"
-                return res.redirect(url)
+                if (response.data.success === true) {
+                    const url = "http://hire2inspire.com/employer/transactionamount/success"
+                    return res.redirect(url)
+                } else {
+                    const url = "http://hire2inspire.com/employer/transactionamount/failed"
+                    return res.redirect(url)
+                }
             }
-        } else {
-            if (response.data.success === true) {
-                const url = "http://hire2inspire.com/employer/transactionamount/success"
+
+        })
+        .catch((error) => {
+            console.error(error?.data, "err")
+            if (page != 'transaction') {
+                const url = "http://hire2inspire.com/showPrice/failed"
                 return res.redirect(url)
             } else {
                 const url = "http://hire2inspire.com/employer/transactionamount/failed"
                 return res.redirect(url)
             }
         }
-
-    })
-    .catch((error) => {
-        console.error(error?.data, "err")
-        if (page != 'transaction') {
-            const url = "http://hire2inspire.com/showPrice/failed"
-            return res.redirect(url)
-        } else {
-            const url = "http://hire2inspire.com/employer/transactionamount/failed"
-            return res.redirect(url)
-        }
-    }
-    )
+        )
 };
 
-const paymentVerify = async(req,res) =>{
+const paymentVerify = async (req, res) => {
     try {
         let transactionId = req.query.transactionId;
         //let type = req.body.type
-         
-         let emp_id = req.body.emp_id;
 
-         const getEmpData  = await Transaction.find({employer:emp_id});
-         function addPaymentRes(transactions, targetTransactionId, invoiceValue) {
-            
+        let emp_id = req.body.emp_id;
+
+        const getEmpData = await Transaction.find({ employer: emp_id });
+        function addPaymentRes(transactions, targetTransactionId, invoiceValue) {
+
             for (let i = 0; i < transactions.length; i++) {
-              if (transactions[i].transaction_id == targetTransactionId) {
-                  
-                transactions[i]["type"] = invoiceValue;
-                
-              }
+                if (transactions[i].transaction_id == targetTransactionId) {
+
+                    transactions[i]["type"] = invoiceValue;
+
+                }
             }
-           return transactions;
-           
-          }
-         
-          const updatedData = addPaymentRes(getEmpData[0].passbook_amt, transactionId
-          , "paid");
+            return transactions;
+
+        }
+
+        const updatedData = addPaymentRes(getEmpData[0].passbook_amt, transactionId
+            , "paid");
         //   console.log(req.body,"msg")
-         //  console.log(updatedData);
+        //  console.log(updatedData);
 
-           const result = await Transaction.findOneAndUpdate({employer: emp_id},{passbook_amt:updatedData}, {new: true});
+        const result = await Transaction.findOneAndUpdate({ employer: emp_id }, { passbook_amt: updatedData }, { new: true });
 
-           return res.status(200).send({
+        return res.status(200).send({
             error: false,
             message: "payment verified",
             data: result
@@ -165,6 +168,6 @@ const paymentVerify = async(req,res) =>{
 
 module.exports = {
     newPayment,
-   checkStatus,
-   paymentVerify
+    checkStatus,
+    paymentVerify
 }
