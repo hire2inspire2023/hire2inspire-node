@@ -10,11 +10,14 @@ const newPayment = async (req, res) => {
         const { merchantTransactionId, name, amount, merchantUserId, mobileNumber, pagetype } = req.body;
         page = pagetype;
         const data = {
-            merchantId: 'PGTESTPAYUAT',
+            //merchantId: 'PGTESTPAYUAT',
+            merchantId : 'M22UKH0NQ4M7L',
             merchantTransactionId: merchantTransactionId,
+           // merchantTransactionId:"MUID" + Date.now(), 
             merchantUserId: req.body.merchantUserId,
             name: req.body.name,
-            amount: req.body.amount * 100,
+            // amount: req.body.amount * 100,
+            amount:1*100,
             callbackUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectMode: 'POST',
@@ -25,13 +28,15 @@ const newPayment = async (req, res) => {
         };
         const payload = JSON.stringify(data);
         const payloadMain = Buffer.from(payload).toString('base64');
-        const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+        //const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'  
+        const key = '22743b48-6e95-4685-bb40-cb9760b00beb' 
         const keyIndex = 1;
         const string = payloadMain + '/pg/v1/pay' + key;
         const sha256 = crypto.createHash('sha256').update(string).digest('hex');
         const checksum = sha256 + '###' + keyIndex;
 
-        const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+       // const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+       const prod_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay"
         const options = {
             method: 'POST',
             url: prod_URL,
@@ -50,10 +55,11 @@ const newPayment = async (req, res) => {
             return res.send(response.data.data.instrumentResponse.redirectInfo.url)
         })
             .catch(function (error) {
-                console.error(error);
+                console.error(error.response,'error');
             });
 
     } catch (error) {
+        console.error(error,'error100');
         res.status(500).send({
             message: error.message,
             success: false
@@ -64,10 +70,11 @@ const newPayment = async (req, res) => {
 const checkStatus = async (req, res) => {
     console.log("hdkjhdejh");
     const merchantTransactionId = res.req.body.transactionId;
-    const merchantId = res.req.body.merchantId;
-
+    //const merchantId = res.req.body.merchantId;
+    const merchantId = 'M22UKH0NQ4M7L';
     console.log(res.req.body, "result");
-    const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+    // const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+    const key = '22743b48-6e95-4685-bb40-cb9760b00beb' 
     const keyIndex = 1;
     const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + key;
     const sha256 = crypto.createHash('sha256').update(string).digest('hex');
@@ -75,7 +82,7 @@ const checkStatus = async (req, res) => {
 
     const options = {
         method: 'GET',
-        url: `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/${merchantId}/${merchantTransactionId}`,
+        url: `https://api.phonepe.com/apis/hermes/pg/v1/status/${merchantId}/${merchantTransactionId}`,
         headers: {
             accept: 'application/json',
             'Content-Type': 'application/json',
@@ -94,16 +101,16 @@ const checkStatus = async (req, res) => {
                     const url = "http://hire2inspire.com/showPrice/success"
                     return res.redirect(url)
                 } else {
-                    const url = "http://hire2inspire.com/showPrice/failed"
-                    return res.redirect(url)
+                    // const url = "http://hire2inspire.com/showPrice/failed"
+                    // return res.redirect(url)
                 }
             } else {
                 if (response.data.success === true) {
                     const url = "http://hire2inspire.com/employer/transactionamount/success"
                     return res.redirect(url)
                 } else {
-                    const url = "http://hire2inspire.com/employer/transactionamount/failed"
-                    return res.redirect(url)
+                    // const url = "http://hire2inspire.com/employer/transactionamount/failed"
+                    // return res.redirect(url)
                 }
             }
 
@@ -114,8 +121,8 @@ const checkStatus = async (req, res) => {
                 const url = "http://hire2inspire.com/showPrice/failed"
                 return res.redirect(url)
             } else {
-                const url = "http://hire2inspire.com/employer/transactionamount/failed"
-                return res.redirect(url)
+                // const url = "http://hire2inspire.com/employer/transactionamount/failed"
+                // return res.redirect(url)
             }
         }
         )
@@ -156,6 +163,7 @@ const paymentVerify = async (req, res) => {
         })
 
     } catch (error) {
+        console.log(error,'check errror')
         next(error);
     }
 }
