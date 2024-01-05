@@ -31,7 +31,7 @@ var transport = nodemailer.createTransport({
     user: process.env.EMAIL_NAME,
     pass: process.env.EMAIL_PASSWORD
   },
-  requireSSL: true,
+  requireTLS: true,
 });
 
 module.exports = {
@@ -135,7 +135,7 @@ module.exports = {
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
         from: 'info@hire2inspire.com',
-        to: 'subhramukherjee560@gmail.com',
+        to: empEmail,
         subject: `Employer registered successfully`,
         html: `
         <head>
@@ -165,7 +165,7 @@ module.exports = {
 
       var mailOptions = {
         from: 'info@hire2inspire.com',
-        to: 'subhramukherjee560@gmail.com',
+        to: empEmail,
         subject: `Employer Email Verify`,
         html: `
         <head>

@@ -17,12 +17,14 @@ const { v4: uuidv4 } = require("uuid");
 const Employer = require("../models/employer.model");
 const nodemailer = require("nodemailer");
 var transport = nodemailer.createTransport({
-  host: "hire2inspire.com",
-  port: 465,
+  host: process.env.EMAIL_HOST,
+  port: 25,
+  secure: false, // StartTLS should be enabled
   auth: {
-    user: "info@hire2inspire.com",
-    pass: "h2I@2023"
-  }
+    user: process.env.EMAIL_NAME,
+    pass: process.env.EMAIL_PASSWORD
+  },
+  requireTLS: true,
 });
 
 

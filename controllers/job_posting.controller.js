@@ -17,14 +17,15 @@ const UserSubscription = require("../models/user_subscription.model");
 const DraftJob = require("../models/draft_job.model");
 
 var transport = nodemailer.createTransport({
-    host: "hire2inspire.com",
-    port: 465,
+    host: process.env.EMAIL_HOST,
+    port: 25,
+    secure: false, // StartTLS should be enabled
     auth: {
-      user: "info@hire2inspire.com",
-      pass: "h2I@2023"
-    }
-  });
-
+        user: process.env.EMAIL_NAME,
+        pass: process.env.EMAIL_PASSWORD
+    },
+    requireTLS: true,
+});
 
 module.exports = {
     allList: async (req, res, next) => {
