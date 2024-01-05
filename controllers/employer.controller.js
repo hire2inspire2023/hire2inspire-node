@@ -24,12 +24,12 @@ const nodemailer = require("nodemailer");
 const Token = require("../models/token.model");
 
 var transport = nodemailer.createTransport({
-  host: "smtp.office365.com",
-  port: 25,
+  host: process.env.EMAIL_HOST,
+  port: 587,
   secure: false, // StartTLS should be enabled
   auth: {
-    user: "info@hire2inspire.com",
-    pass: "Sant@1293"
+    user: process.env.EMAIL_NAME,
+    pass: process.env.EMAIL_PASSWORD
   },
   requireSSL: true,
 });
