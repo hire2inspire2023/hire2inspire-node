@@ -25,7 +25,7 @@ const Token = require("../models/token.model");
 
 var transport = nodemailer.createTransport({
   host: "smtp.office365.com",
-  port: 25,
+  port: 587,
   secure: false, // StartTLS should be enabled
   auth: {
     user: "info@hire2inspire.com",
