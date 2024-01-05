@@ -25,7 +25,7 @@ const Token = require("../models/token.model");
 
 var transport = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 587,
+  port: 25,
   secure: false, // StartTLS should be enabled
   auth: {
     user: process.env.EMAIL_NAME,
