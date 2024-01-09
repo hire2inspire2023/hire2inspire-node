@@ -25,7 +25,7 @@ const Token = require("../models/token.model");
 
 var transport = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 25,
+  port: 587,
   secure: false, // StartTLS should be enabled
   auth: {
     user: process.env.EMAIL_NAME,
@@ -135,7 +135,7 @@ module.exports = {
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
         from: 'info@hire2inspire.com',
-        to: empEmail,
+        to: "subhramukherjee560@gmail.com",
         subject: `Employer registered successfully`,
         html: `
         <head>
