@@ -16,10 +16,11 @@ const AgencyInviteModel = require("../models/agency_invite.model");
 const { v4: uuidv4 } = require("uuid");
 const Employer = require("../models/employer.model");
 const nodemailer = require("nodemailer");
+
 var transport = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 25,
-  secure: false, // StartTLS should be enabled
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_NAME,
     pass: process.env.EMAIL_PASSWORD

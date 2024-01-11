@@ -16,10 +16,11 @@ const AgencyTransaction = require('../models/agency_transaction.model');
 const Token = require("../models/token.model");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto")
+
 var transport = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 25,
-  secure: false, // StartTLS should be enabled
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_NAME,
     pass: process.env.EMAIL_PASSWORD
