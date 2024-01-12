@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
 
 const PackageTypeSchema = mongoose.Schema({
-    name:{
-        type:String
+    name: {
+        type: String
+    },
+    package_type: {
+        type: String
     }
-}, {timestamps: true});
+}, { timestamps: true });
 
 module.exports = mongoose.model("packageTypes", PackageTypeSchema);
