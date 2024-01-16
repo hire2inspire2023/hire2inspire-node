@@ -14,12 +14,12 @@ const app = express();
 const nodemailer = require("nodemailer");
 
 var transport = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
+    host: 'smtp.zoho.in',
     port: 465,
     secure: true,
     auth: {
-        user: process.env.EMAIL_NAME,
-        pass: process.env.EMAIL_PASSWORD
+        user: 'Info@hire2inspire.com',
+        pass: '17X2DnJJiQmm'
     },
     requireTLS: true,
 });
