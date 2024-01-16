@@ -21,7 +21,8 @@ var transport = nodemailer.createTransport({
         user: 'Info@hire2inspire.com',
         pass: '17X2DnJJiQmm'
     },
-    requireTLS: true,
+   // requireTLS: true,
+    timeout: 5000,
 });
   
 admin.initializeApp({
