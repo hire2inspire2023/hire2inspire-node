@@ -24,6 +24,14 @@ var transport = nodemailer.createTransport({
     requireTLS: true,
 });
   
+transport.verify(function (error, success) {
+    if (error) {
+        console.error('Error verifying transport:', error);
+    } else {
+        console.log('Transport is ready to take messages');
+    }
+});
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: process.env.FIREBASE_DATABASE_URL,
