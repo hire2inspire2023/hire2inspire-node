@@ -15,7 +15,7 @@ const nodemailer = require("nodemailer");
 
 var transport = nodemailer.createTransport({
     host: 'smtp.zoho.in',
-    port: 465,
+    port: 25,
     secure: true,
     auth: {
         user: 'Info@hire2inspire.com',
