@@ -124,7 +124,7 @@ module.exports = {
              console.log("candidateEmail>>>>",candidateEmail)
 
             var mailOptions = {
-                from: 'info@hire2inspire.com',
+                from: 'Info@hire2inspire.com',
                 to: candidateEmail,
                 subject: `Subject: Confirmation of CV Submission for ${jobRole} - Next Steps`,
                 html:`

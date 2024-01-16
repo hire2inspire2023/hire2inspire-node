@@ -31,7 +31,7 @@ module.exports = {
 
             var mailOptions = {
                 from: getEmail,
-                to: 'info@hire2inspire.com',
+                to: 'Info@hire2inspire.com',
                 subject: `${getSubject}`,
                 html:`
             <body>

@@ -131,7 +131,7 @@ const billingAddress = [
     'Hire2Inspire',
     'Bangalore',
     'Phone: 9876456789',
-    'Email: info@hire2inspire.com'
+    'Email: Info@hire2inspire.com'
 ];
 doc.text(billingAddress.join('\n'), 50, 120);
 

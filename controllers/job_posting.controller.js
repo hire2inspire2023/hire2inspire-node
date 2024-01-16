@@ -408,7 +408,7 @@ module.exports = {
             let adminName = AdminData?.name
            
             var mailOptions = {
-                from: 'info@hire2inspire.com',
+                from: 'Info@hire2inspire.com',
                 to: adminMail,
                 subject: `Hired candidate!`,
                 html:`
@@ -796,7 +796,7 @@ module.exports = {
 
 
             var mailOptions = {
-                from: 'info@hire2inspire.com',
+                from: 'Info@hire2inspire.com',
                 to: agencyMail,
                 subject: `Hired candidate!`,
                 html:`

@@ -121,7 +121,7 @@ module.exports = {
       }).select("-otp -password").sort({_id: -1});
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         subject: `Recruiter Invitation`,
         html:`
         <head>
@@ -341,7 +341,7 @@ data.forEach((recipient) => {
       console.log({invitedRecruiters});
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         subject: `Recruiter Invitation`,
         html:`
         <head>

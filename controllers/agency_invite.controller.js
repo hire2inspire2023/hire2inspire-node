@@ -75,7 +75,7 @@ module.exports = {
         const allInvitations = await AgencyInviteModel.find({invited_by: userId, invited_by_ref: dataModel}).sort({_id: -1});
 
         var mailOptions = {
-          from: 'info@hire2inspire.com',
+          from: 'Info@hire2inspire.com',
           subject: `Agency Invited successfully`,
           html:`
           <head>

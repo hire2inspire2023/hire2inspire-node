@@ -134,7 +134,7 @@ module.exports = {
 
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Employer registered successfully`,
         html: `
@@ -164,7 +164,7 @@ module.exports = {
       const tranResult = await transactionData.save();
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Employer Email Verify`,
         html: `

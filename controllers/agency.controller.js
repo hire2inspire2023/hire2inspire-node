@@ -94,7 +94,7 @@ module.exports = {
       const agencyEmail = savedAgency?.corporate_email;
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: agencyEmail,
         subject: `Agency registered successfully`,
         html:`
@@ -135,7 +135,7 @@ module.exports = {
       const token_id = tokenResult?.token;
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: agencyEmail,
         subject: `Agency Email Verify`,
         html:`

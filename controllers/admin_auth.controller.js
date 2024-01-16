@@ -249,7 +249,7 @@ module.exports = {
       }
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Confirmaition for Job Approval`,
         html:`
@@ -320,7 +320,7 @@ module.exports = {
       let agencyName = agencyData?.name;
       let agencyEmail = agencyData?.corporate_email;
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: agencyEmail,
         subject: `Confirmaition for Job Approval`,
         html:`
