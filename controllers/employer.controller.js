@@ -28,7 +28,7 @@ var transport = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: 'info@hire2inspire.com',
+    user: process.env.EMAIL_NAME,
     pass: process.env.EMAIL_PASSWORD
   },
   requireTLS: true,
@@ -105,8 +105,39 @@ module.exports = {
       console.log({ result })
 
       const doesExist = await Employer.findOne({ email: result.email })
-      if (doesExist)
+      if (doesExist){
         throw createError.Conflict(`${result.email} is already been registered`)
+      }
+        
+     //tets
+
+      var mailOptions = {
+        from: 'Info@hire2inspire.com',
+        to: empEmail,
+        subject: `Employer registered successfully`,
+        html: `
+        <head>
+            <title>Welcome to Hire2Inspire</title>
+        </head>
+    <body>
+        // <p>Dear ${empFname} ${empLname},</p>
+        <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
+        <p>If you have any questions or need assistance, feel free to contact our support team at [Support Email Address].</p>
+        <p>We look forward to helping you find the perfect candidates for your job openings!</p>
+        <p>Thank you and best regards,</p>
+        <p> Hire2Inspire </p>
+    </body>
+`
+      };
+
+      transport.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+
 
       const EmployerData = new Employer(result)
       const savedEmployer = await EmployerData.save()
@@ -134,7 +165,7 @@ module.exports = {
 
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Employer registered successfully`,
         html: `
@@ -164,7 +195,7 @@ module.exports = {
       const tranResult = await transactionData.save();
 
       var mailOptions = {
-        from: 'info@hire2inspire.com',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Employer Email Verify`,
         html: `
