@@ -207,7 +207,7 @@ module.exports = {
 //       });
 
       const sgMail = require('@sendgrid/mail')
-      sgMail.setApiKey(process.env.SENDGRID_KEY)
+      sgMail.setApiKey('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')
       const msg = {
         to: 'subhramukherjee560@gmail.com', // Change to your recipient
         from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
