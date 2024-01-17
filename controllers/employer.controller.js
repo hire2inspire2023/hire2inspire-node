@@ -113,14 +113,13 @@ module.exports = {
 
       var mailOptions = {
         from: 'Info@hire2inspire.com',
-        to: empEmail,
+        to: 'subhramukherjee560@gmail.com',
         subject: `Employer registered successfully`,
         html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
         </head>
     <body>
-        // <p>Dear ${empFname} ${empLname},</p>
         <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
         <p>If you have any questions or need assistance, feel free to contact our support team at [Support Email Address].</p>
         <p>We look forward to helping you find the perfect candidates for your job openings!</p>
