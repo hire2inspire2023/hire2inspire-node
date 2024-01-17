@@ -23,13 +23,24 @@ const HiringDetail = require('../models/hiringDetails.model');
 const nodemailer = require("nodemailer");
 const Token = require("../models/token.model");
 
+// var transport = nodemailer.createTransport({
+//   host: process.env.EMAIL_HOST,
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_NAME,
+//     pass: process.env.EMAIL_PASSWORD
+//   },
+//   requireTLS: true,
+// });
+
 var transport = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
+  host: "mail.demo91.co.in",
   port: 465,
-  secure: true,
+ // secure: false, // StartTLS should be enabled
   auth: {
-    user: process.env.EMAIL_NAME,
-    pass: process.env.EMAIL_PASSWORD
+    user: "developer@demo91.co.in",
+    pass: "Developer@2023"
   },
   requireTLS: true,
 });
@@ -105,11 +116,11 @@ module.exports = {
       console.log({ result })
 
       const doesExist = await Employer.findOne({ email: result.email })
-      if (doesExist){
+      if (doesExist)
         throw createError.Conflict(`${result.email} is already been registered`)
-      }
+      
         
-     
+      
 
 
       const EmployerData = new Employer(result)
@@ -138,7 +149,7 @@ module.exports = {
 
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
-        from: 'Info@hire2inspire.com',
+        from: 'developer@demo91.co.in',
         to: empEmail,
         subject: `Employer registered successfully`,
         html: `
@@ -168,7 +179,7 @@ module.exports = {
       const tranResult = await transactionData.save();
 
       var mailOptions = {
-        from: 'Info@hire2inspire.com',
+        from: 'developer@demo91.co.in',
         to: empEmail,
         subject: `Employer Email Verify`,
         html: `
