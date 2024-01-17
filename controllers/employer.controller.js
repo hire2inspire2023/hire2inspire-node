@@ -109,33 +109,7 @@ module.exports = {
         throw createError.Conflict(`${result.email} is already been registered`)
       }
         
-     //tets
-
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        to: 'subhramukherjee560@gmail.com',
-        subject: `Employer registered successfully`,
-        html: `
-        <head>
-            <title>Welcome to Hire2Inspire</title>
-        </head>
-    <body>
-        <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
-        <p>If you have any questions or need assistance, feel free to contact our support team at [Support Email Address].</p>
-        <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-        <p>Thank you and best regards,</p>
-        <p> Hire2Inspire </p>
-    </body>
-`
-      };
-
-      transport.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
+     
 
 
       const EmployerData = new Employer(result)
