@@ -28,7 +28,7 @@ var transport = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: process.env.EMAIL_NAME,
+    user: 'info@hire2inspire.com',
     pass: process.env.EMAIL_PASSWORD
   },
   requireTLS: true,
@@ -134,7 +134,7 @@ module.exports = {
 
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
-        from: 'Info@hire2inspire.com',
+        from: 'info@hire2inspire.com',
         to: empEmail,
         subject: `Employer registered successfully`,
         html: `
@@ -152,19 +152,19 @@ module.exports = {
 `
       };
 
-      // transport.sendMail(mailOptions, function (error, info) {
-      //   if (error) {
-      //     console.log(error);
-      //   } else {
-      //     console.log('Email sent: ' + info.response);
-      //   }
-      // });
+      transport.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
 
       const transactionData = new Transaction({ employer: savedEmployer.id });
       const tranResult = await transactionData.save();
 
       var mailOptions = {
-        from: 'Info@hire2inspire.com',
+        from: 'info@hire2inspire.com',
         to: empEmail,
         subject: `Employer Email Verify`,
         html: `
@@ -190,13 +190,13 @@ module.exports = {
 `
       };
 
-      // transport.sendMail(mailOptions, function (error, info) {
-      //   if (error) {
-      //     console.log(error);
-      //   } else {
-      //     console.log('Email sent: ' + info.response);
-      //   }
-      // });
+      transport.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
 
 
       res.status(201).send({
