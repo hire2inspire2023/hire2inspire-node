@@ -23,27 +23,18 @@ const HiringDetail = require('../models/hiringDetails.model');
 const nodemailer = require("nodemailer");
 const Token = require("../models/token.model");
 
-// var transport = nodemailer.createTransport({
-//   host: process.env.EMAIL_HOST,
-//   port: 465,
-//   secure: true,
-//   auth: {
-//     user: process.env.EMAIL_NAME,
-//     pass: process.env.EMAIL_PASSWORD
-//   },
-//   requireTLS: true,
-// });
-
 var transport = nodemailer.createTransport({
-  host: "mail.demo91.co.in",
+  host: process.env.EMAIL_HOST,
   port: 465,
- // secure: false, // StartTLS should be enabled
+  secure: true,
   auth: {
-    user: "developer@demo91.co.in",
-    pass: "Developer@2023"
+    user: process.env.EMAIL_NAME,
+    pass: process.env.EMAIL_PASSWORD
   },
   requireTLS: true,
 });
+
+
 
 module.exports = {
   list: async (req, res, next) => {
@@ -149,7 +140,7 @@ module.exports = {
 
       //console.log("tokenResult",tokenResult);
       var mailOptions = {
-        from: 'developer@demo91.co.in',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Employer registered successfully`,
         html: `
@@ -179,7 +170,7 @@ module.exports = {
       const tranResult = await transactionData.save();
 
       var mailOptions = {
-        from: 'developer@demo91.co.in',
+        from: 'Info@hire2inspire.com',
         to: empEmail,
         subject: `Employer Email Verify`,
         html: `
