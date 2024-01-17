@@ -22,18 +22,20 @@ const JobPosting = require("../models/job_posting.model");
 const HiringDetail = require('../models/hiringDetails.model');
 const nodemailer = require("nodemailer");
 const Token = require("../models/token.model");
+const sgMail = require('@sendgrid/mail');
 
-var transport = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_NAME,
-    pass: process.env.EMAIL_PASSWORD
-  },
-  requireTLS: true,
-});
+// var transport = nodemailer.createTransport({
+//   host: process.env.EMAIL_HOST,
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_NAME,
+//     pass: process.env.EMAIL_PASSWORD
+//   },
+//   requireTLS: true,
+// });
 
+// sgMail.setApiKey('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');
 
 
 module.exports = {
@@ -139,71 +141,88 @@ module.exports = {
       const token_id = tokenResult?.token;
 
       //console.log("tokenResult",tokenResult);
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        to: empEmail,
-        subject: `Employer registered successfully`,
-        html: `
-        <head>
-            <title>Welcome to Hire2Inspire</title>
-        </head>
-    <body>
-        <p>Dear ${empFname} ${empLname},</p>
-        <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
-        <p>If you have any questions or need assistance, feel free to contact our support team at [Support Email Address].</p>
-        <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-        <p>Thank you and best regards,</p>
-        <p> Hire2Inspire </p>
-    </body>
-`
-      };
+//       var mailOptions = {
+//         from: 'Info@hire2inspire.com',
+//         to: empEmail,
+//         subject: `Employer registered successfully`,
+//         html: `
+//         <head>
+//             <title>Welcome to Hire2Inspire</title>
+//         </head>
+//     <body>
+//         <p>Dear ${empFname} ${empLname},</p>
+//         <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
+//         <p>If you have any questions or need assistance, feel free to contact our support team at [Support Email Address].</p>
+//         <p>We look forward to helping you find the perfect candidates for your job openings!</p>
+//         <p>Thank you and best regards,</p>
+//         <p> Hire2Inspire </p>
+//     </body>
+// `
+//       };
 
-      transport.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
+//       transport.sendMail(mailOptions, function (error, info) {
+//         if (error) {
+//           console.log(error);
+//         } else {
+//           console.log('Email sent: ' + info.response);
+//         }
+//       });
 
       const transactionData = new Transaction({ employer: savedEmployer.id });
       const tranResult = await transactionData.save();
 
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        to: empEmail,
-        subject: `Employer Email Verify`,
-        html: `
-        <head>
-            <title>Welcome to Hire2Inspire</title>
-        </head>
-    <body>
-        <p>Dear ${empFname} ${empLname},</p>
-        <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
+//       var mailOptions = {
+//         from: 'Info@hire2inspire.com',
+//         to: empEmail,
+//         subject: `Employer Email Verify`,
+//         html: `
+//         <head>
+//             <title>Welcome to Hire2Inspire</title>
+//         </head>
+//     <body>
+//         <p>Dear ${empFname} ${empLname},</p>
+//         <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
   
-        <p>Please click on the following link to verify your email:</p>
-        <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
+//         <p>Please click on the following link to verify your email:</p>
+//         <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
 
-        <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
-        <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
+//         <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
+//         <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
 
-        <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
+//         <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
-        <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-        <p>Thank you and best regards,</p>
-        <p> Hire2Inspire </p>
-    </body>
-`
-      };
+//         <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
+//         <p>Thank you and best regards,</p>
+//         <p> Hire2Inspire </p>
+//     </body>
+// `
+//       };
 
-      transport.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
+//       transport.sendMail(mailOptions, function (error, info) {
+//         if (error) {
+//           console.log(error);
+//         } else {
+//           console.log('Email sent: ' + info.response);
+//         }
+//       });
 
+      const sgMail = require('@sendgrid/mail')
+      sgMail.setApiKey(process.env.SENDGRID_KEY)
+      const msg = {
+        to: 'subhramukherjee560@gmail.com', // Change to your recipient
+        from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
+        subject: 'Sending with SendGrid is Fun',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      }
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
       res.status(201).send({
         error: false,
