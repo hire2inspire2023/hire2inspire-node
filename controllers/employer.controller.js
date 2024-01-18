@@ -207,10 +207,9 @@ module.exports = {
 //       });
 
       const sgMail = require('@sendgrid/mail')
-      console.log(process.env.SENDGRID,'process.env.SENDGRID')
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
-        to: 'subhramukherjee560@gmail.com', // Change to your recipient
+        to: 'sm95595@yopmail.com', // Change to your recipient
         from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
         subject: 'Sending with SendGrid is Fun',
         text: 'and easy to do anywhere, even with Node.js',
