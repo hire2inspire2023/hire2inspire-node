@@ -24,20 +24,6 @@ const nodemailer = require("nodemailer");
 const Token = require("../models/token.model");
 const sgMail = require('@sendgrid/mail');
 
-// var transport = nodemailer.createTransport({
-//   host: process.env.EMAIL_HOST,
-//   port: 465,
-//   secure: true,
-//   auth: {
-//     user: process.env.EMAIL_NAME,
-//     pass: process.env.EMAIL_PASSWORD
-//   },
-//   requireTLS: true,
-// });
-
-// sgMail.setApiKey('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');
-
-
 module.exports = {
   list: async (req, res, next) => {
     try {
@@ -140,6 +126,58 @@ module.exports = {
       const user_id = savedEmployer?._id;
       const token_id = tokenResult?.token;
 
+
+
+      //   const sgMail = require('@sendgrid/mail')
+      //   sgMail.setApiKey('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')
+      //   const msg = {
+      //     to: empEmail, // Change to your recipient
+      //     from: 'info@hire2inspire.com', // Change to your verified sender
+      //     subject: `Employer Email Verify`,
+      //     html: `
+      //     <head>
+      //         <title>Welcome to Hire2Inspire</title>
+      //     </head>
+      // <body>
+      //     <p>Dear ${empFname} ${empLname},</p>
+      //     <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
+
+      //     <p>Please click on the following link to verify your email:</p>
+      //     <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
+
+      //     <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
+      //     <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
+
+      //     <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
+
+      //     <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
+      //     <p>Thank you and best regards,</p>
+      //     <p> Hire2Inspire </p>
+      // </body>`
+      //   }
+
+      // sgMail
+      //   .send(msg)
+      //   .then(() => {
+      //     console.log('Email sent')
+      //   })
+      //   .catch((error) => {
+      //     console.error(error,'my code')
+      //   })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       //console.log("tokenResult",tokenResult);
       //       var mailOptions = {
       //         from: 'Info@hire2inspire.com',
@@ -167,6 +205,36 @@ module.exports = {
       //           console.log('Email sent: ' + info.response);
       //         }
       //       });
+
+      const sgMail = require('@sendgrid/mail')
+      //sgMail.setApiKey(process.env.SENDGRID)
+      let msg = {
+        to: empEmail, // Change to your recipient
+        from: 'info@hire2inspire.com', // Change to your verified sender
+        subject: `Employer Email Register`,
+        html: `
+              <head>
+                  <title>Welcome to Hire2Inspire</title>
+              </head>
+          <body>
+              <p>Dear ${empFname} ${empLname},</p>
+              <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
+              <p>If you have any questions or need assistance, feel free to contact our support team at [Support Email Address].</p>
+              <p>We look forward to helping you find the perfect candidates for your job openings!</p>
+              <p>Thank you and best regards,</p>
+              <p> Hire2Inspire </p>
+          </body>
+      `
+      }
+
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
       const transactionData = new Transaction({ employer: savedEmployer.id });
       const tranResult = await transactionData.save();
@@ -206,42 +274,43 @@ module.exports = {
       //         }
       //       });
 
-      const sgMail = require('@sendgrid/mail')
-      sgMail.setApiKey(process.env.SENDGRID)
-      const msg = {
-        to: 'subhramukherjee560@gmail.com', // Change to your recipient
-        from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
-        subject: `Employer Email Verify`,
-        html: `
-        <head>
-            <title>Welcome to Hire2Inspire</title>
-        </head>
-    <body>
-        <p>Dear ${empFname} ${empLname},</p>
-        <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
-  
-        <p>Please click on the following link to verify your email:</p>
-        <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
+      //const sgMail = require('@sendgrid/mail')
+       sgMail.setApiKey(process.env.SENDGRID)
+     
+        let msg2 = {
+          to: empEmail, // Change to your recipient
+          from: 'info@hire2inspire.com', // Change to your verified sender
+          subject: `Employer Email Verify`,
+          html: `
+          <head>
+              <title>Welcome to Hire2Inspire</title>
+          </head>
+      <body>
+          <p>Dear ${empFname} ${empLname},</p>
+          <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
 
-        <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
-        <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
+          <p>Please click on the following link to verify your email:</p>
+          <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
 
-        <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
+          <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
+          <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
 
-        <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-        <p>Thank you and best regards,</p>
-        <p> Hire2Inspire </p>
-    </body>`
-      }
+          <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
-      sgMail
-        .send(msg)
-        .then(() => {
-          console.log('Email sent')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+          <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
+          <p>Thank you and best regards,</p>
+          <p> Hire2Inspire </p>
+      </body>`
+        }
+
+        sgMail
+          .send(msg2)
+          .then(() => {
+            console.log('Email sent')
+          })
+          .catch((error) => {
+            console.error(error)
+          })
 
       res.status(201).send({
         error: false,

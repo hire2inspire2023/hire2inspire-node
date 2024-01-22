@@ -12,18 +12,19 @@ var serviceAccount = require("../hire2inspire-firebase-adminsdk.json");
 const express = require('express')
 const app = express();
 const nodemailer = require("nodemailer");
+const sgMail = require('@sendgrid/mail');
 
-var transport = nodemailer.createTransport({
-    host: 'smtp.zoho.in',
-    port: 465,
-    secure: true,
-    auth: {
-        user: 'Info@hire2inspire.com',
-        pass: '17X2DnJJiQmm'
-    },
-    requireTLS: true,
-});
-  
+// var transport = nodemailer.createTransport({
+//     host: 'smtp.zoho.in',
+//     port: 465,
+//     secure: true,
+//     auth: {
+//         user: 'Info@hire2inspire.com',
+//         pass: '17X2DnJJiQmm'
+//     },
+//     requireTLS: true,
+// });
+
 
 
 admin.initializeApp({
@@ -47,38 +48,38 @@ module.exports = {
                 (!checkAgency || !checkRecruiter) &&
                 !["agency", "recruiters"].includes(dataModel)
             ) return res.status(401).send({ error: true, message: "User unauthorized." })
-            
-            // Checking the corresponding agency job exist or not
-            const agencyJobExist = await AgencyJobModel.findOne({_id: req.body.agency_job});
 
-            console.log("agencyJobExist",agencyJobExist)
-            
+            // Checking the corresponding agency job exist or not
+            const agencyJobExist = await AgencyJobModel.findOne({ _id: req.body.agency_job });
+
+            console.log("agencyJobExist", agencyJobExist)
+
             // if corresponding agency job not exist
-            if(!agencyJobExist) return res.status(400).send({ error: true, message: "AGgency job does not exist" });
+            if (!agencyJobExist) return res.status(400).send({ error: true, message: "AGgency job does not exist" });
 
             // Checking the candidate exist or not
             // const candidateExist = await CandidateModel.findOne({email:req.body.email});
             // const candidateExist1 = await CandidateModel.findOne({phone:req.body.phone})
 
-            let candidateExist = await CandidateModel.findOne({$and:[{email:req.body.email},{agency_job:req.body.agency_job}]});
-            let candidateExist1 = await CandidateModel.findOne({$and:[{phone:req.body.phone},{agency_job:req.body.agency_job}]});
+            let candidateExist = await CandidateModel.findOne({ $and: [{ email: req.body.email }, { agency_job: req.body.agency_job }] });
+            let candidateExist1 = await CandidateModel.findOne({ $and: [{ phone: req.body.phone }, { agency_job: req.body.agency_job }] });
 
-            console.log("candidate>>>>>",candidateExist)
-            console.log("candidate.id",candidateExist?.agency_job)
-            console.log('patrams',req.body.agency_job);
-            console.log('candidateExist1',candidateExist1);
-            console.log("body",req.body);
+            console.log("candidate>>>>>", candidateExist)
+            console.log("candidate.id", candidateExist?.agency_job)
+            console.log('patrams', req.body.agency_job);
+            console.log('candidateExist1', candidateExist1);
+            console.log("body", req.body);
 
-            if(candidateExist?.agency_job == req.body.agency_job){
+            if (candidateExist?.agency_job == req.body.agency_job) {
                 console.log('in..')
                 return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
             }
-            else if(candidateExist1?.agency_job == req.body.agency_job){
+            else if (candidateExist1?.agency_job == req.body.agency_job) {
                 return res.status(400).send({ error: true, message: `Candidate data already exist with this phone no ${candidateExist1?.phone}` })
             }
-            
+
             // if candidate exist
-            
+
 
             // if corresponding agency job exist and candidate not exist
             // Submit candidate here
@@ -91,8 +92,8 @@ module.exports = {
             // console.log("2", candidateData);
 
             const candidateDataResult = await candidateData.save()
-            
-            const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate({_id: agencyJobExist._id}, {$push: {candidates: candidateDataResult._id}}, {new: true})
+
+            const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate({ _id: agencyJobExist._id }, { $push: { candidates: candidateDataResult._id } }, { new: true })
 
             req.body.emp_job = candidateDataResult?.job;
             req.body.agency_id = candidateDataResult?.agency;
@@ -102,15 +103,15 @@ module.exports = {
 
             const candidateJob = await candidateJobData.save();
 
-            const candidatejobdata = await CandidateJobModel.findOne({_id:candidateJob?._id}).populate([
+            const candidatejobdata = await CandidateJobModel.findOne({ _id: candidateJob?._id }).populate([
                 {
-                    path:"emp_job",
-                    select:"job_name"
+                    path: "emp_job",
+                    select: "job_name"
                 }
             ])
 
 
-            const candidatelist = await CandidateModel.findOne({_id:candidateDataResult?._id});
+            const candidatelist = await CandidateModel.findOne({ _id: candidateDataResult?._id });
             //console.log("agengydata>>>>",agengydata)
 
             let candidateEmail = candidatelist?.email;
@@ -123,39 +124,41 @@ module.exports = {
 
             let candidateId = candidatejobdata?.candidate;
 
-             console.log("candidateEmail>>>>",candidateEmail)
+            console.log("candidateEmail>>>>", candidateEmail)
 
-            var mailOptions = {
-                from: 'Info@hire2inspire.com',
-                to: candidateEmail,
+            sgMail.setApiKey(process.env.SENDGRID)
+            const msg = {
+                to: candidateEmail, // Change to your recipient
+                from: 'info@hire2inspire.com',
                 subject: `Subject: Confirmation of CV Submission for ${jobRole} - Next Steps`,
-                html:`
-                <head>
-                    <title>Notification: Candidate Hired - Backend Development Position</title>
-            </head>
-            <body>
-                <p>Dear ${candidatefName} ${candidatelName} ,</p>
-                <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at [Company Name]. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
+                html: `
+                       <head>
+                           <title>Notification: Candidate Hired - Backend Development Position</title>
+                   </head>
+                   <body>
+                       <p>Dear ${candidatefName} ${candidatelName} ,</p>
+                       <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at [Company Name]. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
+       
+                       <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
+       
+                       <p>Find the link 
+                       <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
+                     </p>
+       
+                       <p>Best regards,</p>
+                       <p>Hire2Inspire</p>
+                   </body>
+               `
+            }
 
-                <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
-
-                <p>Find the link 
-                <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
-              </p>
-
-                <p>Best regards,</p>
-                <p>Hire2Inspire</p>
-            </body>
-        `
- };   
-            transport.sendMail(mailOptions, function(error, info){
-                if (error) {
-                  console.log(error);
-                } else {
-                  console.log('Email sent: ' + info.response);
-                }
-            });
-
+            sgMail
+                .send(msg)
+                .then(() => {
+                    console.log('Email sent')
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
 
             if (candidateDataResult) {
                 return res.status(201).send({
@@ -189,14 +192,14 @@ module.exports = {
             ) return res.status(401).send({ error: true, message: "User unauthorized." })
 
             // Checking the corresponding agency job exist or not
-            const agencyJobExist = await AgencyJobModel.findOne({_id: req.body.agency_job})
+            const agencyJobExist = await AgencyJobModel.findOne({ _id: req.body.agency_job })
 
-            const empJobExist = await JobPosting.findOne({_id: req.body.job})
-            
+            const empJobExist = await JobPosting.findOne({ _id: req.body.job })
+
             // if corresponding agency job not exist
-            if(!agencyJobExist) return res.status(400).send({ error: true, message: "Candidate submission failed" })
+            if (!agencyJobExist) return res.status(400).send({ error: true, message: "Candidate submission failed" })
 
-            if(!empJobExist) return res.status(400).send({ error: true, message: "Candidate submission failed" })
+            if (!empJobExist) return res.status(400).send({ error: true, message: "Candidate submission failed" })
 
             // if corresponding agency job exist
             // Submit candidate here
@@ -213,8 +216,8 @@ module.exports = {
                         { job: agencyJobExist.job },
                         {
                             $or: [
-                                {email: candidates[index].email},
-                                {phone: candidates[index].phone}
+                                { email: candidates[index].email },
+                                { phone: candidates[index].phone }
                             ]
                         }
                     ]
@@ -222,42 +225,42 @@ module.exports = {
 
                 const candidateExist1 = await CandidateModel.findOne({
                     $and: [
-                        { job: empJobExist?._id},
+                        { job: empJobExist?._id },
                         {
                             $or: [
-                                {email: candidates[index].email},
-                                {phone: candidates[index].phone}
+                                { email: candidates[index].email },
+                                { phone: candidates[index].phone }
                             ]
                         }
                     ]
                 })
                 // console.log("candidateExist >>>>>>>>>>>>>>>>>>> ", candidateExist);
                 // if candidate exist
-                if(candidateExist) return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
+                if (candidateExist) return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
 
-                if(candidateExist1) return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
+                if (candidateExist1) return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
 
 
                 candidates[index].agency = agencyJobExist.agency
                 candidates[index].recruiter = checkRecruiter?._id
-               // candidates[index].job = agencyJobExist.job
+                // candidates[index].job = agencyJobExist.job
                 candidates[index].job = empJobExist?._id
                 candidateData.push(candidates[index])
 
-            
-                
+
+
             }
 
             // console.log("candidates >>>>>>>>>>>>", candidateData);
             const candidateDataResult = await CandidateModel.insertMany(candidateData);
             const candidatejobData = await CandidateJobModel.insertMany(candidateData);
 
-            console.log({candidatejobData});
+            console.log({ candidatejobData });
 
-            submitted_candidates_id = candidateDataResult.map(e => e._id) 
-            const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate({_id: agencyJobExist._id}, {$push: {candidates: submitted_candidates_id}}, {new: true})
+            submitted_candidates_id = candidateDataResult.map(e => e._id)
+            const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate({ _id: agencyJobExist._id }, { $push: { candidates: submitted_candidates_id } }, { new: true })
             // console.log("agencyJobUpdate >>>>>>>>>>>> ", agencyJobUpdate);
-              console.log({candidateDataResult});
+            console.log({ candidateDataResult });
 
             if (candidateDataResult.length) {
                 return res.status(201).send({
@@ -265,7 +268,7 @@ module.exports = {
                     message: "Candidate data submitted",
                     data: candidateDataResult
                 })
-            }else if(candidatejobData.length){
+            } else if (candidatejobData.length) {
                 return res.status(201).send({
                     error: false,
                     message: "Candidate data submitted",
@@ -287,11 +290,11 @@ module.exports = {
     statusUpdate: async (req, res, next) => {
         try {
             // Status update
-            const candidateData = await CandidateModel.findOneAndUpdate({_id: req.params.candidateId}, {status: req.body.status}, {new: true})
+            const candidateData = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { status: req.body.status }, { new: true })
 
-            if(!candidateData) return res.status(400).send({error: true, message: "Candidate status is not updated"})
+            if (!candidateData) return res.status(400).send({ error: true, message: "Candidate status is not updated" })
 
-            return res.status(200).send({error: false, message: "Candidate status updated"})
+            return res.status(200).send({ error: false, message: "Candidate status updated" })
 
         } catch (error) {
             next(error)
@@ -312,19 +315,19 @@ module.exports = {
                 !["agency", "recruiters"].includes(dataModel)
             ) return res.status(401).send({ error: true, message: "User unauthorized." })
 
-            if(req.file.mimetype != 'application/pdf') return res.status(400).send({error: true, message: "Only pdf file is allowed."})
+            if (req.file.mimetype != 'application/pdf') return res.status(400).send({ error: true, message: "Only pdf file is allowed." })
 
             const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;
             const fileData = await app.locals.bucket.file(fileName).createWriteStream().end(req.file.buffer);
-            
+
             fileurl = `https://firebasestorage.googleapis.com/v0/b/hire2inspire-62f96.appspot.com/o/${fileName}?alt=media`;
 
             // Status update
-            const candidateData = await CandidateModel.findOneAndUpdate({_id: req.params.candidateId}, {resume: fileurl}, {new: true})
+            const candidateData = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { resume: fileurl }, { new: true })
 
-            if(!candidateData) return res.status(400).send({error: true, message: "Candidate resume not uploaded."})
+            if (!candidateData) return res.status(400).send({ error: true, message: "Candidate resume not uploaded." })
 
-            return res.status(200).send({error: false, message: "Candidate resume uploaded", data: candidateData})
+            return res.status(200).send({ error: false, message: "Candidate resume uploaded", data: candidateData })
 
         } catch (error) {
             next(error)
@@ -341,11 +344,11 @@ module.exports = {
             matchTry['$and'] = []
             var queriesArray = Object.entries(req.query)
             queriesArray.forEach(x => {
-                if(x[1] != '') {
-                    if(ObjectId.isValid(x[1])) {
+                if (x[1] != '') {
+                    if (ObjectId.isValid(x[1])) {
                         var z = { [x[0]]: { $eq: ObjectId(x[1]) } }
                     } else {
-                        var z = { [x[0]]: { $regex:x[1], $options: 'i' } }
+                        var z = { [x[0]]: { $regex: x[1], $options: 'i' } }
                     }
                     matchTry.$and.push(z)
                 }
@@ -353,9 +356,9 @@ module.exports = {
 
             const candidates = await CandidateModel
                 .find(matchTry)
-                .sort({_id: -1})
+                .sort({ _id: -1 })
 
-            return res.status(200).send({error: false, message: "Candidate list",data: candidates})
+            return res.status(200).send({ error: false, message: "Candidate list", data: candidates })
 
         } catch (error) {
             next(error)
@@ -368,7 +371,7 @@ module.exports = {
     details: async (req, res, next) => {
         try {
             const candidateDetail = await CandidateModel
-                .findOne({_id: req.params.id})
+                .findOne({ _id: req.params.id })
                 .populate([
                     {
                         path: "job"
@@ -380,8 +383,8 @@ module.exports = {
                         path: "recruiter"
                     }
                 ])
-            if (!candidateDetail) return res.status(400).send({error: true, message: "Candidate not found"})
-            return res.status(200).send({error: false, message: "Candidate data found", data: candidateDetail})
+            if (!candidateDetail) return res.status(400).send({ error: true, message: "Candidate not found" })
+            return res.status(200).send({ error: false, message: "Candidate data found", data: candidateDetail })
         } catch (error) {
             next(error)
         }
@@ -390,27 +393,27 @@ module.exports = {
     requestUpdate: async (req, res, next) => {
         try {
             // Status update
-            const candidateJobData = await CandidateJobModel.findOneAndUpdate({candidate: req.params.candidateId}, {request: req.body.request}, {new: true});
+            const candidateJobData = await CandidateJobModel.findOneAndUpdate({ candidate: req.params.candidateId }, { request: req.body.request }, { new: true });
 
-            console.log({candidateJobData})
+            console.log({ candidateJobData })
 
-            const candidateData = await CandidateModel.findOneAndUpdate({_id: req.params.candidateId}, {status: candidateJobData?.request}, {new: true})
+            const candidateData = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { status: candidateJobData?.request }, { new: true })
 
-            console.log("candidateJobData",candidateJobData?.request)
+            console.log("candidateJobData", candidateJobData?.request)
 
-            if(candidateJobData?.request == "1"){
-                const jobData = await JobPosting.findOneAndUpdate({_id:candidateJobData?.emp_job},{ '$inc': { 'reviewing_count': 1 }, },{new:true});
+            if (candidateJobData?.request == "1") {
+                const jobData = await JobPosting.findOneAndUpdate({ _id: candidateJobData?.emp_job }, { '$inc': { 'reviewing_count': 1 }, }, { new: true });
             }
-            else if(candidateJobData?.request == "2"){
-                const jobData = await JobPosting.findOneAndUpdate({_id:candidateJobData?.emp_job},{ '$inc': { 'interviewin_count': 1 }, },{new:true});
+            else if (candidateJobData?.request == "2") {
+                const jobData = await JobPosting.findOneAndUpdate({ _id: candidateJobData?.emp_job }, { '$inc': { 'interviewin_count': 1 }, }, { new: true });
             }
-            else if(candidateJobData?.request == "3"){
-                const jobData = await JobPosting.findOneAndUpdate({_id:candidateJobData?.emp_job},{ '$inc': { 'offer_count': 1 }, },{new:true});
+            else if (candidateJobData?.request == "3") {
+                const jobData = await JobPosting.findOneAndUpdate({ _id: candidateJobData?.emp_job }, { '$inc': { 'offer_count': 1 }, }, { new: true });
             }
 
-            if(!candidateJobData) return res.status(400).send({error: true, message: "Candidate status is not updated"})
+            if (!candidateJobData) return res.status(400).send({ error: true, message: "Candidate status is not updated" })
 
-            return res.status(200).send({error: false, message: "Candidate status updated"})
+            return res.status(200).send({ error: false, message: "Candidate status updated" })
 
         } catch (error) {
             next(error)
@@ -419,9 +422,9 @@ module.exports = {
 
     update: async (req, res, next) => {
         try {
-            const result = await CandidateModel.findOneAndUpdate({_id: req.params.id}, req.body, {new: true});
-    
-            if(!result) return res.status(200).send({ error: false, message: "Candidate not updated" })
+            const result = await CandidateModel.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true });
+
+            if (!result) return res.status(200).send({ error: false, message: "Candidate not updated" })
 
             return res.status(200).send({
                 error: false,
@@ -436,63 +439,63 @@ module.exports = {
 
     candidateJobUpdate: async (req, res, next) => {
         try {
-            const candidateJobData = await CandidateJobModel.findOneAndUpdate({candidate: req.params.candidateId},req.body,{new: true}).populate([
+            const candidateJobData = await CandidateJobModel.findOneAndUpdate({ candidate: req.params.candidateId }, req.body, { new: true }).populate([
                 {
-                    path:"emp_job",
-                    select:""
+                    path: "emp_job",
+                    select: ""
                 },
                 {
-                    path:"agency_id",
-                    select:""
+                    path: "agency_id",
+                    select: ""
                 },
                 {
-                    path:"candidate",
-                    select:""
+                    path: "candidate",
+                    select: ""
                 },
             ]);
 
-            if(candidateJobData?.final_submit == true){
-                const candidateDataUpdate = await CandidateModel.findOneAndUpdate({_id:req.params.candidateId},{final_submit:true},{new:true})
+            if (candidateJobData?.final_submit == true) {
+                const candidateDataUpdate = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { final_submit: true }, { new: true })
             }
 
-            if(candidateJobData?.screening_q_a.length != null){
-                const candidateUpdate = await CandidateModel.findOneAndUpdate({_id:req.params.candidateId},{"$push":{screening_q_a:candidateJobData?.screening_q_a}},{new:true})
+            if (candidateJobData?.screening_q_a.length != null) {
+                const candidateUpdate = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { "$push": { screening_q_a: candidateJobData?.screening_q_a } }, { new: true })
             }
 
-            if(!candidateJobData) return res.status(400).send({error: true, message: "Candidate status is not updated"})
+            if (!candidateJobData) return res.status(400).send({ error: true, message: "Candidate status is not updated" })
 
-            return res.status(200).send({error: false, message: "Candidate status updated"})
+            return res.status(200).send({ error: false, message: "Candidate status updated" })
 
         } catch (error) {
             next(error)
         }
     },
 
-    candidateJobDetail: async(req,res,next) => {
-        try{
-            const result = await CandidateJobModel.findOne({candidate: req.params.candidateId}).populate([
+    candidateJobDetail: async (req, res, next) => {
+        try {
+            const result = await CandidateJobModel.findOne({ candidate: req.params.candidateId }).populate([
                 {
-                    path:"emp_job",
-                    select:""
+                    path: "emp_job",
+                    select: ""
                 },
                 {
-                    path:"agency_id",
-                    select:""
+                    path: "agency_id",
+                    select: ""
                 },
                 {
-                    path:"candidate",
-                    select:""
+                    path: "candidate",
+                    select: ""
                 },
 
             ]);
-    
+
             return res.status(200).send({
                 error: false,
                 message: "Detail of candidate job",
                 data: result
             })
 
-        }catch(error){
+        } catch (error) {
             next(error)
         }
     },
@@ -508,7 +511,7 @@ module.exports = {
     //             !["agency", "recruiters"].includes(dataModel)
     //         ) return res.status(401).send({ error: true, message: "User unauthorized." })
 
-            
+
     //         if (candidateDataResult.length) {
     //             return res.status(201).send({
     //                 error: false,
@@ -525,6 +528,6 @@ module.exports = {
     //     }
     // },
 
-    
+
 
 }

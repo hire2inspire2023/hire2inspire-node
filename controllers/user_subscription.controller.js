@@ -8,6 +8,7 @@ const fs = require("fs");
 const { generateInvoicePdf } = require('../utils/pdf-generator');
 const moment = require('moment-timezone');
 const nodemailer = require("nodemailer");
+const sgMail = require('@sendgrid/mail');
 
 module.exports = {
     listbyId: async (req, res, next) => {
@@ -203,17 +204,17 @@ module.exports = {
 
             //const fileContent = fs.readFileSync(filePath);
 
-            var transport = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST,
-                port: 465,
-                secure: true,
-                auth: {
-                    user: process.env.EMAIL_NAME,
-                    pass: process.env.EMAIL_PASSWORD
-                },
-                requireTLS: true,
-            });
-            
+            // var transport = nodemailer.createTransport({
+            //     host: process.env.EMAIL_HOST,
+            //     port: 465,
+            //     secure: true,
+            //     auth: {
+            //         user: process.env.EMAIL_NAME,
+            //         pass: process.env.EMAIL_PASSWORD
+            //     },
+            //     requireTLS: true,
+            // });
+
             // var transport = nodemailer.createTransport({
             //     host: "mail.demo91.co.in",
             //      port: 465,
@@ -225,65 +226,66 @@ module.exports = {
             //      requireTLS: true,
             // });
 
-            var mailOptions = {
-                from: 'Info@hire2inspire.com',
-                to: empEmail,
+            sgMail.setApiKey(process.env.SENDGRID)
+            const msg = {
+                to: empEmail, // Change to your recipient
+                from: 'info@hire2inspire.com',
                 subject: `Package purchase successfully`,
                 html: `
-                <head>
-                <meta charset="UTF-8">
-                <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Purchase of "Pay As You Go" Package</title>
-                </head>
-                    <body>
-                        <p><strong>Subject:</strong> Purchase of "Pay As You Go" Package for Hiri2Inspire - INR 499</p>
-
-                        <p>Dear [Purchasing Team's Name],</p>
-
-                        <p>I hope this message finds you well. I am writing on behalf of Hiri2Inspire to request the purchase of the "Pay As You Go" package, priced at INR 499. We believe that this package will greatly benefit our organization and help us achieve our goals more efficiently.</p>
-
-                        <p>The "Pay As You Go" package offers several key advantages for our team, including:</p>
-
-                        <ol>
-                            <li><strong>Cost-Effective:</strong> With this package, we only pay for the services we use, which aligns well with our budgetary considerations.</li>
-                            <li><strong>Flexibility:</strong> It provides us with the flexibility to scale our usage up or down based on our evolving needs, ensuring that we always have access to the resources required for our projects.</li>
-                            <li><strong>Easy Management:</strong> The package comes with a user-friendly management interface that will allow us to monitor our usage, track expenses, and make adjustments as needed.</li>
-                            <li><strong>Support:</strong> We also appreciate the support and assistance that comes with this package, ensuring that we have access to help whenever necessary.</li>
-                        </ol>
-
-                        <p>We have thoroughly reviewed the package details and believe that it is the ideal solution for our organization's current requirements. To proceed with the purchase, we kindly request that you initiate the process as soon as possible.</p>
-
-                        <p>Please let us know if there are any specific procedures or paperwork that we need to complete on our end to facilitate this purchase. If you require any additional information or have any questions, please feel free to reach out to us at [Your Contact Information].</p>
-
-                        <p>We are excited about the possibilities that the "Pay As You Go" package offers, and we look forward to working with your team to finalize this purchase.</p>
-
-                        <p>Thank you for your prompt attention to this matter.</p>
-
-                        <p>Warm regards,</p>
-
-                        <p>[Your Name]<br>
-                        [Your Title]<br>
-                        Hiri2Inspire<br>
-                        [Your Contact Information]</p>
-                    </body>
-                `,
+                      <head>
+                      <meta charset="UTF-8">
+                      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>Purchase of "Pay As You Go" Package</title>
+                      </head>
+                          <body>
+                              <p><strong>Subject:</strong> Purchase of "Pay As You Go" Package for Hiri2Inspire - INR 499</p>
+      
+                              <p>Dear [Purchasing Team's Name],</p>
+      
+                              <p>I hope this message finds you well. I am writing on behalf of Hiri2Inspire to request the purchase of the "Pay As You Go" package, priced at INR 499. We believe that this package will greatly benefit our organization and help us achieve our goals more efficiently.</p>
+      
+                              <p>The "Pay As You Go" package offers several key advantages for our team, including:</p>
+      
+                              <ol>
+                                  <li><strong>Cost-Effective:</strong> With this package, we only pay for the services we use, which aligns well with our budgetary considerations.</li>
+                                  <li><strong>Flexibility:</strong> It provides us with the flexibility to scale our usage up or down based on our evolving needs, ensuring that we always have access to the resources required for our projects.</li>
+                                  <li><strong>Easy Management:</strong> The package comes with a user-friendly management interface that will allow us to monitor our usage, track expenses, and make adjustments as needed.</li>
+                                  <li><strong>Support:</strong> We also appreciate the support and assistance that comes with this package, ensuring that we have access to help whenever necessary.</li>
+                              </ol>
+      
+                              <p>We have thoroughly reviewed the package details and believe that it is the ideal solution for our organization's current requirements. To proceed with the purchase, we kindly request that you initiate the process as soon as possible.</p>
+      
+                              <p>Please let us know if there are any specific procedures or paperwork that we need to complete on our end to facilitate this purchase. If you require any additional information or have any questions, please feel free to reach out to us at [Your Contact Information].</p>
+      
+                              <p>We are excited about the possibilities that the "Pay As You Go" package offers, and we look forward to working with your team to finalize this purchase.</p>
+      
+                              <p>Thank you for your prompt attention to this matter.</p>
+      
+                              <p>Warm regards,</p>
+      
+                              <p>[Your Name]<br>
+                              [Your Title]<br>
+                              Hiri2Inspire<br>
+                              [Your Contact Information]</p>
+                          </body>
+                      `,
                 attachments: [
                     {
                         filename: fileName,
                         content: filePath
                     }
                 ]
-            };
+            }
 
-            transport.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log('Email sent: ' + info.response);
-                }
-            });
-
+            sgMail
+                .send(msg)
+                .then(() => {
+                    console.log('Email sent')
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
 
             return res.status(200).send({
                 error: false,

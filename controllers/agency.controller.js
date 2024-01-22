@@ -15,18 +15,19 @@ const Admin = require('../models/admin.model')
 const AgencyTransaction = require('../models/agency_transaction.model');
 const Token = require("../models/token.model");
 const nodemailer = require("nodemailer");
-const crypto = require("crypto")
+const crypto = require("crypto");
+const sgMail = require('@sendgrid/mail');
 
-var transport = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_NAME,
-    pass: process.env.EMAIL_PASSWORD
-  },
-  requireTLS: true,
-});
+// var transport = nodemailer.createTransport({
+//   host: process.env.EMAIL_HOST,
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_NAME,
+//     pass: process.env.EMAIL_PASSWORD
+//   },
+//   requireTLS: true,
+// });
 
 module.exports = {
   allList: async (req, res, next) => {
@@ -58,10 +59,10 @@ module.exports = {
   allDetail: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      const checkAdmin = await Admin.findOne({_id: userId})
-      if(!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "User unauthorized." })
-      const agencyData = await Agency.findOne({_id: req.params.id})
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkAdmin = await Admin.findOne({ _id: userId })
+      if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "User unauthorized." })
+      const agencyData = await Agency.findOne({ _id: req.params.id })
       res.status(200).send({
         error: false,
         message: 'Agency detail',
@@ -86,18 +87,19 @@ module.exports = {
       const savedAgency = await AgencyData.save()
       // console.log(savedAgency.id);
       const agencyName = savedAgency?.name;
-      console.log({agencyName});
+      console.log({ agencyName });
       const agencyFname = savedAgency?.AgencyUserAccountInfo?.first_name;
-      console.log({agencyFname});
+      console.log({ agencyFname });
       const agencyLname = savedAgency?.AgencyUserAccountInfo?.last_name;
-      console.log({agencyLname});
+      console.log({ agencyLname });
       const agencyEmail = savedAgency?.corporate_email;
 
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        to: agencyEmail,
+      sgMail.setApiKey(process.env.SENDGRID)
+      const msg2 = {
+        to: agencyEmail, // Change to your recipient
+        from: 'info@hire2inspire.com',
         subject: `Agency registered successfully`,
-        html:`
+        html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
         </head>
@@ -110,23 +112,25 @@ module.exports = {
         <p> Hire2Inspire </p>
     </body>
 `
-}; 
 
-      transport.sendMail(mailOptions, function(error, info){
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
-      
+      }
+
+      sgMail
+        .send(msg2)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
       const accessToken = await signAccessToken(savedAgency.id, "agency")
       const refreshToken = await signRefreshToken(savedAgency.id, "agency");
 
-      const transactionData = new AgencyTransaction({agency:savedAgency.id});
+      const transactionData = new AgencyTransaction({ agency: savedAgency.id });
       const tranResult = await transactionData.save();
 
-      const TokenData = new Token({user_id:savedAgency?._id,user_type:"agencies",token:crypto.randomBytes(32).toString("hex")});
+      const TokenData = new Token({ user_id: savedAgency?._id, user_type: "agencies", token: crypto.randomBytes(32).toString("hex") });
 
       const tokenResult = await TokenData.save();
 
@@ -134,11 +138,12 @@ module.exports = {
       const user_id = savedAgency?._id;
       const token_id = tokenResult?.token;
 
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        to: agencyEmail,
+      sgMail.setApiKey(process.env.SENDGRID)
+      const msg = {
+        to: agencyEmail, // Change to your recipient
+        from: 'info@hire2inspire.com',
         subject: `Agency Email Verify`,
-        html:`
+        html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
         </head>
@@ -159,22 +164,22 @@ module.exports = {
         <p> Hire2Inspire </p>
     </body>
 `
-}; 
+      }
 
-      transport.sendMail(mailOptions, function(error, info){
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-      });
-
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
       res.status(201).send({
         error: false,
         message: 'Agency created',
         data: {
-          accessToken, 
+          accessToken,
           refreshToken
         },
         user: savedAgency
@@ -185,14 +190,14 @@ module.exports = {
     }
   },
 
-  
+
 
   detail: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      const checkAgency = await Agency.findOne({_id: userId})
-      if(!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not found." })
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkAgency = await Agency.findOne({ _id: userId })
+      if (!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not found." })
 
       return res.status(200).send({
         error: false,
@@ -207,11 +212,11 @@ module.exports = {
   dashboard: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      const checkAgency = await Agency.findOne({_id: userId})
-      if(!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not found." })
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkAgency = await Agency.findOne({ _id: userId })
+      if (!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not found." })
 
-      const agencyJobs = await AgencyJobModel.find({agency: userId}).populate([{path: "job"}]).sort({_id: -1});
+      const agencyJobs = await AgencyJobModel.find({ agency: userId }).populate([{ path: "job" }]).sort({ _id: -1 });
 
       return res.status(200).send({
         error: false,
@@ -232,10 +237,10 @@ module.exports = {
   jobsByStatus: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      const checkAgency = await Agency.findOne({_id: userId})
-      const checkRecruiter = await Recruiter.findOne({_id: userId})
-      console.log({userId, dataModel, checkAgency, checkRecruiter});
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkAgency = await Agency.findOne({ _id: userId })
+      const checkRecruiter = await Recruiter.findOne({ _id: userId })
+      console.log({ userId, dataModel, checkAgency, checkRecruiter });
       if (
         (!checkAgency || !checkRecruiter) &&
         !["agency", "recruiters"].includes(dataModel)
@@ -244,16 +249,16 @@ module.exports = {
       let findFilter;
       switch (dataModel) {
         case "recruiters":
-          findFilter =  {agency: checkRecruiter?.agency, status: req.query.status}
+          findFilter = { agency: checkRecruiter?.agency, status: req.query.status }
           break;
         case "agency":
-          findFilter =  {agency: userId, status: req.query.status}
+          findFilter = { agency: userId, status: req.query.status }
           break;
         default:
           break;
       }
-      
-      const agencyJobs = await AgencyJobModel.find(findFilter).populate([{path: "job"}, {path: "candidates"}]).sort({_id: -1});
+
+      const agencyJobs = await AgencyJobModel.find(findFilter).populate([{ path: "job" }, { path: "candidates" }]).sort({ _id: -1 });
 
       return res.status(200).send({
         error: false,
@@ -268,13 +273,13 @@ module.exports = {
   updateJobStatus: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      const checkAgency = await Agency.findOne({_id: userId})
-      if(!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not found." })
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkAgency = await Agency.findOne({ _id: userId })
+      if (!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not found." })
 
       const accepted_on = req.body.status == "1" ? new Date() : undefined;
 
-      const agencyJobs = await AgencyJobModel.findOneAndUpdate({_id: req.params.agencyJobId}, {status: req.body.status, accepted_on }, {new: true}).populate([{path: "job"}]).sort({_id: -1});
+      const agencyJobs = await AgencyJobModel.findOneAndUpdate({ _id: req.params.agencyJobId }, { status: req.body.status, accepted_on }, { new: true }).populate([{ path: "job" }]).sort({ _id: -1 });
 
       return res.status(200).send({
         error: false,
@@ -288,20 +293,20 @@ module.exports = {
 
   updateAccountInfo: async (req, res, next) => {
     try {
-      const updatedData = await Agency.findOneAndUpdate({_id: req.params.id}, req.body, {new: true}).select("-otp -password")
-      if(updatedData) {
+      const updatedData = await Agency.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true }).select("-otp -password")
+      if (updatedData) {
         return res.status(200).send({
           error: false,
           message: "Agency data updated",
           data: updatedData
         })
       }
-      return res.status(400).send({error: true, message: "Agency not updated"})
+      return res.status(400).send({ error: true, message: "Agency not updated" })
     } catch (error) {
       next(error)
     }
   },
-  
+
 
   login: async (req, res, next) => {
     try {
@@ -309,7 +314,7 @@ module.exports = {
       const AgencyData = await Agency.findOne({ corporate_email: result.email })
       if (!AgencyData) throw createError.NotFound('Agency not registered')
 
-      if(AgencyData?.verified == false) throw createError.NotFound('Your Email is not yet verified');
+      if (AgencyData?.verified == false) throw createError.NotFound('Your Email is not yet verified');
 
       const isMatch = await AgencyData.isValidPassword(result.password)
       if (!isMatch)
@@ -325,7 +330,7 @@ module.exports = {
         error: false,
         message: 'Agency logged in',
         data: {
-          accessToken, 
+          accessToken,
           refreshToken
         },
         user: AgencyData
@@ -340,11 +345,11 @@ module.exports = {
   changePassword: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      
-      const checkAgency = await Agency.findOne({_id: userId})
+      let { userId, dataModel } = await getUserViaToken(token)
+
+      const checkAgency = await Agency.findOne({ _id: userId })
       // return res.status(200).send({userId, dataModel, checkAgency})
-      if(!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not authorized." })
+      if (!checkAgency && dataModel != "agency") return res.status(401).send({ error: true, message: "Agency not authorized." })
 
       const result = await agencyChangePasswordSchema.validateAsync(req.body)
 
@@ -356,29 +361,29 @@ module.exports = {
           }
           return res.status(200).send(message);
         }
-        
+
         passwordCheck = await bcrypt.compare(req.body.old_password, checkAgency.password);
         if (passwordCheck) {
-            const result = await Agency.findOneAndUpdate({
-              _id: userId
-            }, {
-              password: req.body.new_password
-            }, {new: true});
-            message = {
-                error: false,
-                message: "Agency password changed!"
-            }
+          const result = await Agency.findOneAndUpdate({
+            _id: userId
+          }, {
+            password: req.body.new_password
+          }, { new: true });
+          message = {
+            error: false,
+            message: "Agency password changed!"
+          }
         } else {
-            message = {
-              error: true,
-              message: "Old password is not correct!"
-            }
+          message = {
+            error: true,
+            message: "Old password is not correct!"
+          }
         }
       } else {
-          message = {
-              error: true,
-              message: "Old password, new password are required!"
-          }
+        message = {
+          error: true,
+          message: "Old password, new password are required!"
+        }
       }
       return res.status(200).send(message);
     } catch (error) {
@@ -389,13 +394,13 @@ module.exports = {
 
   forgetPassword: async (req, res, next) => {
     try {
-      if(!req.body.email) return res.status(400).send({error: true, message: "Email required"});
+      if (!req.body.email) return res.status(400).send({ error: true, message: "Email required" });
 
-      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, {otp: 1234});
-      if(!AgencyData) return res.status(404).send({error: true, message: 'Agency not found'});
+      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: 1234 });
+      if (!AgencyData) return res.status(404).send({ error: true, message: 'Agency not found' });
 
-      return res.status(200).send({error: false, message: 'Otp sent successfully'});
-    
+      return res.status(200).send({ error: false, message: 'Otp sent successfully' });
+
     } catch (error) {
       next(error)
     }
@@ -403,7 +408,7 @@ module.exports = {
 
   verifyOtp: async (req, res, next) => {
     try {
-      if(!req.body.email && !req.body.otp) return res.status(400).send({error: true, message: "Email and OTP required"});
+      if (!req.body.email && !req.body.otp) return res.status(400).send({ error: true, message: "Email and OTP required" });
 
       const AgencyData = await Agency.findOne({
         $and: [
@@ -411,10 +416,10 @@ module.exports = {
           { otp: req.body.otp }
         ]
       });
-      if(!AgencyData) return res.status(404).send({error: true, message: 'Agency not found / OTP not correct'});
+      if (!AgencyData) return res.status(404).send({ error: true, message: 'Agency not found / OTP not correct' });
 
-      return res.status(200).send({error: false, message: 'Otp verfied successfully'});
-    
+      return res.status(200).send({ error: false, message: 'Otp verfied successfully' });
+
     } catch (error) {
       next(error)
     }
@@ -424,16 +429,16 @@ module.exports = {
     try {
       if (req.body.new_password && req.body.confirm_password) {
         if (req.body.new_password !== req.body.confirm_password) {
-            message = {
-              error: true,
-              message: "new and confirm password are not equal"
-            }
-            return res.status(400).send(message);
+          message = {
+            error: true,
+            message: "new and confirm password are not equal"
+          }
+          return res.status(400).send(message);
         }
         const AgencyData = await Agency.findOne({
           corporate_email: req.body.email
         });
-       
+
         if (AgencyData === null) {
           message = {
             error: true,
@@ -453,22 +458,22 @@ module.exports = {
             password: req.body.new_password
           });
 
-          console.log("result",result);
-          
+          console.log("result", result);
+
           message = {
             error: false,
             message: "Agency password reset successfully!"
           }
           return res.status(200).send(message);
         }
-    } else {
-      message = {
-        error: true,
-        message: "new password, confirm password are required!"
+      } else {
+        message = {
+          error: true,
+          message: "new password, confirm password are required!"
+        }
+        return res.status(404).send(message);
       }
-      return res.status(404).send(message);
-    }
-    
+
     } catch (error) {
       next(error)
     }
@@ -490,15 +495,15 @@ module.exports = {
 
   updateWelcomeStatus: async (req, res, next) => {
     try {
-      const updatedData = await Agency.findOneAndUpdate({_id: req.params.id},{is_welcome:req.body.is_welcome}, {new: true});
-      if(updatedData) {
+      const updatedData = await Agency.findOneAndUpdate({ _id: req.params.id }, { is_welcome: req.body.is_welcome }, { new: true });
+      if (updatedData) {
         return res.status(200).send({
           error: false,
           message: "Agency data updated",
           data: updatedData
         })
       }
-      return res.status(400).send({error: true, message: "Agency not updated"})
+      return res.status(400).send({ error: true, message: "Agency not updated" })
     } catch (error) {
       next(error)
     }
@@ -508,7 +513,7 @@ module.exports = {
     try {
       const result = await Agency.findOneAndUpdate({
         _id: req.params.userId
-      }, {verified:req.body.verified}, { new: true });
+      }, { verified: req.body.verified }, { new: true });
       message = {
         error: false,
         message: "Email verified",
