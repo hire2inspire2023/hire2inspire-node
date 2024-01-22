@@ -118,12 +118,17 @@ module.exports = {
       const recruiterInvite = await RecruiterModel.insertMany(data);
       const invitedRecruiters = await RecruiterModel.find({
         agency: userId,
-      }).select("-otp -password").sort({_id: -1});
+      }).select("-otp -password").sort({ _id: -1 });
 
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        subject: `Recruiter Invitation`,
-        html:`
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID)
+      console.log(emails, 'emails')
+
+      const msg = {
+        to: emails, // replace these with your email addresses
+        from: 'info@hire2inspire.com',
+        subject: `Agency Invited successfully`,
+        html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
         </head>
@@ -148,7 +153,7 @@ module.exports = {
         every step.
     </p>
     <p>Find the link 
-    <a href="https://hire2inspire-dev.netlify.app/recruiter/login" target="blank">Registration Link</a>
+    <a href="http://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
   </p>
   <p>
    password: secret
@@ -157,21 +162,67 @@ module.exports = {
         <p> Hire2Inspire </p>
     </body>
 `
-}; 
+      };
+
+      sgMail.sendMultiple(msg).then(() => {
+        console.log('emails sent successfully!');
+      }).catch(error => {
+        console.log(error);
+      });
 
 
-data.forEach((recipient) => {
-  mailOptions.to = recipient?.email;
+      //       var mailOptions = {
+      //         from: 'Info@hire2inspire.com',
+      //         subject: `Recruiter Invitation`,
+      //         html:`
+      //         <head>
+      //             <title>Welcome to Hire2Inspire</title>
+      //         </head>
+      //     <body>
+      //     <p>Dear Recruiter,</p>
 
-  transport.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(`Error sending email to ${recipient}: ${error}`);
-    } else {
-      console.log(`Email sent to ${recipient?.email}: ${info.response}`);
-    }
-  });
-});
-      
+      //     <p>
+      //         I hope this message finds you well. We're thrilled to extend a warm and exclusive invitation to your esteemed recruiter
+      //         to become a part of the Hire2inspire platform - a dynamic community dedicated to connecting exceptional agencies with
+      //         clients seeking top-notch services.
+      //     </p>
+
+      //     <p>
+      //         At Hire2inspire, we believe in the power of collaboration and innovation, and we see your recruiter as a perfect fit for
+      //         our community. We are impressed by your talents and capabilities, and we are confident that your involvement will
+      //         greatly enrich our platform.
+      //     </p>
+
+      //     <p>
+      //         To start this exciting journey, all you need to do is click the link below to create your recruiter's profile on our
+      //         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
+      //         every step.
+      //     </p>
+      //     <p>Find the link 
+      //     <a href="https://hire2inspire-dev.netlify.app/recruiter/login" target="blank">Registration Link</a>
+      //   </p>
+      //   <p>
+      //    password: secret
+      // </p>
+      //         <p>Thank you and best regards,</p>
+      //         <p> Hire2Inspire </p>
+      //     </body>
+      // `
+      // }; 
+
+
+      // data.forEach((recipient) => {
+      //   mailOptions.to = recipient?.email;
+
+      //   transport.sendMail(mailOptions, (error, info) => {
+      //     if (error) {
+      //       console.error(`Error sending email to ${recipient}: ${error}`);
+      //     } else {
+      //       console.log(`Email sent to ${recipient?.email}: ${info.response}`);
+      //     }
+      //   });
+      // });
+
       return res.status(200).send({
         error: false,
         message: "Invitation sent successfully",
@@ -255,7 +306,7 @@ data.forEach((recipient) => {
           .status(400)
           .send({ error: true, message: "User Unauthorized" });
 
-      const recruiterData = await RecruiterModel.find({agency:userId}).select(
+      const recruiterData = await RecruiterModel.find({ agency: userId }).select(
         "-password -otp"
       );
 
@@ -268,7 +319,7 @@ data.forEach((recipient) => {
       next(error);
     }
   },
-//////////////////////// list of recruiter by emp /////////////////////////
+  //////////////////////// list of recruiter by emp /////////////////////////
   empReqlist: async (req, res, next) => {
     try {
       let token = req.headers["authorization"]?.split(" ")[1];
@@ -279,7 +330,7 @@ data.forEach((recipient) => {
           .status(400)
           .send({ error: true, message: "User Unauthorized" });
 
-      const recruiterData = await RecruiterModel.find({employer:userId})
+      const recruiterData = await RecruiterModel.find({ employer: userId })
 
       return res.status(200).send({
         error: false,
@@ -312,11 +363,13 @@ data.forEach((recipient) => {
       const hashedPassword = await bcrypt.hash("secret", salt);
 
       for (let index = 0; index < emails.length; index++) {
-        const checkInvitation = await RecruiterModel.findOne({$and:[
-          {employer:userId},
-          {email: emails[index]}
-        ]});
-        console.log({checkInvitation})
+        const checkInvitation = await RecruiterModel.findOne({
+          $and: [
+            { employer: userId },
+            { email: emails[index] }
+          ]
+        });
+        console.log({ checkInvitation })
         if (checkInvitation)
           return res
             .status(200)
@@ -334,16 +387,20 @@ data.forEach((recipient) => {
 
       const recruiterInvite = await RecruiterModel.insertMany(data);
       const invitedRecruiters = await RecruiterModel.find({
-        employer:userId,
-      }).select("-otp -password").sort({_id: -1});
+        employer: userId,
+      }).select("-otp -password").sort({ _id: -1 });
 
-      console.log({recruiterInvite});
-      console.log({invitedRecruiters});
+      console.log({ recruiterInvite });
+      console.log({ invitedRecruiters });
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID)
+      console.log(emails, 'emails')
 
-      var mailOptions = {
-        from: 'Info@hire2inspire.com',
-        subject: `Recruiter Invitation`,
-        html:`
+      const msg = {
+        to: emails, // replace these with your email addresses
+        from: 'info@hire2inspire.com',
+        subject: `Agency Invited successfully`,
+        html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
         </head>
@@ -367,7 +424,8 @@ data.forEach((recipient) => {
         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
         every step.
     </p>
-    <a href="https://hire2inspire-dev.netlify.app/recruiter/login" target="blank">Registration Link</a>
+    <p>Find the link 
+    <a href="http://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
   </p>
   <p>
    password: secret
@@ -376,20 +434,64 @@ data.forEach((recipient) => {
         <p> Hire2Inspire </p>
     </body>
 `
-}; 
+      };
+
+      sgMail.sendMultiple(msg).then(() => {
+        console.log('emails sent successfully!');
+      }).catch(error => {
+        console.log(error);
+      });      
+
+//       var mailOptions = {
+//         from: 'Info@hire2inspire.com',
+//         subject: `Recruiter Invitation`,
+//         html: `
+//         <head>
+//             <title>Welcome to Hire2Inspire</title>
+//         </head>
+//     <body>
+//     <p>Dear Recruiter,</p>
+
+//     <p>
+//         I hope this message finds you well. We're thrilled to extend a warm and exclusive invitation to your esteemed recruiter
+//         to become a part of the Hire2inspire platform - a dynamic community dedicated to connecting exceptional agencies with
+//         clients seeking top-notch services.
+//     </p>
+
+//     <p>
+//         At Hire2inspire, we believe in the power of collaboration and innovation, and we see your recruiter as a perfect fit for
+//         our community. We are impressed by your talents and capabilities, and we are confident that your involvement will
+//         greatly enrich our platform.
+//     </p>
+
+//     <p>
+//         To start this exciting journey, all you need to do is click the link below to create your recruiter's profile on our
+//         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
+//         every step.
+//     </p>
+//     <a href="https://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
+//   </p>
+//   <p>
+//    password: secret
+// </p>
+//         <p>Thank you and best regards,</p>
+//         <p> Hire2Inspire </p>
+//     </body>
+// `
+//       };
 
 
-data.forEach((recipient) => {
-  mailOptions.to = recipient?.email;
+//       data.forEach((recipient) => {
+//         mailOptions.to = recipient?.email;
 
-  transport.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(`Error sending email to ${recipient}: ${error}`);
-    } else {
-      console.log(`Email sent to ${recipient?.email}: ${info.response}`);
-    }
-  });
-});
+//         transport.sendMail(mailOptions, (error, info) => {
+//           if (error) {
+//             console.error(`Error sending email to ${recipient}: ${error}`);
+//           } else {
+//             console.log(`Email sent to ${recipient?.email}: ${info.response}`);
+//           }
+//         });
+//       });
       return res.status(200).send({
         error: false,
         message: "Invitation sent successfully",
@@ -403,7 +505,7 @@ data.forEach((recipient) => {
     }
   },
 
-/////////////////////////// status update by emp ///////////////////
+  /////////////////////////// status update by emp ///////////////////
 
   statusEmpUpdate: async (req, res, next) => {
     try {
@@ -441,11 +543,11 @@ data.forEach((recipient) => {
   changePassword: async (req, res, next) => {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
-      let {userId, dataModel} = await getUserViaToken(token)
-      
-      const checkRecruiter = await RecruiterModel.findOne({_id: userId})
+      let { userId, dataModel } = await getUserViaToken(token)
+
+      const checkRecruiter = await RecruiterModel.findOne({ _id: userId })
       // return res.status(200).send({userId, dataModel, checkRecruiter})
-      if(!checkRecruiter && dataModel != "recruiters") return res.status(400).send({ error: true, message: "Recruiter not authorized." })
+      if (!checkRecruiter && dataModel != "recruiters") return res.status(400).send({ error: true, message: "Recruiter not authorized." })
 
       if (req.body.old_password && req.body.new_password) {
         if (req.body.old_password === req.body.new_password) {
@@ -455,14 +557,14 @@ data.forEach((recipient) => {
           }
           return res.status(200).send(message);
         }
-        
+
         passwordCheck = await bcrypt.compare(req.body.old_password, checkRecruiter.password);
         if (passwordCheck) {
           const result = await RecruiterModel.findOneAndUpdate({
             _id: userId
           }, {
             password: req.body.new_password
-          }, {new: true});
+          }, { new: true });
           message = {
             error: false,
             message: "Recruiter password changed!"
@@ -488,13 +590,13 @@ data.forEach((recipient) => {
 
   forgetPassword: async (req, res, next) => {
     try {
-      if(!req.body.email) return res.status(400).send({error: true, message: "Email required"});
+      if (!req.body.email) return res.status(400).send({ error: true, message: "Email required" });
 
-      const RecruiterData = await RecruiterModel.findOneAndUpdate({ email: req.body.email }, {otp: 1234});
-      if(!RecruiterData) return res.status(404).send({error: true, message: 'Recruiter not found'});
+      const RecruiterData = await RecruiterModel.findOneAndUpdate({ email: req.body.email }, { otp: 1234 });
+      if (!RecruiterData) return res.status(404).send({ error: true, message: 'Recruiter not found' });
 
-      return res.status(200).send({error: false, message: 'Otp sent successfully'});
-    
+      return res.status(200).send({ error: false, message: 'Otp sent successfully' });
+
     } catch (error) {
       next(error)
     }
@@ -502,7 +604,7 @@ data.forEach((recipient) => {
 
   verifyOtp: async (req, res, next) => {
     try {
-      if(!req.body.email && !req.body.otp) return res.status(400).send({error: true, message: "Email and OTP required"});
+      if (!req.body.email && !req.body.otp) return res.status(400).send({ error: true, message: "Email and OTP required" });
 
       const RecruiterData = await RecruiterModel.findOne({
         $and: [
@@ -510,10 +612,10 @@ data.forEach((recipient) => {
           { otp: req.body.otp }
         ]
       });
-      if(!RecruiterData) return res.status(404).send({error: true, message: 'Recruiter not found / OTP not correct'});
+      if (!RecruiterData) return res.status(404).send({ error: true, message: 'Recruiter not found / OTP not correct' });
 
-      return res.status(200).send({error: false, message: 'OTP verfied successfully'});
-    
+      return res.status(200).send({ error: false, message: 'OTP verfied successfully' });
+
     } catch (error) {
       next(error)
     }
@@ -523,16 +625,16 @@ data.forEach((recipient) => {
     try {
       if (req.body.new_password && req.body.confirm_password) {
         if (req.body.new_password !== req.body.confirm_password) {
-            message = {
-              error: true,
-              message: "new and confirm password are not equal"
-            }
-            return res.status(400).send(message);
+          message = {
+            error: true,
+            message: "new and confirm password are not equal"
+          }
+          return res.status(400).send(message);
         }
         const RecruiterData = await RecruiterModel.findOne({
           email: req.body.email
         });
-       
+
         if (RecruiterData === null) {
           message = {
             error: true,
@@ -552,8 +654,8 @@ data.forEach((recipient) => {
             password: req.body.new_password
           });
 
-          console.log("result",result);
-          
+          console.log("result", result);
+
           message = {
             error: false,
             message: "Recruiter password reset successfully!"
@@ -567,7 +669,7 @@ data.forEach((recipient) => {
         }
         return res.status(404).send(message);
       }
-    
+
     } catch (error) {
       next(error)
     }
