@@ -410,9 +410,9 @@ module.exports = {
 
             sgMail.setApiKey(process.env.SENDGRID)
             const msg = {
-                to: adminMail, // Change to your recipient
+                to: 'info@hire2inspire.com', // Change to your recipient
                 from: 'info@hire2inspire.com',
-                subject: `Hired candidate!`,
+                subject: `Job Approval Request!`,
                 html: `
                       <head>
                           <title>Notification: Request for Job Approval</title>
@@ -428,13 +428,12 @@ module.exports = {
                     Please let us know if you have any questions or need additional details. We look forward to your positive response.
                   </p>
                   <p>Find the link 
-                      <a href="https://hire2inspire-dev.netlify.app/admin/login" target="blank">LogIn</a>
+                      <a href="https://https://hire2inspire.com/admin/login" target="blank">LogIn</a>
                     </p>
                   <p>Warm regards,</p>
                   <p>${empFname} ${empLname} </p>
                 </body>
               `
-
             }
 
             sgMail

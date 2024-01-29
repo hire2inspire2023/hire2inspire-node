@@ -313,6 +313,52 @@ module.exports = {
           console.error(error)
         })
 
+
+      const AdminData = await Admin.findOne({});
+
+      let adminMail = AdminData?.email;
+      let adminName = AdminData?.name;
+
+      sgMail.setApiKey(process.env.SENDGRID)
+      const new_msg = {
+        to: "info@hire2inspire.com", // Change to your recipient
+        from: 'info@hire2inspire.com', // Change to your verified sender
+        subject: `New Employee Registration`,
+        html: `
+          <head>
+              <title>Notification:New Employee Registration</title>
+      </head>
+      <body>
+      <p>
+        Dear ${adminName},
+      </p>
+      <p>A new employee has been registered. Below are the details of the new employee:</p>
+      
+      <ul>
+        <li><strong>Name:</strong> ${empFname} ${empLname}</li>
+        <li><strong>Email:</strong> ${empEmail}</li>
+      </ul>
+      
+      <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employee.</p>
+
+      <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com.</p>
+
+     
+      <p>Best regards,<br>
+      Hire2Ispire Team</p>
+    </body>
+      `
+      }
+      sgMail
+        .send(new_msg)
+        .then(() => {
+          console.log('Email sent for Admin')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
+
       res.status(201).send({
         error: false,
         message: 'Employer created',

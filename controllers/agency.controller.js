@@ -124,6 +124,50 @@ module.exports = {
           console.error(error)
         })
 
+      const AdminData = await Admin.findOne({});
+
+      let adminMail = AdminData?.email;
+      let adminName = AdminData?.name;
+
+      sgMail.setApiKey(process.env.SENDGRID)
+      const new_msg = {
+        to: "info@hire2inspire.com", // Change to your recipient
+        from: 'info@hire2inspire.com', // Change to your verified sender
+        subject: `New Agency Registration`,
+        html: `
+          <head>
+              <title>New Agency Registration Notification</title>
+      </head>
+      <body>
+      <p>
+        Dear ${adminName},
+      </p>
+      <p>A new agency has been registered. Below are the details of the new agency:</p>
+      
+      <ul>
+        <li><strong>Agency Name:</strong> ${agencyFname}  ${agencyLname} </li>
+        <li><strong>Contact Email:</strong> ${agencyEmail}</li>
+      </ul>
+      
+      <p>Please review the details and ensure that the necessary steps are taken to validate and approve the new agency registration.</p>
+
+      <p>If you have any questions or need further information, feel free to contact the administration department at info@hire2inspire.com.</p>
+
+     
+      <p>Best regards,<br>
+      Hire2Ispire Team</p>
+    </body>
+      `
+      }
+      sgMail
+        .send(new_msg)
+        .then(() => {
+          console.log('Email sent for Admin')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
       const accessToken = await signAccessToken(savedAgency.id, "agency")
       const refreshToken = await signRefreshToken(savedAgency.id, "agency");
 
