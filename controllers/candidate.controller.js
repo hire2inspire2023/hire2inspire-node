@@ -447,6 +447,7 @@ module.exports = {
                 let candidateId = updatedData?._id;
 
                 sgMail.setApiKey(process.env.SENDGRID)
+                console.log(process.env.SENDGRID,'process.env.SENDGRID')
                 const msg = {
                     to: candidateEmail, // Change to your recipient
                     from: 'subhra.onenesstechs@gmail.com',
