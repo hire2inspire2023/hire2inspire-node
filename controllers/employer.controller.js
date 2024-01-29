@@ -276,13 +276,13 @@ module.exports = {
       //       });
 
       //const sgMail = require('@sendgrid/mail')
-       sgMail.setApiKey(process.env.SENDGRID)
-     
-        let msg2 = {
-          to: empEmail, // Change to your recipient
-          from: 'info@hire2inspire.com', // Change to your verified sender
-          subject: `Employer Email Verify`,
-          html: `
+      sgMail.setApiKey(process.env.SENDGRID)
+
+      let msg2 = {
+        to: empEmail, // Change to your recipient
+        from: 'info@hire2inspire.com', // Change to your verified sender
+        subject: `Employer Email Verify`,
+        html: `
           <head>
               <title>Welcome to Hire2Inspire</title>
           </head>
@@ -302,16 +302,16 @@ module.exports = {
           <p>Thank you and best regards,</p>
           <p> Hire2Inspire </p>
       </body>`
-        }
+      }
 
-        sgMail
-          .send(msg2)
-          .then(() => {
-            console.log('Email sent')
-          })
-          .catch((error) => {
-            console.error(error)
-          })
+      sgMail
+        .send(msg2)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
       res.status(201).send({
         error: false,
@@ -716,7 +716,7 @@ module.exports = {
                   invoice_file: "",
                   invoice_No: generateNextInvoice(PrevInvoiceId, "EM"),
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "IGST",
                   igst: "18%",
                   gst_cal_amount: gstAmount,
@@ -745,7 +745,7 @@ module.exports = {
                   invoice_file: "",
                   invoice_No: generateNextInvoice(PrevInvoiceId, "EM"),
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "CGST/SGST",
                   cgst: "9%",
                   sgst: "9%",
@@ -777,7 +777,7 @@ module.exports = {
                   invoice_file: "",
                   invoice_No: generateNextInvoice(PrevInvoiceId, "EM"),
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "IGST",
                   igst: "18%",
                   gst_cal_amount: gstAmount,
@@ -806,7 +806,7 @@ module.exports = {
                   invoice_file: "",
                   invoice_No: generateNextInvoice(PrevInvoiceId, "EM"),
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "CGST/SGST",
                   cgst: "9%",
                   sgst: "9%",
@@ -857,7 +857,7 @@ module.exports = {
                   invoice_No: generateNextInvoice(PrevInvoiceId, "AG"),
                   employer: result?.employer,
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "IGST",
                   igst: "18%",
                   gst_cal_amount: gstAmountData,
@@ -887,7 +887,7 @@ module.exports = {
                   invoice_No: generateNextInvoice(PrevInvoiceId, "AG"),
                   employer: result?.employer,
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "CGST/SGST",
                   cgst: "9%",
                   sgst: "9%",
@@ -922,7 +922,7 @@ module.exports = {
                   invoice_No: generateNextInvoice(PrevInvoiceId, "AG"),
                   employer: result?.employer,
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "IGST",
                   igst: "18%",
                   gst_cal_amount: gstAmountData,
@@ -953,7 +953,7 @@ module.exports = {
                   invoice_No: generateNextInvoice(PrevInvoiceId, "AG"),
                   employer: result?.employer,
                   gst_in: "29AAHCH0363H1ZK",
-                  hsn_code: "SAC 9983",
+                  hsn_code: "998311",
                   gst_type: "CGST/SGST",
                   cgst: "9%",
                   sgst: "9%",
