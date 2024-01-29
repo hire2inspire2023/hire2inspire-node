@@ -445,6 +445,49 @@ module.exports = {
                     console.error(error)
                 })
 
+
+            const agencydata = await Agency.find({});
+
+            let agencyEmails = agencydata.map(e => e.corporate_email.toString());
+
+            sgMail.setApiKey(process.env.SENDGRID)
+            const new_msg = {
+                to: agencyEmails, // Change to your recipient
+                from: 'info@hire2inspire.com', // Change to your verified sender
+                subject: `New Job Posting`,
+                html: `
+            <head>
+                <title>Notification:New Job Posting</title>
+          </head>
+          <body>
+          <p>
+              Dear Agency,
+          </p>
+          <p>A new job has been posted on your company's website. Below are the details of the job:</p>
+        
+          <ul>
+            <li><strong>Job Title:</strong> ${jobPostingData?.job_name}</li>
+          </ul>
+          
+          <p>Please review the details and take any necessary actions, such as sharing the job opening with the relevant teams or departments.</p>
+    
+          <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com .</p>
+      
+          <p>Best regards,<br>
+          Hire2Ispire Team</p>
+          </body>
+        `
+            }
+            sgMail
+                .sendMultiple(new_msg)
+                .then(() => {
+                    console.log('Email sent')
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+
+
             if (result) {
                 let userCreditData2;
                 userCreditData2 = await UserCredit.findOneAndUpdate({ employer: userId }, { '$inc': { 'purchased_count': -1 } }, { new: true });
