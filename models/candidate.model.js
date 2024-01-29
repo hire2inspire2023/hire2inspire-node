@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const { string } = require("joi");
 
 const CandidateSchema = new Schema(
-	{
+    {
         agency_job: {
             type: ObjectId,
             ref: 'agency_jobs',
@@ -40,30 +40,31 @@ const CandidateSchema = new Schema(
             trim: true,
             required: true
         },
-		email: {
-			type: String,
-			required: true,
-			lowercase: true,
-			trim: true,
-			validate(value) {
-				const pattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z-.]+$/g;
-				if (!pattern.test(value)) {s
-					throw new Error("Wrong email format.");
-				}
-			},
-		},
+        email: {
+            type: String,
+            required: true,
+            lowercase: true,
+            trim: true,
+            validate(value) {
+                const pattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z-.]+$/g;
+                if (!pattern.test(value)) {
+                    s
+                    throw new Error("Wrong email format.");
+                }
+            },
+        },
         phone: {
             type: String,
-			trim: true,
+            trim: true,
             required: true,
             validate: {
-                validator: function(v) {
-                  return /\d{10}/.test(v);
+                validator: function (v) {
+                    return /\d{10}/.test(v);
                 },
                 message: props => `${props.value} is not a valid phone number!`
             }
         },
-		country: {
+        country: {
             type: String,
             trim: true
         },
@@ -108,7 +109,7 @@ const CandidateSchema = new Schema(
         status: {
             type: String,
             enum: {
-                values: [0,1,2,3,4],
+                values: [0, 1, 2, 3, 4],
                 message: "only 0:(pending)/1:(reviewing)/2:(interviewing)/3:(offer)/4:(rejected) allowed."
             },
             default: 0
@@ -116,16 +117,27 @@ const CandidateSchema = new Schema(
         screening_q_a: {
             type: Array
         },
-        is_hired:{
-            type:Boolean,
-            default:false
+        is_hired: {
+            type: Boolean,
+            default: false
         },
-        final_submit:{
-            type:Boolean,
-            default:false
+        final_submit: {
+            type: Boolean,
+            default: false
         },
-	},
-	{ timestamps: true }
+        reSubmit: {
+            type: Boolean,
+            default: false
+        },
+        updated_by: {
+            type: String,
+            enum: {
+                values: ["agency", "candidate"]
+            },
+            default: "candidate"
+        },
+    },
+    { timestamps: true }
 );
 
 const Candidate = mongoose.model("candidates", CandidateSchema);

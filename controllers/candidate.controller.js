@@ -118,6 +118,8 @@ module.exports = {
             let candidatefName = candidatelist?.fname;
             let candidatelName = candidatelist?.lname;
 
+            let companyName = candidatejobdata?.emp_job?.comp_name;
+
             let jobRole = candidatejobdata?.emp_job?.job_name;
 
             let jobId = candidatejobdata?.emp_job;
@@ -137,7 +139,7 @@ module.exports = {
                    </head>
                    <body>
                        <p>Dear ${candidatefName} ${candidatelName} ,</p>
-                       <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at [Company Name]. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
+                       <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at ${companyName}. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
        
                        <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
        
@@ -420,21 +422,80 @@ module.exports = {
         }
     },
 
+
     update: async (req, res, next) => {
         try {
             const result = await CandidateModel.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true });
 
             if (!result) return res.status(200).send({ error: false, message: "Candidate not updated" })
 
+            let updatedData;
+            if (result?.updated_by == "agency") {
+                updatedData = await CandidateModel.findOneAndUpdate({ _id: req.params.id }, { reSubmit: true }, { new: true });
+
+
+                let candidateEmail = updatedData?.email;
+                let candidatefName = updatedData?.fname;
+                let candidatelName = updatedData?.lname;
+
+                let jobRole = updatedData?.job?.job_name;
+
+                let jobId = updatedData?.job;
+
+                let companyName = updatedData?.job?.comp_name;
+
+                let candidateId = updatedData?._id;
+
+                sgMail.setApiKey(process.env.SENDGRID)
+                const msg = {
+                    to: candidateEmail, // Change to your recipient
+                    from: 'subhra.onenesstechs@gmail.com',
+                    subject: `Subject: Confirmation of CV Submission for ${jobRole} - Next Steps`,
+                    html: `
+                          <head>
+                              <title>Notification: Candidate Hired - Backend Development Position</title>
+                      </head>
+                      <body>
+                          <p>Dear ${candidatefName} ${candidatelName} ,</p>
+                          <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at ${companyName}. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
+          
+                          <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
+          
+                          <p>Find the link 
+                          <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
+                        </p>
+          
+                          <p>Best regards,</p>
+                          <p>Hire2Inspire</p>
+                      </body>
+                  `
+                }
+
+                sgMail
+                    .send(msg)
+                    .then(() => {
+                        console.log('Email sent')
+                    })
+                    .catch((error) => {
+                        console.error(error)
+                    })
+
+            }
+
             return res.status(200).send({
                 error: false,
                 message: "Candidate Updated",
-                data: result
+                data: result,
+                updatedData
             })
         } catch (error) {
             next(error)
         }
     },
+
+
+
+   
 
 
     candidateJobUpdate: async (req, res, next) => {
