@@ -410,7 +410,7 @@ module.exports = {
 
             sgMail.setApiKey(process.env.SENDGRID)
             const msg = {
-                to: 'admin@hire2inspire.com', // Change to your recipient 
+                to: 'hire2inspireh2i@gmail.com', // Change to your recipient 
                 from: 'info@hire2inspire.com',
                 subject: `Job Approval Request!`,
                 html: `
@@ -439,7 +439,7 @@ module.exports = {
             sgMail
                 .send(msg)
                 .then(() => {
-                    console.log('Email sent')
+                    console.log('Email sent for Admin approve')
                 })
                 .catch((error) => {
                     console.error(error)
@@ -474,7 +474,7 @@ module.exports = {
             sgMail
                 .sendMultiple(new_msg)
                 .then(() => {
-                    console.log('Email sent')
+                    console.log('Email sent to allagencies')
                 })
                 .catch((error) => {
                     console.error(error)
