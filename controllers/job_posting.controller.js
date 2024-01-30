@@ -446,11 +446,11 @@ module.exports = {
                 })
 
 
-            const agencydata = await Agency.find({});
+            // const agencydata = await Agency.find({});
 
-            let agencyEmails = agencydata.map(e => e.corporate_email.toString());
+            // let agencyEmails = agencydata.map(e => e.corporate_email.toString());
 
-            console.log(agencyEmails)
+            // console.log(agencyEmails)
 
 //             sgMail.setApiKey(process.env.SENDGRID)
 //             const new_msg = {

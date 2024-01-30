@@ -287,7 +287,9 @@ module.exports = {
         })
 
         
+      const agencydata = await Agency.find({});
 
+      let agencyEmails = agencydata.map(e => e.corporate_email.toString());
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
