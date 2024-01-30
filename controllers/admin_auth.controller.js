@@ -295,7 +295,7 @@ module.exports = {
       const new_msg = {
         to: agencyEmails, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: "Calling All Talent Architects, A New Blueprint Awaits!",
+        subject: `H2I ${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`,
         html: `
       <head>
           <title>Notification:New Job Posting</title>
@@ -304,7 +304,7 @@ module.exports = {
     <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
     <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
     <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
-    <p>Job details and link of the job to be provided here posted on H2I, click here  <a href="https://hire2inspire.com/agency/job-details?id=${jobId}" target="blank">Find your job</p>
+    <p>Find your job<a href="https://hire2inspire.com/jobgrid" target="blank">${jodUID}</a>
     <p>Regards,</p>
     <p>hire2Inspire</p>
     <p>&nbsp;</p>
