@@ -106,7 +106,7 @@ module.exports = {
             const candidatejobdata = await CandidateJobModel.findOne({ _id: candidateJob?._id }).populate([
                 {
                     path: "emp_job",
-                    select: "job_name"
+                    select: ""
                 }
             ])
 
@@ -426,7 +426,14 @@ module.exports = {
     update: async (req, res, next) => {
         try {
             const resData = await CandidateModel.find({ _id: req.params.id });
-            const result = await CandidateModel.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true });
+            // const result = await CandidateModel.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true });
+
+            const result = await CandidateModel.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true }).populate([
+                {
+                    path: "job",
+                    select: ""
+                }
+            ]);
 
             if (!result) return res.status(200).send({ error: false, message: "Candidate not updated" });
 
@@ -437,11 +444,15 @@ module.exports = {
 
             let jobRole = result?.job?.job_name;
 
+            console.log(result,'result')
+
             let jobId = result?.job;
 
             let companyName = result?.job?.comp_name;
 
             let candidateId = result?._id;
+
+
 
             if (result?.final_submit == false) {
                 sgMail.setApiKey(process.env.SENDGRID)
