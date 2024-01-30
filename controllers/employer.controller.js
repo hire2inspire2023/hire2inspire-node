@@ -228,14 +228,14 @@ module.exports = {
       `
       }
 
-      sgMail
-        .send(msg)
-        .then(() => {
-          console.log('Email sent')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+      // sgMail
+      //   .send(msg)
+      //   .then(() => {
+      //     console.log('Email sent')
+      //   })
+      //   .catch((error) => {
+      //     console.error(error)
+      //   })
 
       const transactionData = new Transaction({ employer: savedEmployer.id });
       const tranResult = await transactionData.save();
@@ -304,14 +304,14 @@ module.exports = {
       </body>`
       }
 
-      sgMail
-        .send(msg2)
-        .then(() => {
-          console.log('Email sent')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+      // sgMail
+      //   .send(msg2)
+      //   .then(() => {
+      //     console.log('Email sent')
+      //   })
+      //   .catch((error) => {
+      //     console.error(error)
+      //   })
 
 
       const AdminData = await Admin.findOne({});
@@ -321,9 +321,9 @@ module.exports = {
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
-        to: "admin@hire2inspire.com", // Change to your recipient
+        to: "admin99900@yopmail.com", // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `New Employee Registration`,
+        subject: `New Employeer Registration`,
         html: `
           <head>
               <title>Notification:New Employee Registration</title>
