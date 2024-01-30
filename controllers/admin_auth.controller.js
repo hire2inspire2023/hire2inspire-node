@@ -245,12 +245,7 @@ module.exports = {
 
       let jobId = jobPostingData?._id;
 
-      if (jobPostingData) {
-        return res.status(200).send({
-          error: false,
-          message: "Admin approval for job updated."
-        });
-      }
+      
 
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
@@ -323,6 +318,12 @@ module.exports = {
           console.error(error)
         })
 
+      if (jobPostingData) {
+        return res.status(200).send({
+          error: false,
+          message: "Admin approval for job updated."
+        });
+      }
 
       return res.status(400).send({
         error: false,
