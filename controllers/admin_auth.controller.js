@@ -285,7 +285,7 @@ module.exports = {
       sgMail
         .send(msg)
         .then(() => {
-          console.log('Email sent')
+          console.log('Email sent to emp')
         })
         .catch((error) => {
           console.error(error)
