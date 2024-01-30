@@ -145,7 +145,7 @@ module.exports = {
       <p>A new agency has been registered. Below are the details of the new agency:</p>
       
       <ul>
-        <li><strong>Agency Name:</strong> ${agencyFname}  ${agencyLname} </li>
+        <li><strong>Agency Name:</strong> ${agencyName} </li>
         <li><strong>Contact Email:</strong> ${agencyEmail}</li>
       </ul>
       

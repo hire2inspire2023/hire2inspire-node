@@ -366,14 +366,14 @@ module.exports = {
       const msg = {
         to: agencyEmail, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `Confirmaition for Job Approval`,
+        subject: `Confirmation of Agency Approval`,
         html: `
        <head>
        <title>Confirmation of Agency Approval</title>
      </head>
      <body>
         <p>Dear ${agencyName},</p>
-        <p>I hope this email finds you well. We are pleased to inform you that your agency's application for approval has been successfully processed and has received the necessary clearance. We are excited to confirm your agency's status as an approved partner with [Your Company Name].</p>
+        <p>I hope this email finds you well. We are pleased to inform you that your agency's application for approval has been successfully processed and has received the necessary clearance. We are excited to confirm your agency's status as an approved partner with Hire2Inspire.</p>
         <p>Best regards,</p>
         <p>Hire2Inspire</p>
       </body>
