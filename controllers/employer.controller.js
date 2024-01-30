@@ -1017,7 +1017,7 @@ module.exports = {
 
       message = {
         error: false,
-        message: "Billing data added",
+        message: "Invoice generated successfully",
         data: result
       }
       return res.status(200).send(message);
