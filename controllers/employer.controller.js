@@ -1032,6 +1032,8 @@ module.exports = {
 
       // employer
 
+      console.log('showwwwwwwwwwww', empEmail)
+
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
         to: empEmail, // Change to your recipient
@@ -1067,7 +1069,9 @@ module.exports = {
           console.error(error)
         })
 
-      // agency
+      
+      console.log('showwwwwwwwwwww', agncyEmail)  // agency
+
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
         to: agncyEmail, // Change to your recipient
