@@ -293,6 +293,8 @@ module.exports = {
 
       let jodUID = jobPostingData?.job_id;
 
+      console.log(agencyEmails)
+
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
         to: agencyEmails, // Change to your recipient
