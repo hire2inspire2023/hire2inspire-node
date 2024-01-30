@@ -958,7 +958,7 @@ module.exports = {
                   amount: amountData,
                   // "split_amount.agency_amount": agency_amountData + gstAmountData,  // amount get agencys
                   "split_amount.agency_amount": amountData + gstAmountData,  // amount get agencys
-                  "split_amount.h2i_amount": 0,
+                  "split_amount.h2i_amount": h2i_amountData,
                   type: "payble",
                   billing_id: billingId,
                   candidate: candidateData,
@@ -989,7 +989,7 @@ module.exports = {
                   amount: amountData,
                   // "split_amount.agency_amount": agency_amountData + cgstAmountData + sgstAmountData,
                   "split_amount.agency_amount": amountData + cgstAmountData + sgstAmountData,
-                  "split_amount.h2i_amount": 0,
+                  "split_amount.h2i_amount": h2i_amountData,
                   type: "payble",
                   billing_id: billingId,
                   candidate: candidateData,
