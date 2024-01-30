@@ -452,35 +452,35 @@ module.exports = {
 
             console.log(agencyEmails)
 
-            sgMail.setApiKey(process.env.SENDGRID)
-            const new_msg = {
-                to: agencyEmails, // Change to your recipient
-                from: 'info@hire2inspire.com', // Change to your verified sender
-                subject: `New Job Posting`,
-                html: `
-            <head>
-                <title>Notification:New Job Posting</title>
-          </head>
-         <body>
-    <p>Subject: Calling All Talent Architects, A New Blueprint Awaits!</p>
-    <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
-    <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
-    <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
-    <p>(Job details and link of the job to be provided here posted on H2I)</p>
-    <p>Regards,</p>
-    <p>hire2Inspire</p>
-    <p>&nbsp;</p>
-</body>
-        `
-            }
-            sgMail
-                .sendMultiple(new_msg)
-                .then(() => {
-                    console.log('Email sent to allagencies')
-                })
-                .catch((error) => {
-                    console.error(error)
-                })
+//             sgMail.setApiKey(process.env.SENDGRID)
+//             const new_msg = {
+//                 to: agencyEmails, // Change to your recipient
+//                 from: 'info@hire2inspire.com', // Change to your verified sender
+//                 subject: ` Calling All Talent Architects, A New Blueprint Awaits!`,
+//                 html: `
+//             <head>
+//                 <title>Notification:New Job Posting</title>
+//           </head>
+//          <body>
+//     // <p>Subject: Calling All Talent Architects, A New Blueprint Awaits!</p>
+//     <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
+//     <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
+//     <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
+//     <p>(Job details and link of the job to be provided here posted on H2I)</p>
+//     <p>Regards,</p>
+//     <p>hire2Inspire</p>
+//     <p>&nbsp;</p>
+// </body>
+//         `
+//             }
+//             sgMail
+//                 .sendMultiple(new_msg)
+//                 .then(() => {
+//                     console.log('Email sent to allagencies')
+//                 })
+//                 .catch((error) => {
+//                     console.error(error)
+//                 })
 
 
             if (result) {

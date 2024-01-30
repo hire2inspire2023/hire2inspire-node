@@ -242,6 +242,9 @@ module.exports = {
       let empEmail = jobPostingData?.employer?.email;
       let jobName = jobPostingData?.job_name;
       let compName = jobPostingData?.comp_name;
+
+      let jobId = jobPostingData?._id;
+
       if (jobPostingData) {
         return res.status(200).send({
           error: false,
@@ -288,6 +291,37 @@ module.exports = {
           console.error(error)
         })
 
+        
+
+
+      sgMail.setApiKey(process.env.SENDGRID)
+      const new_msg = {
+        to: agencyEmails, // Change to your recipient
+        from: 'info@hire2inspire.com', // Change to your verified sender
+        subject: "Calling All Talent Architects, A New Blueprint Awaits!",
+        html: `
+      <head>
+          <title>Notification:New Job Posting</title>
+      </head>
+      <body>
+    <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
+    <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
+    <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
+    <p>Job details and link of the job to be provided here posted on H2I  <a href="https://hire2inspire.com/agency/job-details?id=${jobId}" target="blank">Find your job</p>
+    <p>Regards,</p>
+    <p>hire2Inspire</p>
+    <p>&nbsp;</p>
+    </body>
+        `
+      }
+      sgMail
+        .sendMultiple(new_msg)
+        .then(() => {
+          console.log('Email sent to allagencies')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
 
       return res.status(400).send({
