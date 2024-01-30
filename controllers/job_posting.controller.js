@@ -410,7 +410,7 @@ module.exports = {
 
             sgMail.setApiKey(process.env.SENDGRID)
             const msg = {
-                to: 'info@hire2inspire.com', // Change to your recipient
+                to: 'admin@hire2inspire.com', // Change to your recipient 
                 from: 'info@hire2inspire.com',
                 subject: `Job Approval Request!`,
                 html: `
@@ -459,23 +459,16 @@ module.exports = {
             <head>
                 <title>Notification:New Job Posting</title>
           </head>
-          <body>
-          <p>
-              Dear Agency,
-          </p>
-          <p>A new job has been posted on your company's website. Below are the details of the job:</p>
-        
-          <ul>
-            <li><strong>Job Title:</strong> ${jobPostingData?.job_name}</li>
-          </ul>
-          
-          <p>Please review the details and take any necessary actions, such as sharing the job opening with the relevant teams or departments.</p>
-    
-          <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com .</p>
-      
-          <p>Best regards,<br>
-          Hire2Ispire Team</p>
-          </body>
+         <body>
+    <p>Subject: Calling All Talent Architects, A New Blueprint Awaits!</p>
+    <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
+    <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
+    <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
+    <p>(Job details and link of the job to be provided here posted on H2I)</p>
+    <p>Regards,</p>
+    <p>hire2Inspire</p>
+    <p>&nbsp;</p>
+</body>
         `
             }
             sgMail

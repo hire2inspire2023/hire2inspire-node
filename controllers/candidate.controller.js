@@ -132,7 +132,7 @@ module.exports = {
             const msg = {
                 to: candidateEmail, // Change to your recipient
                 from: 'info@hire2inspire.com',
-                subject: `Subject: Confirmation of CV Submission for ${jobRole} - Next Steps`,
+                subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
                 html: `
                        <head>
                            <title>Notification: Candidate Hired - Backend Development Position</title>
@@ -459,7 +459,7 @@ module.exports = {
                 const msg = {
                     to: candidateEmail, // Change to your recipient
                     from: 'info@hire2inspire.com',
-                    subject: `Subject: Confirmation of CV Submission for ${jobRole} - Next Steps`,
+                    subject: `Subject: Confirmation of CV Resubmission for ${jobRole} - Next Steps`,
                     html: `
                       <head>
                           <title>Notification: Candidate Hired - Backend Development Position</title>
