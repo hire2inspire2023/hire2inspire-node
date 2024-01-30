@@ -304,7 +304,7 @@ module.exports = {
     <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
     <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
     <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
-    <p>Job details and link of the job to be provided here posted on H2I  <a href="https://hire2inspire.com/agency/job-details?id=${jobId}" target="blank">Find your job</p>
+    <p>Job details and link of the job to be provided here posted on H2I, click here  <a href="https://hire2inspire.com/agency/job-details?id=${jobId}" target="blank">Find your job</p>
     <p>Regards,</p>
     <p>hire2Inspire</p>
     <p>&nbsp;</p>
