@@ -299,7 +299,7 @@ module.exports = {
       const new_msg = {
         to: agencyEmails, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `H2I ${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`,
+        subject: `H2I | Calling All Talent Architects, A New Blueprint Awaits!`,
         html: `
       <head>
           <title>Notification:New Job Posting</title>
