@@ -207,8 +207,54 @@ module.exports = {
       //       });
 
       const sgMail = require('@sendgrid/mail')
+
+
+      const AdminData = await Admin.findOne({});
+
+      let adminMail = AdminData?.email;
+      let adminName = AdminData?.name;
+
       sgMail.setApiKey(process.env.SENDGRID)
-      console.log(process.env.SENDGRID)
+      const new_msg = {
+        to: "admin99900@yopmail.com", // Change to your recipient
+        from: 'info@hire2inspire.com', // Change to your verified sender
+        subject: `New Employeer Registration`,
+        html: `
+          <head>
+              <title>Notification:New Employee Registration</title>
+      </head>
+      <body>
+      <p>
+        Dear ${adminName},
+      </p>
+      <p>A new employee has been registered. Below are the details of the new employee:</p>
+      
+      <ul>
+        <li><strong>Name:</strong> ${empFname} ${empLname}</li>
+        <li><strong>Email:</strong> ${empEmail}</li>
+      </ul>
+      
+      <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employee.</p>
+
+      <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com.</p>
+
+     
+      <p>Best regards,<br>
+      Hire2Ispire Team</p>
+    </body>
+      `
+      }
+      sgMail
+        .send(new_msg)
+        .then(() => {
+          console.log('Email sent for Admin')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
+      sgMail.setApiKey(process.env.SENDGRID)
+      // console.log(process.env.SENDGRID)
       let msg = {
         to: empEmail, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
@@ -228,14 +274,14 @@ module.exports = {
       `
       }
 
-      // sgMail
-      //   .send(msg)
-      //   .then(() => {
-      //     console.log('Email sent')
-      //   })
-      //   .catch((error) => {
-      //     console.error(error)
-      //   })
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
       const transactionData = new Transaction({ employer: savedEmployer.id });
       const tranResult = await transactionData.save();
@@ -304,59 +350,17 @@ module.exports = {
       </body>`
       }
 
-      // sgMail
-      //   .send(msg2)
-      //   .then(() => {
-      //     console.log('Email sent')
-      //   })
-      //   .catch((error) => {
-      //     console.error(error)
-      //   })
-
-
-      const AdminData = await Admin.findOne({});
-
-      let adminMail = AdminData?.email;
-      let adminName = AdminData?.name;
-
-      sgMail.setApiKey(process.env.SENDGRID)
-      const new_msg = {
-        to: "admin99900@yopmail.com", // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `New Employeer Registration`,
-        html: `
-          <head>
-              <title>Notification:New Employee Registration</title>
-      </head>
-      <body>
-      <p>
-        Dear ${adminName},
-      </p>
-      <p>A new employee has been registered. Below are the details of the new employee:</p>
-      
-      <ul>
-        <li><strong>Name:</strong> ${empFname} ${empLname}</li>
-        <li><strong>Email:</strong> ${empEmail}</li>
-      </ul>
-      
-      <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employee.</p>
-
-      <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com.</p>
-
-     
-      <p>Best regards,<br>
-      Hire2Ispire Team</p>
-    </body>
-      `
-      }
       sgMail
-        .send(new_msg)
+        .send(msg2)
         .then(() => {
-          console.log('Email sent for Admin')
+          console.log('Email sent')
         })
         .catch((error) => {
           console.error(error)
         })
+
+
+      
 
 
       res.status(201).send({
