@@ -290,12 +290,16 @@ module.exports = {
       const agencydata = await Agency.find({});
 
       let agencyEmails = agencydata.map(e => e.corporate_email.toString());
+      let jodUID = jobPostingData?.job_id;
+
+      console.log(`H2I - ${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`)
+      console.log(` <p>Find your job <a href="https://hire2inspire.com/jobgrid" target="blank" />${jodUID}</a></p>`)
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
-        to: ['arc555@yopmail.com'], // Change to your recipient
+        to: agencyEmails, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: "H2I Job Id | Calling All Talent Architects, A New Blueprint Awaits!",
+        subject: `${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`,
         html: `
       <head>
           <title>Notification:New Job Posting</title>
@@ -304,7 +308,7 @@ module.exports = {
     <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
     <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
     <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
-    <p>Find your job <a href="https://hire2inspire.com/agency/job-details?id=${jobId}" target="blank" />Find your job</p></a>
+    <p>Find your job <a href="https://hire2inspire.com/jobgrid" target="blank" />${jodUID}</a></p>
     <p>Regards,</p>
     <p>hire2Inspire</p>
     <p>&nbsp;</p>
