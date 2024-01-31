@@ -244,16 +244,16 @@ module.exports = {
     </body>
       `
       }
-      sgMail
-        .send(new_msg)
-        .then(() => {
-          console.log('Email sent for Admin')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+      // sgMail
+      //   .send(new_msg)
+      //   .then(() => {
+      //     console.log('Email sent for Admin')
+      //   })
+      //   .catch((error) => {
+      //     console.error(error)
+      //   })
 
-      sgMail.setApiKey(process.env.SENDGRID)
+       sgMail.setApiKey(process.env.SENDGRID)
        //console.log(process.env.SENDGRID)
       let msg = {
         to: empEmail, // Change to your recipient
@@ -280,7 +280,8 @@ module.exports = {
           console.log('Email sent')
         })
         .catch((error) => {
-          console.error(error)
+          console.warn(error.response.body, 'error body');
+          // console.error(error)
         })
 
       const transactionData = new Transaction({ employer: savedEmployer.id });
@@ -350,14 +351,14 @@ module.exports = {
       </body>`
       }
 
-      sgMail
-        .send(msg2)
-        .then(() => {
-          console.log('Email sent')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+      // sgMail
+      //   .send(msg2)
+      //   .then(() => {
+      //     console.log('Email sent')
+      //   })
+      //   .catch((error) => {
+      //     console.error(error)
+      //   })
 
 
       
