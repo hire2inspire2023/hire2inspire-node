@@ -494,7 +494,7 @@ module.exports = {
                 sgMail.setApiKey(process.env.SENDGRID)
                 const new_msg = {
                     to: candidateEmail, // Change to your recipient
-                    from: 'subhra.onenesstechs@gmail.com',
+                    from: 'info@hire2inspire.com',
                     subject: `Subject: Confirmation of CV Submission for ${jobRole} - Next Steps`,
                     html: `
                       <head>
