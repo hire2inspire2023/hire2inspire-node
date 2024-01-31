@@ -233,7 +233,7 @@ module.exports = {
         <li><strong>Name:</strong> ${empFname} ${empLname}</li>
         <li><strong>Email:</strong> ${empEmail}</li>
       </ul>
-      <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com.</p>
+       <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employer.</p>
       <p>Best regards,<br>
       Hire2Ispire Team</p>
     </body>
