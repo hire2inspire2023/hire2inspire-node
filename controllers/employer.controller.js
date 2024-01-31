@@ -216,7 +216,7 @@ module.exports = {
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
-        to: "hire2inspireh2i@gmail.com", // Change to your recipient
+        to: "admin@hire2inspire.com", // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
         subject: `New Employeer Registration`,
         html: `
@@ -244,14 +244,14 @@ module.exports = {
     </body>
       `
       }
-      // sgMail
-      //   .send(new_msg)
-      //   .then(() => {
-      //     console.log('Email sent for Admin')
-      //   })
-      //   .catch((error) => {
-      //     console.error(error)
-      //   })
+      sgMail
+        .send(new_msg)
+        .then(() => {
+          console.log('Email sent for Admin')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
        sgMail.setApiKey(process.env.SENDGRID)
        //console.log(process.env.SENDGRID)
@@ -351,14 +351,14 @@ module.exports = {
       </body>`
       }
 
-      // sgMail
-      //   .send(msg2)
-      //   .then(() => {
-      //     console.log('Email sent')
-      //   })
-      //   .catch((error) => {
-      //     console.error(error)
-      //   })
+      sgMail
+        .send(msg2)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
 
       
