@@ -217,7 +217,7 @@ module.exports = {
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
         to: "hire2inspireh2i@gmail.com", // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
+        from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
         subject: `New Employeer Registration`,
         html: `
           <head>
@@ -257,7 +257,7 @@ module.exports = {
       // console.log(process.env.SENDGRID)
       let msg = {
         to: empEmail, // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
+        from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
         subject: `Employer Email Register`,
         html: `
               <head>
@@ -326,7 +326,7 @@ module.exports = {
 
       let msg2 = {
         to: empEmail, // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
+        from: 'subhra.onenesstechs@gmail.com', // Change to your verified sender
         subject: `Employer Email Verify`,
         html: `
           <head>
