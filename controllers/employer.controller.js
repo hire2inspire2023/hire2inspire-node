@@ -218,27 +218,22 @@ module.exports = {
       const new_msg = {
         to: "hire2inspireh2i@gmail.com", // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `New Employeer Registration`,
+        subject: `New Employer Registration`,
         html: `
           <head>
-              <title>Notification:New Employee Registration</title>
+              <title>Notification:New Employer Registration</title>
       </head>
       <body>
       <p>
         Dear ${adminName},
       </p>
-      <p>A new employee has been registered. Below are the details of the new employee:</p>
+      <p>A new employer has been registered. Below are the details of the new employer</p>
       
       <ul>
         <li><strong>Name:</strong> ${empFname} ${empLname}</li>
         <li><strong>Email:</strong> ${empEmail}</li>
       </ul>
-      
-      <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employee.</p>
-
       <p>If you have any questions or need further information, feel free to contact the HR department at info@hire2inspire.com.</p>
-
-     
       <p>Best regards,<br>
       Hire2Ispire Team</p>
     </body>
