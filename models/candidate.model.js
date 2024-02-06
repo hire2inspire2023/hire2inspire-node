@@ -117,6 +117,9 @@ const CandidateSchema = new Schema(
         screening_q_a: {
             type: Array
         },
+        personal_q_a: {
+            type: Array
+        },
         is_hired: {
             type: Boolean,
             default: false
@@ -142,3 +145,4 @@ const CandidateSchema = new Schema(
 
 const Candidate = mongoose.model("candidates", CandidateSchema);
 module.exports = Candidate;
+
