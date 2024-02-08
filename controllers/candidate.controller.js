@@ -474,7 +474,7 @@ module.exports = {
                       <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
                     </p>
       
-                      <p>Best regards,</p>
+                      <p>Regards,</p>
                       <p>Hire2Inspire</p>
                   </body>
               `
