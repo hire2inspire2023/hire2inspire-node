@@ -452,7 +452,8 @@ module.exports = {
 
             let candidateId = result?._id;
 
-
+            console.log(result?.final_submit,'final submit');
+            console.log(result?.updated_by, 'updated_by');
 
             if (result?.final_submit == false && result?.updated_by == "agency") {
                 sgMail.setApiKey(process.env.SENDGRID)
@@ -671,13 +672,16 @@ module.exports = {
         }
     },
 
-
     candidateJobDetail: async (req, res, next) => {
         try {
             const result = await CandidateJobModel.findOne({ candidate: req.params.candidateId }).populate([
                 {
                     path: "emp_job",
-                    select: ""
+                    select: "",
+                    populate: {
+                        path: "employer",
+                        select: ""
+                    }
                 },
                 {
                     path: "agency_id",
