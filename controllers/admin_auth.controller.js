@@ -402,7 +402,7 @@ module.exports = {
       // }
       return res.status(400).send({
         error: false,
-        message: "Admin approval for agency updated."
+        message: "Agency Status Update Successfully."
       });
     } catch (error) {
       next(error)

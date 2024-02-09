@@ -248,8 +248,8 @@ module.exports = {
           console.error(error)
         })
 
-       sgMail.setApiKey(process.env.SENDGRID)
-       //console.log(process.env.SENDGRID)
+      sgMail.setApiKey(process.env.SENDGRID)
+      //console.log(process.env.SENDGRID)
       let msg = {
         to: empEmail, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
@@ -356,7 +356,7 @@ module.exports = {
         })
 
 
-      
+
 
 
       res.status(201).send({
@@ -570,8 +570,61 @@ module.exports = {
     try {
       if (!req.body.email) return res.status(400).send({ error: true, message: "Email required" });
 
-      const EmployerData = await Employer.findOneAndUpdate({ email: req.body.email }, { otp: 1234 });
+      function generateOTP() {
+        // Define a string of all possible characters
+        const chars = '0123456789';
+        let otp = '';
+
+        // Generate 6 random characters from the string and append to OTP
+        for (let i = 0; i < 6; i++) {
+          otp += chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        return otp;
+      }
+
+      let otps = generateOTP();
+
+      const EmployerData = await Employer.findOneAndUpdate({ email: req.body.email }, { otp: otps }, { new: true });
       if (!EmployerData) return res.status(404).send({ error: true, message: 'Employer not found' });
+
+      let empFName = EmployerData?.fname;
+      let empLName = EmployerData?.lname;
+      let empEmail = EmployerData?.email;
+      let empOtp = EmployerData?.otp;
+
+      console.log({ empOtp })
+
+      sgMail.setApiKey(process.env.SENDGRID)
+      const msg = {
+        to: empEmail, // Change to your recipient
+        from: 'info@hire2inspire.com',
+        subject: `Verification Code for Your Account`,
+        html: `
+        <head>
+            <title>Verification Code for Your Account</title>
+        </head>
+        <body>
+        <p>Dear ${empFName} ${empLName},</p>
+        <p>Thank you for choosing to verify your account with us. To complete the verification process, please use the following One-Time Password (OTP):</p>
+        <p><strong>OTP:</strong>${empOtp}</p>
+        <p>Please enter this OTP on the verification page to confirm your account.</p>
+        <p>If you did not request this OTP or need any assistance, please don't hesitate to contact our support team at info@hire2inspire.com .</p>
+        <p>Thank you for your cooperation.</p>
+        <p>Best regards,<br>
+        Hire2Inspire</p>
+      </body>
+`
+      }
+
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
 
       return res.status(200).send({ error: false, message: 'Otp sent successfully' });
 
@@ -1065,7 +1118,7 @@ module.exports = {
           console.error(error)
         })
 
-      
+
       console.log('showwwwwwwwwwww', agncyEmail)  // agency
 
       sgMail.setApiKey(process.env.SENDGRID)
@@ -1097,7 +1150,7 @@ module.exports = {
         .catch((error) => {
           console.error(error)
         })
-      
+
 
       message = {
         error: false,
@@ -1162,8 +1215,6 @@ module.exports = {
   },
 
 
-
-
   logout: async (req, res, next) => {
     try {
       const { refreshToken } = req.body
@@ -1176,3 +1227,4 @@ module.exports = {
     }
   },
 }
+

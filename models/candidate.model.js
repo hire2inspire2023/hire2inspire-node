@@ -120,6 +120,24 @@ const CandidateSchema = new Schema(
         personal_q_a: {
             type: Array
         },
+        current_CTC: {
+            type: String
+        },
+        expected_CTC: {
+            type: String
+        },
+        notice_period: {
+            type: String
+        },
+        negotiable_upto: {
+            type: String
+        },
+        total_experience: {
+            type: String
+        },
+        relevant_experience: {
+            type: String
+        },
         is_hired: {
             type: Boolean,
             default: false
@@ -145,4 +163,5 @@ const CandidateSchema = new Schema(
 
 const Candidate = mongoose.model("candidates", CandidateSchema);
 module.exports = Candidate;
+
 

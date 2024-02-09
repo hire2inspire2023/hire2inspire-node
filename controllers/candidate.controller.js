@@ -444,7 +444,7 @@ module.exports = {
 
             let jobRole = result?.job?.job_name;
 
-            console.log(result,'result')
+            console.log(result, 'result')
 
             let jobId = result?.job;
 
@@ -452,8 +452,7 @@ module.exports = {
 
             let candidateId = result?._id;
 
-            console.log(result?.final_submit,'final submit');
-            console.log(result?.updated_by, 'updated_by');
+
 
             if (result?.final_submit == false && result?.updated_by == "agency") {
                 sgMail.setApiKey(process.env.SENDGRID)
@@ -475,7 +474,7 @@ module.exports = {
                       <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
                     </p>
       
-                      <p>Regards,</p>
+                      <p>Best regards,</p>
                       <p>Hire2Inspire</p>
                   </body>
               `
@@ -550,27 +549,31 @@ module.exports = {
 
 
 
-   
+
 
     candidateJobUpdate: async (req, res, next) => {
         try {
-            const candidateJobData = await CandidateJobModel.findOneAndUpdate({candidate: req.params.candidateId},req.body,{new: true}).populate([
+            const candidateJobData = await CandidateJobModel.findOneAndUpdate({ candidate: req.params.candidateId }, req.body, { new: true }).populate([
                 {
-                    path:"emp_job",
-                    select:""
+                    path: "emp_job",
+                    select: "",
+                    populate: {
+                        path: "employer",
+                        select: ""
+                    }
                 },
                 {
-                    path:"agency_id",
-                    select:""
+                    path: "agency_id",
+                    select: ""
                 },
                 {
-                    path:"candidate",
-                    select:""
+                    path: "candidate",
+                    select: ""
                 },
             ]);
 
-            if(candidateJobData?.final_submit == true){
-                const candidateDataUpdate = await CandidateModel.findOneAndUpdate({_id:req.params.candidateId},{final_submit:true},{new:true})
+            if (candidateJobData?.final_submit == true) {
+                const candidateDataUpdate = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { final_submit: true }, { new: true })
 
                 let agencyemail = candidateDataUpdate?.agency?.corporate_email;
                 let agencyName = candidateDataUpdate?.agency?.name;
@@ -579,12 +582,12 @@ module.exports = {
                 let candidateLName = candidateDataUpdate?.lname;
                 let jobName = candidateDataUpdate?.job?.job_name;
 
-            sgMail.setApiKey(process.env.SENDGRID)
-            const msg = {
-              to: agencyemail, // Change to your recipient
-              from: 'info@hire2Inspire.com',
-               subject: `FInal Response from ${candidateFName} ${candidateLName} for JoB name ${jobName}`,
-                      html:`
+                sgMail.setApiKey(process.env.SENDGRID)
+                const msg = {
+                    to: agencyemail, // Change to your recipient
+                    from: 'info@hire2Inspire.com',
+                    subject: `FInal Response from ${candidateFName} ${candidateLName} for JoB name ${jobName}`,
+                    html: `
                       <body>
                       <p>Dear ${agencyName},</p>
                     
@@ -606,24 +609,24 @@ module.exports = {
                       <p>Hire2Inspire</p>
                     </body>
               `
-        }
-      
-            sgMail
-              .send(msg)
-              .then(() => {
-                console.log('Email sent')
-              })
-              .catch((error) => {
-                console.error(error)
-              })
+                }
+
+                sgMail
+                    .send(msg)
+                    .then(() => {
+                        console.log('Email sent')
+                    })
+                    .catch((error) => {
+                        console.error(error)
+                    })
 
 
-              sgMail.setApiKey(process.env.SENDGRID)
-              const new_msg = {
-                to: empemail, // Change to your recipient
-                from: 'info@hire2Inspire.com',
-                 subject: `FInal Response from ${candidateFName} ${candidateLName} for JoB name ${jobName}`,
-                        html:`
+                sgMail.setApiKey(process.env.SENDGRID)
+                const new_msg = {
+                    to: empemail, // Change to your recipient
+                    from: 'info@hire2Inspire.com',
+                    subject: `FInal Response from ${candidateFName} ${candidateLName} for JoB name ${jobName}`,
+                    html: `
                         <body>
                         <p>Dear ${empemail},</p>
                       
@@ -645,32 +648,33 @@ module.exports = {
                         <p>Hire2Inspire</p>
                       </body>
                 `
-          }
-        
-              sgMail
-                .send(new_msg)
-                .then(() => {
-                  console.log('Email sent')
-                })
-                .catch((error) => {
-                  console.error(error)
-                })
-  
+                }
+
+                sgMail
+                    .send(new_msg)
+                    .then(() => {
+                        console.log('Email sent')
+                    })
+                    .catch((error) => {
+                        console.error(error)
+                    })
+
 
             }
 
-            if(candidateJobData?.screening_q_a.length != null){
-                const candidateUpdate = await CandidateModel.findOneAndUpdate({_id:req.params.candidateId},{"$push":{screening_q_a:candidateJobData?.screening_q_a}},{new:true})
+            if (candidateJobData?.screening_q_a.length != null) {
+                const candidateUpdate = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { "$push": { screening_q_a: candidateJobData?.screening_q_a } }, { new: true })
             }
 
-            if(!candidateJobData) return res.status(400).send({error: true, message: "Candidate status is not updated"})
+            if (!candidateJobData) return res.status(400).send({ error: true, message: "Candidate status is not updated" })
 
-            return res.status(200).send({error: false, message: "Candidate status updated"})
+            return res.status(200).send({ error: false, message: "Candidate status updated" })
 
         } catch (error) {
             next(error)
         }
     },
+
 
     candidateJobDetail: async (req, res, next) => {
         try {

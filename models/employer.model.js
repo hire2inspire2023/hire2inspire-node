@@ -11,7 +11,7 @@ const EmployerSchema = new Schema({
     trim: true,
     validate(value) {
       const pattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z-.]+$/g
-      if(!pattern.test(value)) {
+      if (!pattern.test(value)) {
         throw new Error("Wrong email format.")
       }
     },
@@ -20,7 +20,7 @@ const EmployerSchema = new Schema({
   mobile: {
     type: String,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return /\d{10}/.test(v);
       },
       message: props => `${props.value} is not a valid mobile number!`
@@ -36,8 +36,8 @@ const EmployerSchema = new Schema({
     required: false,
     trim: true
   },
-  comp_name:{
-    type:String
+  comp_name: {
+    type: String
   },
   linkedin_url: {
     type: String,
@@ -62,7 +62,7 @@ const EmployerSchema = new Schema({
     trim: true
   },
   otp: {
-    type: Number
+    type: String
   },
   status: {
     type: Boolean,
@@ -94,39 +94,39 @@ const EmployerSchema = new Schema({
       message: "only 0/1 allowed."
     }
   },
-}, {timestamps: true})
+}, { timestamps: true })
 
 EmployerSchema.pre('save', async function (next) {
-    try {
-      if (this.isNew) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(this.password, salt);
-        this.password = hashedPassword;
-        this.confirm_password = undefined;
-      }
-      next()
-    } catch (error) {
-      next(error)
+  try {
+    if (this.isNew) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(this.password, salt);
+      this.password = hashedPassword;
+      this.confirm_password = undefined;
     }
+    next()
+  } catch (error) {
+    next(error)
+  }
 })
-  
+
 EmployerSchema.pre('findOneAndUpdate', async function (next) {
-    try {
-      if (this._update.password) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(this._update.password, salt);
-        this._update.password = hashedPassword;
-        this._update.confirm_password = undefined;
-      }
-      next()
-    } catch (error) {
-      next(error)
+  try {
+    if (this._update.password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(this._update.password, salt);
+      this._update.password = hashedPassword;
+      this._update.confirm_password = undefined;
     }
+    next()
+  } catch (error) {
+    next(error)
+  }
 })
 
 // EmployerSchema.method.is
 
-EmployerSchema.methods.testFunc = async(callback) =>
+EmployerSchema.methods.testFunc = async (callback) =>
   console.log('in test')
 
 EmployerSchema.methods.isValidPassword = async function (password) {
@@ -139,5 +139,4 @@ EmployerSchema.methods.isValidPassword = async function (password) {
 
 const Employer = mongoose.model('employers', EmployerSchema)
 module.exports = Employer
-
 

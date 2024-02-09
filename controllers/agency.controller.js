@@ -440,8 +440,60 @@ module.exports = {
     try {
       if (!req.body.email) return res.status(400).send({ error: true, message: "Email required" });
 
-      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: 1234 });
+      function generateOTP() {
+        // Define a string of all possible characters
+        const chars = '0123456789';
+        let otp = '';
+
+        // Generate 6 random characters from the string and append to OTP
+        for (let i = 0; i < 6; i++) {
+          otp += chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        return otp;
+      }
+
+      let otps = generateOTP();
+
+      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: otps }, { new: true });
       if (!AgencyData) return res.status(404).send({ error: true, message: 'Agency not found' });
+
+      let agencyName = AgencyData?.name;
+      let agencyEmail = AgencyData?.corporate_email;
+      let agencyOtp = AgencyData?.otp;
+      console.log({ agencyOtp })
+
+      sgMail.setApiKey(process.env.SENDGRID)
+      const msg = {
+        to: agencyEmail, // Change to your recipient
+        from: 'info@hire2inspire.com',
+        subject: `Verification Code for Your Account`,
+        html: `
+        <head>
+            <title>Verification Code for Your Account</title>
+        </head>
+        <body>
+        <p>Dear ${agencyName},</p>
+        <p>Thank you for choosing to verify your account with us. To complete the verification process, please use the following One-Time Password (OTP):</p>
+        <p><strong>OTP:</strong>${agencyOtp}</p>
+        <p>Please enter this OTP on the verification page to confirm your account.</p>
+        <p>If you did not request this OTP or need any assistance, please don't hesitate to contact our support team at info@hire2inspire.com .</p>
+        <p>Thank you for your cooperation.</p>
+        <p>Best regards,<br>
+        Hire2Inspire</p>
+      </body>
+`
+      }
+
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log('Email sent')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
 
       return res.status(200).send({ error: false, message: 'Otp sent successfully' });
 
@@ -468,6 +520,7 @@ module.exports = {
       next(error)
     }
   },
+
 
   resetPassword: async (req, res, next) => {
     try {
@@ -582,3 +635,4 @@ module.exports = {
     }
   },
 }
+
