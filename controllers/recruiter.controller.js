@@ -36,7 +36,12 @@ module.exports = {
       let recruiterData = await RecruiterModel.findOne({
         email: result.email,
         status: true,
-      });
+      }).populate([
+        {
+          path: "agency",
+          select: ""
+        }
+      ]);
       if (!recruiterData)
         throw createError.NotFound("recruiter not registered");
 
@@ -241,7 +246,12 @@ module.exports = {
       let token = req.headers["authorization"]?.split(" ")[1];
       let { userId, dataModel } = await getUserViaToken(token);
       const checkAgency = await Agency.findOne({ _id: userId });
-      const checkRecruiter = await RecruiterModel.findOne({ _id: userId });
+      const checkRecruiter = await RecruiterModel.findOne({ _id: userId }).populate([
+        {
+          path: "agency",
+          select: ""
+        }
+      ]);
       if (
         (!checkAgency || !checkRecruiter) &&
         !["agency", "recruiters"].includes(dataModel)
@@ -252,7 +262,12 @@ module.exports = {
 
       const recruiterData = await RecruiterModel.findOne({
         _id: req.params.id,
-      }).select("-password -otp");
+      }).select("-password -otp").populate([
+        {
+          path: "agency",
+          select: ""
+        }
+      ]);
 
       return res.status(200).send({
         error: false,
@@ -440,58 +455,58 @@ module.exports = {
         console.log('emails sent successfully!');
       }).catch(error => {
         console.log(error);
-      });      
+      });
 
-//       var mailOptions = {
-//         from: 'Info@hire2inspire.com',
-//         subject: `Recruiter Invitation`,
-//         html: `
-//         <head>
-//             <title>Welcome to Hire2Inspire</title>
-//         </head>
-//     <body>
-//     <p>Dear Recruiter,</p>
+      //       var mailOptions = {
+      //         from: 'Info@hire2inspire.com',
+      //         subject: `Recruiter Invitation`,
+      //         html: `
+      //         <head>
+      //             <title>Welcome to Hire2Inspire</title>
+      //         </head>
+      //     <body>
+      //     <p>Dear Recruiter,</p>
 
-//     <p>
-//         I hope this message finds you well. We're thrilled to extend a warm and exclusive invitation to your esteemed recruiter
-//         to become a part of the Hire2inspire platform - a dynamic community dedicated to connecting exceptional agencies with
-//         clients seeking top-notch services.
-//     </p>
+      //     <p>
+      //         I hope this message finds you well. We're thrilled to extend a warm and exclusive invitation to your esteemed recruiter
+      //         to become a part of the Hire2inspire platform - a dynamic community dedicated to connecting exceptional agencies with
+      //         clients seeking top-notch services.
+      //     </p>
 
-//     <p>
-//         At Hire2inspire, we believe in the power of collaboration and innovation, and we see your recruiter as a perfect fit for
-//         our community. We are impressed by your talents and capabilities, and we are confident that your involvement will
-//         greatly enrich our platform.
-//     </p>
+      //     <p>
+      //         At Hire2inspire, we believe in the power of collaboration and innovation, and we see your recruiter as a perfect fit for
+      //         our community. We are impressed by your talents and capabilities, and we are confident that your involvement will
+      //         greatly enrich our platform.
+      //     </p>
 
-//     <p>
-//         To start this exciting journey, all you need to do is click the link below to create your recruiter's profile on our
-//         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
-//         every step.
-//     </p>
-//     <a href="https://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
-//   </p>
-//   <p>
-//    password: secret
-// </p>
-//         <p>Thank you and best regards,</p>
-//         <p> Hire2Inspire </p>
-//     </body>
-// `
-//       };
+      //     <p>
+      //         To start this exciting journey, all you need to do is click the link below to create your recruiter's profile on our
+      //         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
+      //         every step.
+      //     </p>
+      //     <a href="https://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
+      //   </p>
+      //   <p>
+      //    password: secret
+      // </p>
+      //         <p>Thank you and best regards,</p>
+      //         <p> Hire2Inspire </p>
+      //     </body>
+      // `
+      //       };
 
 
-//       data.forEach((recipient) => {
-//         mailOptions.to = recipient?.email;
+      //       data.forEach((recipient) => {
+      //         mailOptions.to = recipient?.email;
 
-//         transport.sendMail(mailOptions, (error, info) => {
-//           if (error) {
-//             console.error(`Error sending email to ${recipient}: ${error}`);
-//           } else {
-//             console.log(`Email sent to ${recipient?.email}: ${info.response}`);
-//           }
-//         });
-//       });
+      //         transport.sendMail(mailOptions, (error, info) => {
+      //           if (error) {
+      //             console.error(`Error sending email to ${recipient}: ${error}`);
+      //           } else {
+      //             console.log(`Email sent to ${recipient?.email}: ${info.response}`);
+      //           }
+      //         });
+      //       });
       return res.status(200).send({
         error: false,
         message: "Invitation sent successfully",
@@ -675,3 +690,4 @@ module.exports = {
     }
   },
 };
+

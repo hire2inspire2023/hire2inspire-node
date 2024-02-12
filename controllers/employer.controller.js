@@ -439,7 +439,7 @@ module.exports = {
             select: " ",
             populate: {
               path: "job",
-              select: "job_name job_id"
+              select: "job_name job_id min_work_exp max_work_exp"
             }
           }
         }
@@ -729,14 +729,21 @@ module.exports = {
         {
           path: "hire_id",
           select: "",
-          populate: {
-            path: "candidate",
-            select: "fname lname email agency",
-            populate: {
-              path: "agency",
+          populate: ([
+            {
+              path: "candidate",
+              select: "fname lname email agency",
+              populate: {
+                path: "agency",
+                select: ""
+              }
+            },
+            {
+              path: "job",
               select: ""
             }
-          }
+          ])
+
         }
       ]);
 
@@ -748,11 +755,15 @@ module.exports = {
 
       let empEmail = billinglist?.employer?.email;
 
-      let candidateFName = billinglist?.employer?.hire_id?.candidate?.fname;
+      let minExp = billinglist?.hire_id?.job?.min_work_exp;
 
-      let candidateLName = billinglist?.employer?.hire_id?.candidate?.lname;
+      console.log("minExp", minExp)
 
-      let agncyEmail = billinglist?.employer?.hire_id?.candidate?.agency?.corporate_email;
+      let candidateFName = billinglist?.hire_id?.candidate?.fname;
+
+      let candidateLName = billinglist?.hire_id?.candidate?.lname;
+
+      let agncyEmail = billinglist?.hire_id?.candidate?.agency?.corporate_email;
 
       const subscription = await UserSubscription.findOne({ employer: result?.employer });
       const subsData = await Package.findOne({ package: subscription?.package });
@@ -762,10 +773,20 @@ module.exports = {
       console.log("packageName", packageName);
 
 
-      let billingId = billinglist?._id
-      let amount = (billinglist?.hire_id?.comp_offered) * (8.83 / 100);
-      let agency_amount = (billinglist?.hire_id?.comp_offered) * (8.33 / 100);
-      let h2i_amount = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
+      let billingId = billinglist?._id;
+      let amount;
+      let agency_amount;
+      let h2i_amount;
+      if (parseInt(minExp) >= 8) {
+        console.log("hii")
+        amount = (billinglist?.hire_id?.comp_offered) * (10.33 / 100);
+        agency_amount = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
+        h2i_amount = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
+      } else {
+        amount = (billinglist?.hire_id?.comp_offered) * (8.83 / 100);
+        agency_amount = (billinglist?.hire_id?.comp_offered) * (8.33 / 100);
+        h2i_amount = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
+      }
       let designation = billinglist?.hire_id?.desg_offered;
       let candidateData = billinglist?.hire_id?.candidate?._id;
       let tranId = Math.floor(Math.random() * 90000) + 10000;
@@ -938,9 +959,21 @@ module.exports = {
 
       //console.log("agencyId",agencyId)
 
-      let amountData = (billinglist?.hire_id?.comp_offered) * (8.33 / 100);
-      let agency_amountData = (billinglist?.hire_id?.comp_offered) * (7.83 / 100);
-      let h2i_amountData = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
+      let amountData;
+      let agency_amountData;
+      let h2i_amountData;
+
+      if (parseInt(minExp) >= 8) {
+        amountData = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
+        agency_amountData = (billinglist?.hire_id?.comp_offered) * (9.33 / 100);
+        h2i_amountData = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
+
+      } else {
+        amountData = (billinglist?.hire_id?.comp_offered) * (8.33 / 100);
+        agency_amountData = (billinglist?.hire_id?.comp_offered) * (7.83 / 100);
+        h2i_amountData = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
+      }
+
 
 
       let gstAmountData;
@@ -1213,6 +1246,8 @@ module.exports = {
       next(error)
     }
   },
+
+
 
 
   logout: async (req, res, next) => {
