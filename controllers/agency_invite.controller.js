@@ -54,6 +54,8 @@ module.exports = {
       let token = req.headers['authorization']?.split(" ")[1];
       let { userId, dataModel } = await getUserViaToken(token)
       const checkEmployer = await Employer.findOne({ _id: userId })
+      let empFName = checkEmployer?.fname;
+      let empLName = checkEmployer?.lname;
       if (!checkEmployer && dataModel != "employers") return res.status(400).send({ error: true, message: "Employer not found." })
 
       const emails = req.body.email;
@@ -83,7 +85,7 @@ module.exports = {
       const msg = {
         to: emails, // replace these with your email addresses
         from: 'info@hire2inspire.com',
-        subject: `Agency Invited successfully`,
+        subject: `Invitation from ${empFName} ${empLName}`,
         html: `
           <head>
               <title>Welcome to Hire2Inspire</title>
