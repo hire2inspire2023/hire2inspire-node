@@ -177,6 +177,10 @@ const AgencySchema = new Schema(
         micr_code: {
             type: String
         },
+        is_loggedIn: {
+            type: Boolean,
+            default: false
+        },
         terms_condition_check: {
             type: String,
             enum: {

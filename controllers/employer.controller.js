@@ -216,7 +216,8 @@ module.exports = {
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
-        to: "hire2inspireh2i@gmail.com", // Change to your recipient
+        // to: "hire2inspireh2i@gmail.com", // Change to your recipient
+        to: "admin@hire2inspire.com",
         from: 'info@hire2inspire.com', // Change to your verified sender
         subject: `New Employer Registration`,
         html: `

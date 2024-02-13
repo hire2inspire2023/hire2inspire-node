@@ -27,4 +27,6 @@ RecruiterRouter.patch('/change-password', verifyAccessToken, RecruiterController
 
 RecruiterRouter.patch('/status-update-by-emp/:id', verifyAccessToken, RecruiterController.statusEmpUpdate)
 
+RecruiterRouter.get('/logout', verifyAccessToken, RecruiterController.logout)
+
 module.exports = RecruiterRouter

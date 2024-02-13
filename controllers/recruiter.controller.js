@@ -13,20 +13,23 @@ const {
 } = require("../helpers/jwt_helper");
 const bcrypt = require("bcrypt");
 const RecruiterModel = require("../models/recruiter.model");
+const Admin = require('../models/admin.model')
 const { v4: uuidv4 } = require("uuid");
 
 const nodemailer = require("nodemailer");
 
-var transport = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_NAME,
-    pass: process.env.EMAIL_PASSWORD
-  },
-  requireTLS: true,
-});
+const sgMail = require('@sendgrid/mail');
+
+// var transport = nodemailer.createTransport({
+//   host: process.env.EMAIL_HOST,
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_NAME,
+//     pass: process.env.EMAIL_PASSWORD
+//   },
+//   requireTLS: true,
+// });
 
 
 module.exports = {
@@ -45,8 +48,12 @@ module.exports = {
       if (!recruiterData)
         throw createError.NotFound("recruiter not registered");
 
+      if (recruiterData?.is_loggedIn == true) throw createError.NotFound("You are already logged in");
+
       const isMatch = await recruiterData.isValidPassword(result.password);
       if (!isMatch) throw createError.BadRequest("Password not valid");
+
+      const updatedRecruiter = await RecruiterModel.findOneAndUpdate({ _id: recruiterData.id }, { "is_loggedIn": true }, { new: true });
 
       const accessToken = await signAccessToken(recruiterData.id, "recruiters");
       const refreshToken = await signRefreshToken(
@@ -74,6 +81,7 @@ module.exports = {
           refreshToken,
         },
         user: recruiterData,
+        updatedRecruiter
       });
     } catch (error) {
       if (error.isJoi === true)
@@ -88,6 +96,7 @@ module.exports = {
       let { userId, dataModel } = await getUserViaToken(token);
       console.log("{ userId, dataModel } >>> ", { userId, dataModel });
       const checkAgency = await Agency.findOne({ _id: userId });
+      let agencyName = checkAgency?.name;
       if (!checkAgency && dataModel != "agency")
         return res
           .status(401)
@@ -125,14 +134,14 @@ module.exports = {
         agency: userId,
       }).select("-otp -password").sort({ _id: -1 });
 
-      const sgMail = require('@sendgrid/mail');
+      // const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID)
       console.log(emails, 'emails')
 
       const msg = {
         to: emails, // replace these with your email addresses
         from: 'info@hire2inspire.com',
-        subject: `Agency Invited successfully`,
+        subject: `Welcome Onboard-Leverage Intelligence with H2I Marketplace`,
         html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
@@ -174,6 +183,44 @@ module.exports = {
       }).catch(error => {
         console.log(error);
       });
+
+      let adminData = await Admin.findOne({});
+
+      let adminName = adminData?.name;
+
+
+      //  const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID);
+      // console.log(emails, 'emails')
+
+      const new_msg = {
+        to: "hire2inspireh2i@gmail.com", // replace these with your email addresses
+        from: 'info@hire2inspire.com',
+        subject: `Notification for Agency-Recruiter Invitation`,
+        html: `
+        <head>
+            <title>Notification for Agency-Recruiter Invitation</title>
+        </head>
+    <body>
+    <body>
+        <p>Dear ${adminName},</p>
+        <p>I hope this email finds you well. I'm reaching out to provide a consolidated list of invitation emails sent by recruiters who have been invited by agency ${agencyName}. Below, you'll find a summary of the invitations along with relevant details:
+        emails are ${emails}</p>
+        <p>Please review the invitations and their statuses. Let me know if there are any discrepancies or if further action is required from my end.</p>
+        <p>Thank you for your attention to this matter.</p>
+        <p>Best regards,<br>
+        Hire2Inspire</p>
+    </body>
+`
+      };
+
+      sgMail.send(new_msg).then(() => {
+        console.log('emails sent successfully!');
+      }).catch(error => {
+        console.log(error);
+      });
+
+
 
 
       //       var mailOptions = {
@@ -365,6 +412,8 @@ module.exports = {
       let { userId, dataModel } = await getUserViaToken(token);
       console.log("{ userId, dataModel } >>> ", { userId, dataModel });
       const checkEmp = await Employer.findOne({ _id: userId });
+      let empFName = checkEmp?.fname;
+      let empLName = checkEmp?.lname;
       if (!checkEmp && dataModel != "employer")
         return res
           .status(401)
@@ -414,7 +463,7 @@ module.exports = {
       const msg = {
         to: emails, // replace these with your email addresses
         from: 'info@hire2inspire.com',
-        subject: `Agency Invited successfully`,
+        subject: `Welcome Onboard-Leverage Intelligence with H2I Marketplace`,
         html: `
         <head>
             <title>Welcome to Hire2Inspire</title>
@@ -452,6 +501,42 @@ module.exports = {
       };
 
       sgMail.sendMultiple(msg).then(() => {
+        console.log('emails sent successfully!');
+      }).catch(error => {
+        console.log(error);
+      });
+
+      let adminData = await Admin.findOne({});
+
+      let adminName = adminData?.name;
+
+
+      //  const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID);
+      // console.log(emails, 'emails')
+
+      const new_msg = {
+        to: "hire2inspireh2i@gmail.com", // replace these with your email addresses
+        from: 'info@hire2inspire.com',
+        subject: `Notification for Employer-Recruiter Invitation`,
+        html: `
+        <head>
+            <title>Notification for Employer-Recruiter Invitation</title>
+        </head>
+    <body>
+    <body>
+        <p>Dear ${adminName},</p>
+        <p>I hope this email finds you well. I'm reaching out to provide a consolidated list of invitation emails sent by recruiters who have been invited by agency ${empFName} ${empLName}. Below, you'll find a summary of the invitations along with relevant details:
+        emails are ${emails}</p>
+        <p>Please review the invitations and their statuses. Let me know if there are any discrepancies or if further action is required from my end.</p>
+        <p>Thank you for your attention to this matter.</p>
+        <p>Best regards,<br>
+        Hire2Inspire</p>
+    </body>
+`
+      };
+
+      sgMail.send(new_msg).then(() => {
         console.log('emails sent successfully!');
       }).catch(error => {
         console.log(error);
@@ -685,6 +770,26 @@ module.exports = {
         return res.status(404).send(message);
       }
 
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  logout: async (req, res, next) => {
+    try {
+      let token = req.headers['authorization']?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkRecruiter = await RecruiterModel.findOne({ _id: userId })
+
+      if (checkRecruiter?.is_loggedIn == false) throw createError.NotFound('You are not already logged In yet');
+
+      let recruiterData = await RecruiterModel.findOneAndUpdate({ _id: userId }, { "is_loggedIn": false }, { new: true });
+
+      return res.status(200).send({
+        error: false,
+        message: "Recruiter logout.",
+        data: recruiterData
+      })
     } catch (error) {
       next(error)
     }

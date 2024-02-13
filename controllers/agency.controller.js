@@ -360,6 +360,8 @@ module.exports = {
 
       if (AgencyData?.verified == false) throw createError.NotFound('Your Email is not yet verified');
 
+      if (AgencyData?.is_loggedIn == true) throw createError.NotFound('You are already logged In');
+
       const isMatch = await AgencyData.isValidPassword(result.password)
       if (!isMatch)
         throw createError.BadRequest('Password not valid')
@@ -370,6 +372,8 @@ module.exports = {
       AgencyData.password = undefined;
       AgencyData.otp = undefined;
 
+      let updatedAgency = await Agency.findOneAndUpdate({_id:AgencyData.id},{"is_loggedIn":true},{new:true});
+
       res.status(200).send({
         error: false,
         message: 'Agency logged in',
@@ -377,7 +381,8 @@ module.exports = {
           accessToken,
           refreshToken
         },
-        user: AgencyData
+        user: AgencyData,
+        updatedAgency
       })
     } catch (error) {
       if (error.isJoi === true)
@@ -444,24 +449,24 @@ module.exports = {
         // Define a string of all possible characters
         const chars = '0123456789';
         let otp = '';
-
+      
         // Generate 6 random characters from the string and append to OTP
         for (let i = 0; i < 6; i++) {
           otp += chars[Math.floor(Math.random() * chars.length)];
         }
-
+      
         return otp;
       }
 
       let otps = generateOTP();
 
-      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: otps }, { new: true });
+      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: otps },{new:true});
       if (!AgencyData) return res.status(404).send({ error: true, message: 'Agency not found' });
 
       let agencyName = AgencyData?.name;
       let agencyEmail = AgencyData?.corporate_email;
       let agencyOtp = AgencyData?.otp;
-      console.log({ agencyOtp })
+      console.log({agencyOtp})
 
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
@@ -623,13 +628,33 @@ module.exports = {
     }
   },
 
+  // logout: async (req, res, next) => {
+  //   try {
+  //     const { refreshToken } = req.body
+  //     if (!refreshToken) throw createError.BadRequest()
+  //     const userId = await verifyRefreshToken(refreshToken)
+  //     res.sendStatus(204)
+
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // },
+
   logout: async (req, res, next) => {
     try {
-      const { refreshToken } = req.body
-      if (!refreshToken) throw createError.BadRequest()
-      const userId = await verifyRefreshToken(refreshToken)
-      res.sendStatus(204)
+      let token = req.headers['authorization']?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token)
+      const checkAgency = await Agency.findOne({ _id: userId })
 
+      if (checkAgency?.is_loggedIn == false) throw createError.NotFound('You are not already logged In yet');
+
+      let agencyData = await Agency.findOneAndUpdate({_id:userId},{"is_loggedIn":false},{new:true});
+      
+      return res.status(200).send({
+        error: false,
+        message: "Agency logout.",
+        data: agencyData
+      })
     } catch (error) {
       next(error)
     }
