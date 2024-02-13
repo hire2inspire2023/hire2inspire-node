@@ -194,7 +194,7 @@ module.exports = {
       // console.log(emails, 'emails')
 
       const new_msg = {
-        to: "hire2inspireh2i@gmail.com", // replace these with your email addresses
+        to: "admin@hire2inspire.com", // replace these with your email addresses
         from: 'info@hire2inspire.com',
         subject: `Notification for Agency-Recruiter Invitation`,
         html: `
@@ -516,7 +516,7 @@ module.exports = {
       // console.log(emails, 'emails')
 
       const new_msg = {
-        to: "hire2inspireh2i@gmail.com", // replace these with your email addresses
+        to: "admin@hire2inspire.com", // replace these with your email addresses
         from: 'info@hire2inspire.com',
         subject: `Notification for Employer-Recruiter Invitation`,
         html: `
