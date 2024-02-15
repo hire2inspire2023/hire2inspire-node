@@ -354,6 +354,7 @@ module.exports = {
                     }
                     matchTry.$and.push(z)
                 }
+
             })
 
             const candidates = await CandidateModel
@@ -573,11 +574,26 @@ module.exports = {
             ]);
 
             if (candidateJobData?.final_submit == true) {
-                const candidateDataUpdate = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { final_submit: true }, { new: true })
+                const candidateDataUpdate = await CandidateModel.findOneAndUpdate({ _id: req.params.candidateId }, { final_submit: true }, { new: true }).populate([
+                    {
+                        path: "agency",
+                        select: ""
+                    },
+                    {
+                        path: "job",
+                        select: "",
+                        populate: {
+                            path: "employer",
+                            select: ""
+                        }
+                    }
+                ]);
 
                 let agencyemail = candidateDataUpdate?.agency?.corporate_email;
+                console.log({ agencyemail });
                 let agencyName = candidateDataUpdate?.agency?.name;
                 let empemail = candidateDataUpdate?.job?.employer?.email;
+                console.log({ empemail });
                 let candidateFName = candidateDataUpdate?.fname;
                 let candidateLName = candidateDataUpdate?.lname;
                 let jobName = candidateDataUpdate?.job?.job_name;
@@ -736,6 +752,106 @@ module.exports = {
     //         next(error)
     //     }
     // },
+
+    submitBulkCandidate: async (req, res, next) => {
+        try {
+            let token = req.headers["authorization"]?.split(" ")[1];
+            let { userId, dataModel } = await getUserViaToken(token);
+            const checkAgency = await Agency.findOne({ _id: userId });
+            const checkRecruiter = await Recruiter.findOne({ _id: userId });
+            if (
+                (!checkAgency || !checkRecruiter) &&
+                !["agency", "recruiters"].includes(dataModel)
+            ) return res.status(401).send({ error: true, message: "User unauthorized." })
+
+            // Checking the corresponding agency job exist or not
+            const agencyJobExist = await AgencyJobModel.findOne({ _id: req.body.agency_job })
+
+            const empJobExist = await JobPosting.findOne({ _id: req.body.job })
+
+            // if corresponding agency job not exist
+            if (!agencyJobExist) return res.status(400).send({ error: true, message: "Candidate submission failed" })
+
+            if (!empJobExist) return res.status(400).send({ error: true, message: "Candidate submission failed" })
+
+            // if corresponding agency job exist
+            // Submit candidate here
+            const candidates = req.body.candidates
+            let candidateData = []
+
+            for (let index = 0; index < candidates.length; index++) {
+                const candidateExist = await CandidateModel.findOne({
+                    $and: [
+                        { job: agencyJobExist.job },
+                        {
+                            $or: [
+                                { email: candidates[index].email },
+                                { phone: candidates[index].phone }
+                            ]
+                        }
+                    ]
+                });
+
+                const candidateExist1 = await CandidateModel.findOne({
+                    $and: [
+                        { job: empJobExist?._id },
+                        {
+                            $or: [
+                                { email: candidates[index].email },
+                                { phone: candidates[index].phone }
+                            ]
+                        }
+                    ]
+                })
+                // console.log("candidateExist >>>>>>>>>>>>>>>>>>> ", candidateExist);
+                // if candidate exist
+                if (candidateExist) return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
+
+                if (candidateExist1) return res.status(400).send({ error: true, message: `Candidate data already exist with this email ${candidateExist?.email}` })
+
+
+                candidates[index].agency = agencyJobExist.agency
+                candidates[index].recruiter = checkRecruiter?._id;
+                // candidates[index].job = agencyJobExist.job
+                candidates[index].job = empJobExist?._id;
+                candidateData.push(candidates[index]);
+
+
+
+            }
+
+            // console.log("candidates >>>>>>>>>>>>", candidateData);
+            const candidateDataResult = await CandidateModel.insertMany(candidateData);
+            const candidatejobData = await CandidateJobModel.insertMany(candidateData);
+
+            console.log({ candidatejobData });
+
+            submitted_candidates_id = candidateDataResult.map(e => e._id)
+            const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate({ _id: agencyJobExist._id }, { $push: { candidates: submitted_candidates_id } }, { new: true })
+            // console.log("agencyJobUpdate >>>>>>>>>>>> ", agencyJobUpdate);
+            console.log({ candidateDataResult });
+
+            if (candidateDataResult.length) {
+                return res.status(201).send({
+                    error: false,
+                    message: "Candidate data submitted",
+                    data: candidateDataResult
+                })
+            } else if (candidatejobData.length) {
+                return res.status(201).send({
+                    error: false,
+                    message: "Candidate data submitted",
+                    data: candidatejobData
+                })
+            }
+            return res.status(400).send({
+                error: true,
+                message: "Candidate submission failed"
+            })
+        } catch (error) {
+            next(error)
+        }
+    },
 
 
 
