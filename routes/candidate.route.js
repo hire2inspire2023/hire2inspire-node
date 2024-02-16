@@ -3,7 +3,7 @@ const candidateController = require('../controllers/candidate.controller')
 const CandidateController = require('../controllers/candidate.controller')
 const { verifyAccessToken } = require('../helpers/jwt_helper')
 const CandidateRouter = express.Router()
-const multer  = require('multer');
+const multer = require('multer');
 
 const acceptedFileTypes = [
     // 'image/png',
@@ -15,12 +15,12 @@ const acceptedFileTypes = [
     // 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ]
 
-const upload = multer({ 
+const upload = multer({
     // dest: 'uploads/',
     storage: multer.memoryStorage(),
     fileFilter: (req, file, cb) => {
         if (!acceptedFileTypes.includes(file.mimetype)) {
-          return cb(new Error('Only pdf format allowed!'))
+            return cb(new Error('Only pdf format allowed!'))
         }
         cb(null, true)
     }
@@ -49,5 +49,7 @@ CandidateRouter.patch('/apply-job/:candidateId', CandidateController.candidateJo
 CandidateRouter.get('/detail-job/:candidateId', CandidateController.candidateJobDetail)
 
 CandidateRouter.patch('/update/:id', CandidateController.update)
+
+CandidateRouter.get('/review-list/:agencyId', CandidateController.reviewList)
 
 module.exports = CandidateRouter

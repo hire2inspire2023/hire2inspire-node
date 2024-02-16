@@ -854,5 +854,35 @@ module.exports = {
     },
 
 
+    /////// review list //////////
+
+    reviewList: async (req, res, next) => {
+        try {
+            const result = await CandidateJobModel.find({ agency_id: req.params.agencyId }).populate([
+                {
+                    path: "emp_job",
+                    select: "",
+                    populate: {
+                        path: "employer",
+                        select: ""
+                    }
+                },
+                {
+                    path: "agency_id",
+                    select: ""
+                },
+                {
+                    path: "candidate",
+                    select: ""
+                },
+
+            ]).sort({ _id: -1 });
+            return res.status(200).send({ error: false, message: "Candidate review data", data: result })
+        } catch (error) {
+            next(error)
+        }
+    },
+
+
 
 }
