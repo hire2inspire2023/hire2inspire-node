@@ -106,7 +106,11 @@ module.exports = {
             const candidatejobdata = await CandidateJobModel.findOne({ _id: candidateJob?._id }).populate([
                 {
                     path: "emp_job",
-                    select: ""
+                    select: "",
+                    populate: {
+                        path: "employer",
+                        select: "email"
+                    }
                 }
             ])
 
@@ -122,7 +126,15 @@ module.exports = {
 
             let jobRole = candidatejobdata?.emp_job?.job_name;
 
+            let jobIDS = candidatejobdata?.emp_job?.job_id;
+
             let jobId = candidatejobdata?.emp_job;
+
+            let empMail = candidatejobdata?.emp_job?.employer?.email;
+
+            let empFname = candidatejobdata?.emp_job?.employer?.fname;
+
+            let empLname = candidatejobdata?.emp_job?.employer?.lname;
 
             let candidateId = candidatejobdata?.candidate;
 
@@ -144,7 +156,7 @@ module.exports = {
                        <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
        
                        <p>Find the link 
-                       <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
+                       <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Complete your Application here</a>
                      </p>
        
                        <p>Best regards,</p>
@@ -161,6 +173,38 @@ module.exports = {
                 .catch((error) => {
                     console.error(error)
                 })
+
+
+            sgMail.setApiKey(process.env.SENDGRID)
+            const newmsg = {
+                to: empMail, // Change to your recipient
+                from: 'info@hire2inspire.com',
+                subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
+                html: `
+                    <head>
+                        <title>Application for ${jobRole} - ${jobIDS}</title>
+                    </head>
+                    <body>
+                        <p>Dear ${empFname} ${empLname},</p>
+                        <p>I hope this email finds you well. I am writing to express my strong interest in the ${jobRole} position at ${companyName}, as advertised where you found the job posting.</p>
+                        <p>What particularly drew me to this opportunity at ${companyName} is mention something specific about the company that resonates with you. I am eager to be a part of a team that is describe what excites you about the company or its culture.</p>
+                        <p>I am impressed by ${companyName}'s commitment to mention any specific initiatives, values, or projects mentioned by the company. I am eager to bring my mention specific skills or experiences to the team and contribute to ${companyName}'s continued success.</p>
+                        <p>Thank you for considering my application. I have attached my resume for your review. I am available for an interview at your earliest convenience and look forward to the opportunity to discuss how my skills and experiences align with the needs of ${companyName}.</p>
+                        <p>Warm regards,</p>
+                        <p>Hire2Inspires</p>
+                    </body>
+                   `
+            }
+
+            sgMail
+                .send(newmsg)
+                .then(() => {
+                    console.log('Email sent')
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+
 
             if (candidateDataResult) {
                 return res.status(201).send({
@@ -472,7 +516,7 @@ module.exports = {
                       <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
       
                       <p>Find the link 
-                      <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
+                      <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Complete your Application here</a>
                     </p>
       
                       <p>Best regards,</p>
@@ -508,7 +552,7 @@ module.exports = {
                       <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
       
                       <p>Find the link 
-                      <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
+                      <a href="https://hire2inspire.com/candidate/apply-job/${candidateId}" target="blank">Complete your Application here</a>
                     </p>
       
                       <p>Best regards,</p>
