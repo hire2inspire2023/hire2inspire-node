@@ -2,22 +2,25 @@ const mongoose = require("mongoose");
 
 const NotificationSchema = mongoose.Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'users'
     },
     title: {
         type: String,
-       // required: true
+        // required: true
     },
     description: {
         type: String,
-       // required: true
+        // required: true
     },
-    agency:{
-        type: mongoose.Schema.Types.ObjectId, 
+    type: {
+        type: String
+    },
+    agency: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'agencies'
     },
-    seen:{
+    seen: {
         type: Boolean,
         default: false
     },
@@ -25,8 +28,9 @@ const NotificationSchema = mongoose.Schema({
         type: Boolean,
         default: false
     }
-}, {timestamps: true});
+}, { timestamps: true });
 
 
 
 module.exports = mongoose.model("notifications", NotificationSchema);
+

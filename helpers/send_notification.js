@@ -38,7 +38,7 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 //     //     try {
 //     //         if (req.email && req.subject && req.text && req.html) {
 //     //             const accessToken = await oAuth2Client.getAccessToken();
-        
+
 //     //             const transport = nodemailer.createTransport({
 //     //                 service: 'gmail',
 //     //                 auth: {
@@ -50,7 +50,7 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 //     //                     accessToken: accessToken,
 //     //                 },
 //     //             });
-            
+
 //     //             const mailOptions = {
 //     //                 from: FROM_EMAIL,
 //     //                 to: req.email,
@@ -58,7 +58,7 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 //     //                 text: req.text,
 //     //                 html: req.html
 //     //             };
-            
+
 //     //             const result = await transport.sendMail(mailOptions);
 //     //             return result; 
 //     //         }
@@ -122,12 +122,13 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 // }
 
 const sendNotification = async (req, res) => {
-    const user = req.user
-    const title = req.title
-    const description = req.description
-    const notificationData = new Notification({user, title, description})
-    const result = await notificationData.save();
-    return result;
+  const user = req.user
+  const title = req.title
+  const description = req.description
+  const type = req.type
+  const notificationData = new Notification({ user, title, type, description })
+  const result = await notificationData.save();
+  return result;
 }
 
 module.exports = sendNotification

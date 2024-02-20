@@ -80,8 +80,8 @@ module.exports = {
       const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID)
 
-      console.log(emails,'emails')
- 
+      console.log(emails, 'emails')
+
       const msg = {
         to: emails, // replace these with your email addresses
         from: 'info@hire2inspire.com',
@@ -113,7 +113,7 @@ module.exports = {
       <p>Find the link 
       <a href="https://hire2inspire.com/agency/login" target="blank">Registration Link</a>
     </p>
-          <p>Thank you and best regards,</p>
+          <p>Thank you and Regards,</p>
           <p> Hire2Inspire </p>
       </body>
   `
@@ -155,7 +155,7 @@ module.exports = {
       //     <p>Find the link 
       //     <a href="https://hire2inspire-dev.netlify.app/agency/login" target="blank">Registration Link</a>
       //   </p>
-      //         <p>Thank you and best regards,</p>
+      //         <p>Thank you and Regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `

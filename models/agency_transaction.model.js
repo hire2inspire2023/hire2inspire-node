@@ -22,89 +22,171 @@ const agencyTransactionSchema = mongoose.Schema({
     //     ref: 'agencies',
     // },
 
-    agency:{
-        type:ObjectId,
+    agency: {
+        type: ObjectId,
         ref: 'agencies',
     },
-    passbook_amt:[{
-        transaction_id:{
-            type:String
+    passbook_amt: [{
+        transaction_id: {
+            type: String
         },
-        amount:{
-            type:Number
+        amount: {
+            type: Number
         },
-        split_amount:{
-            agency_amount:{
-                type:Number
+        split_amount: {
+            agency_amount: {
+                type: Number
             },
-            h2i_amount:{
-                type:Number
+            h2i_amount: {
+                type: Number
             },
         },
-        type:{
-            type:String,
-            enum:{
-                values:["payble","paid"],
-                message:'please select between -credit/debit'
+        type: {
+            type: String,
+            enum: {
+                values: ["payble", "paid"],
+                message: 'please select between -credit/debit'
             }
         },
-        candidate:{
-            type:ObjectId,
+        candidate: {
+            type: ObjectId,
             ref: 'candidates',
         },
-        desg:{
-            type:String
+        desg: {
+            type: String
         },
-        employer:{
-            type:ObjectId,
+        employer: {
+            type: ObjectId,
             ref: 'employers',
         },
-        invoice_file:{
-            type:String
+        invoice_file: {
+            type: String
         },
-        billing_id:{
-            type:ObjectId,
+        billing_id: {
+            type: ObjectId,
             ref: 'billings',
         },
-        invoice_No:{
-            type:String
+        invoice_No: {
+            type: String
         },
-        description:{
-            type:String
+        description: {
+            type: String
         },
-        gst_in:{
-            type:String
+        gst_in: {
+            type: String
         },
-        hsn_code:{
-            type:String
+        hsn_code: {
+            type: String
         },
-        gst_type:{
-            type:String
+        gst_type: {
+            type: String
         },
-        cgst:{
-            type:String
+        cgst: {
+            type: String
         },
-        igst:{
-            type:String
+        igst: {
+            type: String
         },
-        sgst:{
-            type:String
+        sgst: {
+            type: String
         },
-        gst_cal_amount:{
-            type:Number
+        gst_cal_amount: {
+            type: Number
         },
-        cgst_cal_amount:{
-            type:Number
+        cgst_cal_amount: {
+            type: Number
         },
-        sgst_cal_amount:{
-            type:Number
+        sgst_cal_amount: {
+            type: Number
+        },
+        is_active: {
+            type: Boolean,
+            default: true
         }
-   }],
-    total_amount:{
-        type:Number
+    }],
+    proforma_passbook_amt: [{
+        transaction_id: {
+            type: String
+        },
+        amount: {
+            type: Number
+        },
+        split_amount: {
+            agency_amount: {
+                type: Number
+            },
+            h2i_amount: {
+                type: Number
+            },
+        },
+        type: {
+            type: String,
+            enum: {
+                values: ["payble", "paid"],
+                message: 'please select between -credit/debit'
+            }
+        },
+        candidate: {
+            type: ObjectId,
+            ref: 'candidates',
+        },
+        desg: {
+            type: String
+        },
+        employer: {
+            type: ObjectId,
+            ref: 'employers',
+        },
+        invoice_file: {
+            type: String
+        },
+        billing_id: {
+            type: ObjectId,
+            ref: 'billings',
+        },
+        proforma_invoice_No: {
+            type: String
+        },
+        description: {
+            type: String
+        },
+        gst_in: {
+            type: String
+        },
+        hsn_code: {
+            type: String
+        },
+        gst_type: {
+            type: String
+        },
+        cgst: {
+            type: String
+        },
+        igst: {
+            type: String
+        },
+        sgst: {
+            type: String
+        },
+        gst_cal_amount: {
+            type: Number
+        },
+        cgst_cal_amount: {
+            type: Number
+        },
+        sgst_cal_amount: {
+            type: Number
+        },
+        is_active: {
+            type: Boolean,
+            default: true
+        }
+    }],
+    total_amount: {
+        type: Number
     },
 
-}, {timestamps: true});
+}, { timestamps: true });
 
 
 

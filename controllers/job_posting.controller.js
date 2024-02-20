@@ -410,7 +410,7 @@ module.exports = {
 
             sgMail.setApiKey(process.env.SENDGRID)
             const msg = {
-                to: 'admin@hire2inspire.com', // Change to your recipient 
+                to: 'hire2inspireh2i@gmail.com', // Change to your recipient 
                 from: 'info@hire2inspire.com',
                 subject: `Job Approval Request!`,
                 html: `
@@ -452,35 +452,35 @@ module.exports = {
 
             // console.log(agencyEmails)
 
-//             sgMail.setApiKey(process.env.SENDGRID)
-//             const new_msg = {
-//                 to: agencyEmails, // Change to your recipient
-//                 from: 'info@hire2inspire.com', // Change to your verified sender
-//                 subject: ` Calling All Talent Architects, A New Blueprint Awaits!`,
-//                 html: `
-//             <head>
-//                 <title>Notification:New Job Posting</title>
-//           </head>
-//          <body>
-//     // <p>Subject: Calling All Talent Architects, A New Blueprint Awaits!</p>
-//     <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
-//     <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
-//     <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
-//     <p>(Job details and link of the job to be provided here posted on H2I)</p>
-//     <p>Regards,</p>
-//     <p>hire2Inspire</p>
-//     <p>&nbsp;</p>
-// </body>
-//         `
-//             }
-//             sgMail
-//                 .sendMultiple(new_msg)
-//                 .then(() => {
-//                     console.log('Email sent to allagencies')
-//                 })
-//                 .catch((error) => {
-//                     console.error(error)
-//                 })
+            //             sgMail.setApiKey(process.env.SENDGRID)
+            //             const new_msg = {
+            //                 to: agencyEmails, // Change to your recipient
+            //                 from: 'info@hire2inspire.com', // Change to your verified sender
+            //                 subject: ` Calling All Talent Architects, A New Blueprint Awaits!`,
+            //                 html: `
+            //             <head>
+            //                 <title>Notification:New Job Posting</title>
+            //           </head>
+            //          <body>
+            //     // <p>Subject: Calling All Talent Architects, A New Blueprint Awaits!</p>
+            //     <p>Greetings from hire2Inspire! We are thrilled to unveil a bold new blueprint that demands the expertise and finesse your agency can provide.</p>
+            //     <p>Our latest mandate is not just another project – it's an opportunity to shape careers, transform organizations, and leave an indelible mark on the landscape of talent acquisition.</p>
+            //     <p>Let us leverage our collective expertise to bring this blueprint to life.</p>
+            //     <p>(Job details and link of the job to be provided here posted on H2I)</p>
+            //     <p>Regards,</p>
+            //     <p>hire2Inspire</p>
+            //     <p>&nbsp;</p>
+            // </body>
+            //         `
+            //             }
+            //             sgMail
+            //                 .sendMultiple(new_msg)
+            //                 .then(() => {
+            //                     console.log('Email sent to allagencies')
+            //                 })
+            //                 .catch((error) => {
+            //                     console.error(error)
+            //                 })
 
 
             if (result) {
@@ -851,7 +851,7 @@ module.exports = {
                       <p>At this point, we kindly request your assistance in initiating the necessary steps to finalize the onboarding process for the candidate. This includes coordinating any remaining paperwork, sharing important company information, and facilitating a smooth transition into their new role.</p>
                       <p>Once again, we extend our gratitude for your collaboration and for connecting us with such a promising candidate. We look forward to future opportunities to work together.</p>
                       <p>If you have any further questions or require additional information, please feel free to reach out to us. We value our partnership and appreciate your prompt attention to this matter.</p>
-                      <p>Thank you and best regards,</p>
+                      <p>Thank you and Regards,</p>
                       <p> Hire2Inspire </p>
                   </body>
               `
@@ -868,6 +868,7 @@ module.exports = {
 
             let sendNotificationData = await sendNotification({
                 user: agencyId,
+                type: "hired",
                 title: "Candidate Hired",
                 description: `${candidateFname} ${candidateLname} got a job offer from ${compName} as ${jobRole}`
             });
@@ -1085,6 +1086,47 @@ module.exports = {
 
             console.log("jobUpdata", jobUpdata)
 
+
+            if (jobUpdata) {
+                return res.status(201).send({
+                    error: false,
+                    message: `Success`,
+                    data: jobUpdata
+                })
+            }
+            return res.status(400).send({
+                error: true,
+                message: "Agency job assign/decline failed"
+            })
+
+        } catch (error) {
+            next(error)
+        }
+    },
+
+    // Agency job update
+    announcementJobUpdate: async (req, res, next) => {
+        try {
+            let announcementData = req.body.announcement;
+            const jobUpdata = await JobPosting.findOneAndUpdate({ _id: req.params.job }, { announcement: announcementData }, { new: true });
+
+            console.log("jobUpdata", jobUpdata)
+
+            const agencyJobUpdate = await AgencyJobModel.findOne({ job: req.params.job });
+
+            let agencyName = agencyJobUpdate?.agency?.name;
+            let agencyId = agencyJobUpdate?.agency;
+            let jobName = jobUpdata?.job_name;
+            let jobId = jobUpdata?.job_id;
+
+            let sendNotificationData = await sendNotification({
+                user: agencyId,
+                type: "announcement",
+                title: `New Announcement for ${jobName} - ${jobId}`,
+                description: `${announcementData}`
+            });
+
+            console.log("sendNotificationData", sendNotificationData)
 
             if (jobUpdata) {
                 return res.status(201).send({

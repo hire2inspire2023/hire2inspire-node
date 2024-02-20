@@ -3,6 +3,7 @@ const Transaction = require("../models/transaction.model");
 const AgencyTransaction = require('../models/agency_transaction.model');
 const Agency = require('../models/agency.model');
 const { getUserViaToken, verifyAccessToken } = require("../helpers/jwt_helper");
+const sgMail = require('@sendgrid/mail');
 
 module.exports = {
     list: async (req, res, next) => {
@@ -10,14 +11,18 @@ module.exports = {
             const transaction_data = await Transaction.find({}).populate([
                 {
                     path: "employer",
-                    select: "fname lname"
+                    select: "fname lname comp_name mobile"
                 },
                 {
                     path: "passbook_amt.candidate",
                     select: "fname lname agency",
                     populate: {
                         path: "agency",
-                        select: "name corporate_email gst",
+                        select: "name corporate_email gst agency_account_info",
+                        populate: {
+                            path: "AgencyUserAccountInfo",
+                            select: "agency_location personal_phone"
+                        }
                     }
                 },
                 {
@@ -25,10 +30,34 @@ module.exports = {
                     select: " ",
                     populate: {
                         path: "hire_id",
+                        select: " ",
+                        populate: {
+                            path: "job",
+                            select: ""
+                        }
+                    }
+                },
+                {
+                    path: "proforma_passbook_amt.candidate",
+                    select: "fname lname agency",
+                    populate: {
+                        path: "agency",
+                        select: "name corporate_email gst agency_account_info",
+                        populate: {
+                            path: "AgencyUserAccountInfo",
+                            select: "agency_location personal_phone"
+                        }
+                    }
+                },
+                {
+                    path: "proforma_passbook_amt.billing_id",
+                    select: " ",
+                    populate: {
+                        path: "hire_id",
                         select: " "
                     }
                 }
-            ]);
+            ]).sort({ _id: -1 });
 
 
             const agency_transaction_data = await AgencyTransaction.find({}).populate([
@@ -53,14 +82,46 @@ module.exports = {
                     select: " ",
                     populate: {
                         path: "hire_id",
-                        select: " "
+                        select: " ",
+                        populate: {
+                            path: "job",
+                            select: ""
+                        }
                     }
                 },
                 {
                     path: "passbook_amt.employer",
                     select: "fname lname email mobile",
+                },
+                {
+                    path: "proforma_passbook_amt.candidate",
+                    select: "fname lname",
+                    populate: {
+                        path: "agency",
+                        select: "name corporate_email gst agency_account_info",
+                        populate: {
+                            path: "AgencyUserAccountInfo",
+                            select: "first_name last_name personal_phone agency_location"
+                        }
+                    }
+                },
+                {
+                    path: "proforma_passbook_amt.billing_id",
+                    select: " ",
+                    populate: {
+                        path: "hire_id",
+                        select: " ",
+                        populate: {
+                            path: "job",
+                            select: ""
+                        }
+                    }
+                },
+                {
+                    path: "proforma_passbook_amt.employer",
+                    select: "fname lname email mobile",
                 }
-            ]);
+            ]).sort({ _id: -1 });
 
 
             return res.status(200).send({
@@ -230,6 +291,34 @@ module.exports = {
                 {
                     path: "passbook_amt.employer",
                     select: "fname lname email mobile",
+                },
+                {
+                    path: "proforma_passbook_amt.candidate",
+                    select: "fname lname",
+                    populate: {
+                        path: "agency",
+                        select: "name corporate_email gst agency_account_info",
+                        populate: {
+                            path: "AgencyUserAccountInfo",
+                            select: "first_name last_name personal_phone agency_location"
+                        }
+                    }
+                },
+                {
+                    path: "proforma_passbook_amt.billing_id",
+                    select: " ",
+                    populate: {
+                        path: "hire_id",
+                        select: " ",
+                        populate: {
+                            path: "job",
+                            select: "job_id job_name min_work_exp max_work_exp"
+                        }
+                    }
+                },
+                {
+                    path: "proforma_passbook_amt.employer",
+                    select: "fname lname email mobile",
                 }
             ]);
 
@@ -246,6 +335,135 @@ module.exports = {
             next(error);
         }
     },
+
+    transactionempUpdate: async (req, res, next) => {
+        try {
+            const transactionId = req.body.transactionId;
+            const empId = req.params.id;
+
+            const getEmpData = await Transaction.findOne({ employer: empId });
+
+            // Update passbook_amt array
+            getEmpData.passbook_amt.forEach(transaction => {
+                if (transaction.transaction_id === transactionId) {
+                    transaction.is_active = false;
+                }
+            });
+
+            // Update proforma_passbook_amt array
+            getEmpData.proforma_passbook_amt.forEach(transaction => {
+                if (transaction.transaction_id === transactionId) {
+                    transaction.is_active = false;
+                }
+            });
+
+            // Save the updated document
+            const result = await getEmpData.save();
+
+            //     console.log({result})
+
+            return res.status(200).send({
+                error: false,
+                message: "Invoice cancel successfully",
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    transactionagencyUpdate: async (req, res, next) => {
+        try {
+            const transactionId = req.body.transactionId;
+            const agencyId = req.params.id;
+
+            const getAgeData = await AgencyTransaction.findOne({ agency: agencyId });
+
+            // Update passbook_amt array
+            getAgeData.passbook_amt.forEach(transaction => {
+                if (transaction.transaction_id === transactionId) {
+                    transaction.is_active = false;
+                }
+            });
+
+            // Update proforma_passbook_amt array
+            getAgeData.proforma_passbook_amt.forEach(transaction => {
+                if (transaction.transaction_id === transactionId) {
+                    transaction.is_active = false;
+                }
+            });
+
+            // Save the updated document
+            const result = await getAgeData.save();
+
+            // console.log({result})
+
+            return res.status(200).send({
+                error: false,
+                message: "Invoice cancel successfully",
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    sendMail: async (req, res, next) => {
+        try {
+            let transactionId = req.body.transactionId;
+            let recipents = [];
+            recipents = req.body.recipents;
+            let file = req.body.file;
+
+            let transctionData = await Transaction.findOne({ "passbook_amt.transaction_id": transactionId });
+
+            console.log({ transctionData });
+
+            let invoiceNo;
+            transctionData.passbook_amt.forEach(transaction => {
+                if (transaction.transaction_id === transactionId) {
+                    console.log("hii")
+                    invoiceNo = transaction?.invoice_No;
+                }
+            });
+
+            // let invoiceNo = transctionData?.passbook_amt?.invoice_No;
+
+            console.log({ invoiceNo });
+
+            sgMail.setApiKey(process.env.SENDGRID)
+            const newmsg = {
+                to: recipents, // Change to your recipient
+                from: 'info@hire2inspire.com',
+                subject: `Invoice for Candidate hired ${invoiceNo}`,
+                html: `
+                <p>Hello ,</p>
+                <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
+                <p><a href=${file}>Download Invoice</a></p>
+                <p>[Include any specific details or notes about the invoice No : ${invoiceNo}</p>
+                <p>Should you have any questions or require further clarification regarding the invoice, please don't hesitate to reach out to me.</p>
+                <p>Thank you for your prompt attention to this matter.</p>
+                <p>Regards,<br/>Hire2Inspire</p>
+               `
+            }
+
+            sgMail
+                .sendMultiple(newmsg)
+                .then(() => {
+                    console.log('Email sent')
+                })
+                .catch((error) => {
+                    console.error(error)
+                })
+
+            return res.status(200).send({
+                error: false,
+                message: "Mail send"
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
 
 }

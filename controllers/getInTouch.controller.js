@@ -38,7 +38,7 @@ module.exports = {
             //     <body>
             //         <p>Dear Hire2Inspire,</p>
             //         <p>${getQuery}</p>
-            //         <p>Thank you and best regards,</p>
+            //         <p>Thank you and Regards,</p>
             //         <p> ${getName} </p>
             //     </body>
             // `
@@ -81,7 +81,7 @@ module.exports = {
 
                     <p>Thank you for your prompt attention to this matter.</p>
 
-                    <p>Best regards,</p>
+                    <p>Regards,</p>
                     <p>${getName}<br>
                 </body>         
                 `

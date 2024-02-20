@@ -108,7 +108,7 @@ module.exports = {
         <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
         <p>If you have any questions or need assistance, feel free to contact our support team at info@hire2inspire.com</p>
         <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-        <p>Thank you and best regards,</p>
+        <p>Thank you and Regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -154,7 +154,7 @@ module.exports = {
       <p>If you have any questions or need further information, feel free to contact the administration department at info@hire2inspire.com.</p>
 
      
-      <p>Best regards,<br>
+      <p>Regards,<br>
       Hire2Ispire Team</p>
     </body>
       `
@@ -204,7 +204,7 @@ module.exports = {
         <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
         <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-        <p>Thank you and best regards,</p>
+        <p>Thank you and Regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -372,7 +372,7 @@ module.exports = {
       AgencyData.password = undefined;
       AgencyData.otp = undefined;
 
-      let updatedAgency = await Agency.findOneAndUpdate({_id:AgencyData.id},{"is_loggedIn":true},{new:true});
+      let updatedAgency = await Agency.findOneAndUpdate({ _id: AgencyData.id }, { "is_loggedIn": true }, { new: true });
 
       res.status(200).send({
         error: false,
@@ -449,24 +449,24 @@ module.exports = {
         // Define a string of all possible characters
         const chars = '0123456789';
         let otp = '';
-      
+
         // Generate 6 random characters from the string and append to OTP
         for (let i = 0; i < 6; i++) {
           otp += chars[Math.floor(Math.random() * chars.length)];
         }
-      
+
         return otp;
       }
 
       let otps = generateOTP();
 
-      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: otps },{new:true});
+      const AgencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.email }, { otp: otps }, { new: true });
       if (!AgencyData) return res.status(404).send({ error: true, message: 'Agency not found' });
 
       let agencyName = AgencyData?.name;
       let agencyEmail = AgencyData?.corporate_email;
       let agencyOtp = AgencyData?.otp;
-      console.log({agencyOtp})
+      console.log({ agencyOtp })
 
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
@@ -484,7 +484,7 @@ module.exports = {
         <p>Please enter this OTP on the verification page to confirm your account.</p>
         <p>If you did not request this OTP or need any assistance, please don't hesitate to contact our support team at info@hire2inspire.com .</p>
         <p>Thank you for your cooperation.</p>
-        <p>Best regards,<br>
+        <p>Regards,<br>
         Hire2Inspire</p>
       </body>
 `
@@ -648,8 +648,8 @@ module.exports = {
 
       if (checkAgency?.is_loggedIn == false) throw createError.NotFound('You are not already logged In yet');
 
-      let agencyData = await Agency.findOneAndUpdate({_id:userId},{"is_loggedIn":false},{new:true});
-      
+      let agencyData = await Agency.findOneAndUpdate({ _id: userId }, { "is_loggedIn": false }, { new: true });
+
       return res.status(200).send({
         error: false,
         message: "Agency logout.",

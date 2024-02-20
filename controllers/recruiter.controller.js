@@ -172,7 +172,7 @@ module.exports = {
   <p>
    password: secret
 </p>
-        <p>Thank you and best regards,</p>
+        <p>Thank you and Regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -208,7 +208,7 @@ module.exports = {
         emails are ${emails}</p>
         <p>Please review the invitations and their statuses. Let me know if there are any discrepancies or if further action is required from my end.</p>
         <p>Thank you for your attention to this matter.</p>
-        <p>Best regards,<br>
+        <p>Regards,<br>
         Hire2Inspire</p>
     </body>
 `
@@ -256,7 +256,7 @@ module.exports = {
       //   <p>
       //    password: secret
       // </p>
-      //         <p>Thank you and best regards,</p>
+      //         <p>Thank you and Regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `
@@ -494,7 +494,7 @@ module.exports = {
   <p>
    password: secret
 </p>
-        <p>Thank you and best regards,</p>
+        <p>Thank you and Regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -530,7 +530,7 @@ module.exports = {
         emails are ${emails}</p>
         <p>Please review the invitations and their statuses. Let me know if there are any discrepancies or if further action is required from my end.</p>
         <p>Thank you for your attention to this matter.</p>
-        <p>Best regards,<br>
+        <p>Regards,<br>
         Hire2Inspire</p>
     </body>
 `
@@ -574,7 +574,7 @@ module.exports = {
       //   <p>
       //    password: secret
       // </p>
-      //         <p>Thank you and best regards,</p>
+      //         <p>Thank you and Regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `

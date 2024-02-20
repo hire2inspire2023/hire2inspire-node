@@ -245,7 +245,7 @@ module.exports = {
 
       let jobId = jobPostingData?._id;
 
-      
+
 
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
@@ -270,7 +270,7 @@ module.exports = {
 
         <p>Thank you for choosing our platform to connect with talented individuals. We wish you the best of luck in finding the perfect candidate for your job opening. If you have any further questions or require any assistance, please don't hesitate to reach out.</p>
 
-        <p>Best regards,</p>
+        <p>Regards,</p>
         <p>Hire2Inspire</p>
       </body>
 
@@ -286,7 +286,7 @@ module.exports = {
           console.error(error)
         })
 
-        
+
       const agencydata = await Agency.find({});
 
       let agencyEmails = agencydata.map(e => e.corporate_email.toString());
@@ -378,7 +378,7 @@ module.exports = {
      <body>
         <p>Dear ${agencyName},</p>
         <p>I hope this email finds you well. We are pleased to inform you that your agency's application for approval has been successfully processed and has received the necessary clearance. We are excited to confirm your agency's status as an approved partner with Hire2Inspire.</p>
-        <p>Best regards,</p>
+        <p>Regards,</p>
         <p>Hire2Inspire</p>
       </body>
 `

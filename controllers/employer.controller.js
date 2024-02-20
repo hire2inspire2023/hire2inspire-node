@@ -151,7 +151,7 @@ module.exports = {
       //     <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
       //     <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-      //     <p>Thank you and best regards,</p>
+      //     <p>Thank you and Regards,</p>
       //     <p> Hire2Inspire </p>
       // </body>`
       //   }
@@ -192,7 +192,7 @@ module.exports = {
       //         <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
       //         <p>If you have any questions or need assistance, feel free to contact our support team at info@hire2inspire.com</p>
       //         <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-      //         <p>Thank you and best regards,</p>
+      //         <p>Thank you and Regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `
@@ -216,8 +216,7 @@ module.exports = {
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
-        // to: "hire2inspireh2i@gmail.com", // Change to your recipient
-        to: "admin@hire2inspire.com",
+        to: "hire2inspireh2i@gmail.com", // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
         subject: `New Employer Registration`,
         html: `
@@ -235,7 +234,7 @@ module.exports = {
         <li><strong>Email:</strong> ${empEmail}</li>
       </ul>
        <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employer.</p>
-      <p>Best regards,<br>
+      <p>Regards,<br>
       Hire2Ispire Team</p>
     </body>
       `
@@ -264,7 +263,7 @@ module.exports = {
               <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
               <p>If you have any questions or need assistance, feel free to contact our support team at info@hire2inspire.com</p>
               <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-              <p>Thank you and best regards,</p>
+              <p>Thank you and Regards,</p>
               <p> Hire2Inspire </p>
           </body>
       `
@@ -304,7 +303,7 @@ module.exports = {
       //         <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
       //         <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-      //         <p>Thank you and best regards,</p>
+      //         <p>Thank you and Regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `
@@ -342,7 +341,7 @@ module.exports = {
           <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
           <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-          <p>Thank you and best regards,</p>
+          <p>Thank you and Regards,</p>
           <p> Hire2Inspire </p>
       </body>`
       }
@@ -434,6 +433,26 @@ module.exports = {
         },
         {
           path: "passbook_amt.billing_id",
+          select: " ",
+          populate: {
+            path: "hire_id",
+            select: " ",
+            populate: {
+              path: "job",
+              select: "job_name job_id min_work_exp max_work_exp"
+            }
+          }
+        },
+        {
+          path: "proforma_passbook_amt.candidate",
+          select: "fname lname agency",
+          populate: {
+            path: "agency",
+            select: " "
+          }
+        },
+        {
+          path: "proforma_passbook_amt.billing_id",
           select: " ",
           populate: {
             path: "hire_id",
@@ -612,7 +631,7 @@ module.exports = {
         <p>Please enter this OTP on the verification page to confirm your account.</p>
         <p>If you did not request this OTP or need any assistance, please don't hesitate to contact our support team at info@hire2inspire.com .</p>
         <p>Thank you for your cooperation.</p>
-        <p>Best regards,<br>
+        <p>Regards,<br>
         Hire2Inspire</p>
       </body>
 `
@@ -748,7 +767,7 @@ module.exports = {
         }
       ]);
 
-      console.log("billinglist", billinglist);
+      // console.log("billinglist", billinglist);
 
       let empFname = billinglist?.employer?.fname;
 
@@ -758,7 +777,7 @@ module.exports = {
 
       let minExp = billinglist?.hire_id?.job?.min_work_exp;
 
-      console.log("minExp", minExp)
+      //console.log("minExp",minExp)
 
       let candidateFName = billinglist?.hire_id?.candidate?.fname;
 
@@ -768,10 +787,10 @@ module.exports = {
 
       const subscription = await UserSubscription.findOne({ employer: result?.employer });
       const subsData = await Package.findOne({ package: subscription?.package });
-      console.log("subsData", subsData);
+      // console.log("subsData", subsData);
       const packageData = await PackageType.findOne({ _id: subsData?.package_type });
       const packageName = packageData?.name;
-      console.log("packageName", packageName);
+      //console.log("packageName", packageName);
 
 
       let billingId = billinglist?._id;
@@ -780,8 +799,9 @@ module.exports = {
       let h2i_amount;
       if (parseInt(minExp) >= 8) {
         console.log("hii")
-        amount = (billinglist?.hire_id?.comp_offered) * (10.33 / 100);
-        agency_amount = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
+        amount = (billinglist?.hire_id?.comp_offered) * (10.83 / 100);
+        // agency_amount = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
+        agency_amount = (billinglist?.hire_id?.comp_offered) * (10.33 / 100);
         h2i_amount = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
       } else {
         amount = (billinglist?.hire_id?.comp_offered) * (8.83 / 100);
@@ -819,11 +839,40 @@ module.exports = {
         }
       }
 
+      const generateNextproformaInvoice = (prevInv, type) => {
 
-      let transactionlist = await Transaction.findOne({});
+        if (prevInv == undefined) {
+          console.log('here1')
+          return `H2I/${type}/PI/24-25-01`
+        } else {
+          const [, yearPart, numberPart] = prevInv.match(/(\d{2}-\d{2})-(\d{2})/);
+          let newNumberPart = (parseInt(numberPart, 10) + 1).toString().padStart(2, '0')
+          const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+          let currentYear = new Date().getFullYear() % 100;
+          let currentYearNext = currentYear + 1;
+          if (currentMonth > 3 && currentYear != 23) {
+            if (currentYear != yearPart.split('-')[0]) {
+              return `H2I/${currentYear}-${currentYearNext}-01`
+            } else {
+              return `H2I/${currentYear}-${currentYearNext}-${(parseInt(numberPart, 10) + 1).toString().padStart(2, '0')}`
+            }
 
-      let PrevInvoiceId = transactionlist?.passbook_amt[transactionlist?.passbook_amt?.length - 1]?.invoice_No
-      console.log("transactionlist", transactionlist?.passbook_amt[transactionlist?.passbook_amt?.length - 1]?.invoice_No);
+          }
+
+          else {
+            return `H2I/${type}/PI/${currentYear}-${currentYearNext}-${newNumberPart}`
+          }
+
+        }
+      }
+
+
+      let transactionlist = await Transaction.findOne({ employer: req.body.employer });
+
+      let PrevInvoiceId = transactionlist?.passbook_amt[transactionlist?.passbook_amt?.length - 1]?.invoice_No;
+      let PrevproformaInvoiceId = transactionlist?.proforma_passbook_amt[transactionlist?.proforma_passbook_amt?.length - 1]?.proforma_invoice_No;
+      console.log({ PrevproformaInvoiceId })
+      // console.log("transactionlist", transactionlist?.passbook_amt[transactionlist?.passbook_amt?.length - 1]?.invoice_No);
 
       //let data2  = generateNextInvoice();
       let gstAmount;
@@ -854,7 +903,24 @@ module.exports = {
                   igst: "18%",
                   gst_cal_amount: gstAmount,
                 },
-              },
+                proforma_passbook_amt: {
+                  amount: amount + gstAmount,
+                  "split_amount.agency_amount": agency_amount,
+                  "split_amount.h2i_amount": h2i_amount,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "EM"),
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "IGST",
+                  igst: "18%",
+                  gst_cal_amount: gstAmount,
+                },
+              }
             },
             { new: true }
           );
@@ -885,10 +951,30 @@ module.exports = {
                   cgst_cal_amount: cgstAmount,
                   sgst_cal_amount: sgstAmount,
                 },
+                proforma_passbook_amt: {
+                  amount: amount + cgstAmount + sgstAmount,
+                  "split_amount.agency_amount": agency_amount,
+                  "split_amount.h2i_amount": h2i_amount,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "EM"),
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "CGST/SGST",
+                  cgst: "9%",
+                  sgst: "9%",
+                  cgst_cal_amount: cgstAmount,
+                  sgst_cal_amount: sgstAmount,
+                },
               },
             },
             { new: true }
           );
+          console.log("transactionData>>>", transactionData)
         }
       } else {
         if (billinglist?.supply_code != "29") {
@@ -915,10 +1001,28 @@ module.exports = {
                   igst: "18%",
                   gst_cal_amount: gstAmount,
                 },
+                proforma_passbook_amt: {
+                  amount: amount + gstAmount,
+                  "split_amount.agency_amount": agency_amount,
+                  "split_amount.h2i_amount": 0,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "EM"),
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "IGST",
+                  igst: "18%",
+                  gst_cal_amount: gstAmount,
+                },
               },
             },
             { new: true }
           );
+          console.log("transactionData>>>", transactionData)
         } else if (billinglist?.supply_code == "29") {
           cgstAmount = (amount * (9 / 100));
           sgstAmount = (amount * (9 / 100));
@@ -926,7 +1030,7 @@ module.exports = {
             { employer: result?.employer },
             {
               '$inc': { 'total_amount': amount },
-              '$push': {
+              '$push': [{
                 passbook_amt: {
                   amount: amount + cgstAmount + sgstAmount,
                   "split_amount.agency_amount": agency_amount,
@@ -947,14 +1051,37 @@ module.exports = {
                   sgst_cal_amount: sgstAmount,
                 },
               },
+              {
+                proforma_passbook_amt: {
+                  amount: amount + cgstAmount + sgstAmount,
+                  "split_amount.agency_amount": agency_amount,
+                  "split_amount.h2i_amount": 0,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "EM"),
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "CGST/SGST",
+                  cgst: "9%",
+                  sgst: "9%",
+                  cgst_cal_amount: cgstAmount,
+                  sgst_cal_amount: sgstAmount,
+                },
+              },
+              ]
             },
             { new: true }
           );
+          console.log("transactionData>>>", transactionData)
         }
       }
 
 
-      //console.log("transactionData>>>",transactionData)
+      // console.log("transactionData>>>",transactionData)
 
       let agencyId = billinglist?.hire_id?.candidate?.agency?._id;
 
@@ -965,8 +1092,10 @@ module.exports = {
       let h2i_amountData;
 
       if (parseInt(minExp) >= 8) {
-        amountData = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
-        agency_amountData = (billinglist?.hire_id?.comp_offered) * (9.33 / 100);
+        // amountData = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
+        // agency_amountData = (billinglist?.hire_id?.comp_offered) * (9.33 / 100);
+        amountData = (billinglist?.hire_id?.comp_offered) * (10.33 / 100);
+        agency_amountData = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
         h2i_amountData = (billinglist?.hire_id?.comp_offered) * (0.5 / 100);
 
       } else {
@@ -1007,6 +1136,24 @@ module.exports = {
                   igst: "18%",
                   gst_cal_amount: gstAmountData,
                 },
+                proforma_passbook_amt: {
+                  amount: amountData,
+                  "split_amount.agency_amount": agency_amountData + gstAmountData,  // amount get agencys
+                  "split_amount.h2i_amount": h2i_amountData,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "AG"),
+                  employer: result?.employer,
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "IGST",
+                  igst: "18%",
+                  gst_cal_amount: gstAmountData,
+                },
               },
             },
             { new: true }
@@ -1039,6 +1186,24 @@ module.exports = {
                   cgst_cal_amount: cgstAmountData,
                   sgst_cal_amount: sgstAmountData,
                 },
+                proforma_passbook_amt: {
+                  amount: amountData,
+                  "split_amount.agency_amount": agency_amountData + cgstAmountData + sgstAmountData,  // amount get agencys
+                  "split_amount.h2i_amount": h2i_amountData,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "AG"),
+                  employer: result?.employer,
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "IGST",
+                  igst: "18%",
+                  gst_cal_amount: gstAmountData,
+                },
               },
             },
             { new: true }
@@ -1055,8 +1220,8 @@ module.exports = {
               '$push': {
                 passbook_amt: {
                   amount: amountData,
-                  // "split_amount.agency_amount": agency_amountData + gstAmountData,  // amount get agencys
-                  "split_amount.agency_amount": amountData + gstAmountData,  // amount get agencys
+                  "split_amount.agency_amount": agency_amountData + gstAmountData,  // amount get agencys
+                  // "split_amount.agency_amount": amountData + gstAmountData,  // amount get agencys
                   "split_amount.h2i_amount": h2i_amountData,
                   type: "payble",
                   billing_id: billingId,
@@ -1065,6 +1230,24 @@ module.exports = {
                   transaction_id: tranId,
                   invoice_file: "",
                   invoice_No: generateNextInvoice(PrevInvoiceId, "AG"),
+                  employer: result?.employer,
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "IGST",
+                  igst: "18%",
+                  gst_cal_amount: gstAmountData,
+                },
+                proforma_passbook_amt: {
+                  amount: amountData,
+                  "split_amount.agency_amount": agency_amountData + gstAmountData,  // amount get agencys
+                  "split_amount.h2i_amount": h2i_amountData,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "AG"),
                   employer: result?.employer,
                   gst_in: "29AAHCH0363H1ZK",
                   hsn_code: "998311",
@@ -1086,8 +1269,8 @@ module.exports = {
               '$push': {
                 passbook_amt: {
                   amount: amountData,
-                  // "split_amount.agency_amount": agency_amountData + cgstAmountData + sgstAmountData,
-                  "split_amount.agency_amount": amountData + cgstAmountData + sgstAmountData,
+                  "split_amount.agency_amount": agency_amountData + cgstAmountData + sgstAmountData,
+                  // "split_amount.agency_amount": amountData + cgstAmountData + sgstAmountData,
                   "split_amount.h2i_amount": h2i_amountData,
                   type: "payble",
                   billing_id: billingId,
@@ -1105,6 +1288,24 @@ module.exports = {
                   cgst_cal_amount: cgstAmountData,
                   sgst_cal_amount: sgstAmountData,
                 },
+                proforma_passbook_amt: {
+                  amount: amountData,
+                  "split_amount.agency_amount": agency_amountData + cgstAmountData + sgstAmountData,  // amount get agencys
+                  "split_amount.h2i_amount": h2i_amountData,
+                  type: "payble",
+                  billing_id: billingId,
+                  candidate: candidateData,
+                  desg: designation,
+                  transaction_id: tranId,
+                  invoice_file: "",
+                  proforma_invoice_No: generateNextproformaInvoice(PrevproformaInvoiceId, "AG"),
+                  employer: result?.employer,
+                  gst_in: "29AAHCH0363H1ZK",
+                  hsn_code: "998311",
+                  gst_type: "IGST",
+                  igst: "18%",
+                  gst_cal_amount: gstAmountData,
+                },
               },
             },
             { new: true }
@@ -1115,7 +1316,7 @@ module.exports = {
 
       // employer
 
-      console.log('showwwwwwwwwwww', empEmail)
+      // console.log('showwwwwwwwwwww', empEmail)
 
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
@@ -1138,7 +1339,7 @@ module.exports = {
     
         <p>Thank you for choosing us as your recruitment partner.</p>
     
-        <p>Best regards,</p>
+        <p>Regards,</p>
         <p>Hire2Inspire</p>
     </body>
         `
@@ -1153,7 +1354,7 @@ module.exports = {
         })
 
 
-      console.log('showwwwwwwwwwww', agncyEmail)  // agency
+      // console.log('showwwwwwwwwwww', agncyEmail)  // agency
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
