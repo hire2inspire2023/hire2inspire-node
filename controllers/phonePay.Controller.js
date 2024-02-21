@@ -12,8 +12,8 @@ const newPayment = async (req, res) => {
         const data = {
             //merchantId: 'PGTESTPAYUAT',
             merchantId : 'M22UKH0NQ4M7L',
-            merchantTransactionId: merchantTransactionId,
-           // merchantTransactionId:"MUID" + Date.now(), 
+          //  merchantTransactionId: merchantTransactionId,
+            merchantTransactionId:"MUID" + Date.now(), 
             merchantUserId: req.body.merchantUserId,
             name: req.body.name,
             amount: req.body.amount * 100,
