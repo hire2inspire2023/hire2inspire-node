@@ -665,7 +665,7 @@ module.exports = {
                     
                       <p>Thank you again for your partnership.</p>
                     
-                      <p>Best regards</p>
+                      <p>Regards,</p>
                       <p>Hire2Inspire</p>
                     </body>
               `
@@ -704,7 +704,7 @@ module.exports = {
                       
                         <p>Thank you again for your partnership.</p>
                       
-                        <p>Best regards</p>
+                        <p>Regards,</p>
                         <p>Hire2Inspire</p>
                       </body>
                 `
