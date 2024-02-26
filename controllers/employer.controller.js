@@ -62,24 +62,92 @@ module.exports = {
       const checkAdmin = await Admin.findOne({ _id: userId })
       if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "User unauthorized." })
       const employerData = await Employer.findOne({ _id: req.params.id })
-      // const billingData = await Billing.findOne({employer:req.params.id})
+      const billingData = await Billing.find({ employer: req.params.id }).sort({ _id: -1 });
 
-      const employerSubscriptionData = await UserSubscription.findOne({ employer: req.params.id }).populate([
+      const transactionData = await Transaction.findOne({ employer: req.params.id }).populate([
+        {
+          path: "passbook_amt.candidate",
+          select: "fname lname agency",
+          populate: {
+            path: "agency",
+            select: " "
+          }
+        },
+        {
+          path: "passbook_amt.billing_id",
+          select: " ",
+          populate: {
+            path: "hire_id",
+            select: " ",
+            populate: {
+              path: "job",
+              select: "job_name job_id min_work_exp max_work_exp"
+            }
+          }
+        },
+        {
+          path: "proforma_passbook_amt.candidate",
+          select: "fname lname agency",
+          populate: {
+            path: "agency",
+            select: " "
+          }
+        },
+        {
+          path: "proforma_passbook_amt.billing_id",
+          select: " ",
+          populate: {
+            path: "hire_id",
+            select: " ",
+            populate: {
+              path: "job",
+              select: "job_name job_id min_work_exp max_work_exp"
+            }
+          }
+        }
+      ]);
+
+      const employerSubscriptionData = await UserSubscription.find({ employer: req.params.id }).populate([
         {
           path: "employer",
           select: ""
         },
         {
           path: "package",
+          select: " ",
+          populate: {
+            path: "package_type",
+            select: " "
+          }
+        }
+      ]).sort({ _id: -1 });
+
+      console.log("employerSubscriptionData", employerSubscriptionData);
+
+      const employerCreditData = await UserCredit.findOne({ employer: req.params.id }).populate([
+        {
+          path: "employer",
           select: ""
+        },
+        {
+          path: "package",
+          select: "",
+          populate: {
+            path: "package_type",
+            select: "name"
+          }
         }
       ]);
+
+
       res.status(200).send({
         error: false,
-        message: 'Employer detail',
+        message: 'Employer data',
         data: employerData,
-        employerSubscriptionData
-        // billingData
+        billingData,
+        transactionData,
+        employerSubscriptionData,
+        employerCreditData
       })
     } catch (error) {
       next(error)
@@ -1463,5 +1531,25 @@ module.exports = {
       next(error)
     }
   },
+
+  //   empdetail: async (req, res, next) => {
+  //   try {
+  //     let token = req.headers['authorization']?.split(" ")[1];
+  //     let { userId, dataModel } = await getUserViaToken(token)
+  //     const checkAdmin = await Admin.findOne({ _id: userId })
+  //     if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "User unauthorized." })
+  //     const employerData = await Employer.findOne({ _id: req.params.id })
+
+  //     res.status(200).send({
+  //       error: false,
+  //       message: 'Employer detail',
+  //       data: employerData,
+  //       employerSubscriptionData
+  //       // billingData
+  //     })
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // },
 }
 

@@ -10,13 +10,15 @@ const {
 const bcrypt = require('bcrypt')
 
 const JobPosting = require("../models/job_posting.model");
+const Agency = require("../models/agency.model");
 const Employer = require("../models/employer.model");
+const Candidate = require("../models/candidate.model");
+const CandidateJobModel = require("../models/candidate_job.model");
+const HiringDetail = require('../models/hiringDetails.model');
 const AgencyJobModel = require("../models/agency_job.model");
 const RecruiterModel = require("../models/recruiter.model");
-const Agency = require("../models/agency.model");
 const Transaction = require("../models/transaction.model");
 const AgencyTransaction = require('../models/agency_transaction.model');
-const HiringDetail = require('../models/hiringDetails.model');
 const nodemailer = require("nodemailer");
 const Billing = require('../models/billing.model')
 const sgMail = require('@sendgrid/mail');
@@ -287,6 +289,7 @@ module.exports = {
         })
 
 
+      //const agencydata = await Agency.find({"is_approved":true});
       const agencydata = await Agency.find({});
 
       let agencyEmails = agencydata.map(e => e.corporate_email.toString());
@@ -402,7 +405,7 @@ module.exports = {
       // }
       return res.status(400).send({
         error: false,
-        message: "Agency Status Update Successfully."
+        message: "Admin approval for agency updated."
       });
     } catch (error) {
       next(error)
@@ -640,4 +643,77 @@ module.exports = {
       next(error)
     }
   },
+
+  reportlist: async (req, res, next) => {
+    try {
+      const jobData = await JobPosting.find({ is_approved: true }).populate([
+        {
+          path: "employer",
+          select: " "
+        }
+      ]).sort({ _id: -1 });
+
+      let jobIds = jobData.map(e => e._id.toString());
+
+      //console.log({jobIds})
+
+      let agencydata = await AgencyJobModel.find({ job: { $in: jobIds } }).populate([
+        {
+          path: "agency",
+          select: ""
+        },
+        {
+          path: "job",
+          select: "job_name"
+        }
+      ]).select("agency job createdAt").sort({ _id: -1 });
+
+      // console.log({agencydata})
+
+      let candidatedata = await CandidateJobModel.find({ emp_job: { $in: jobIds } }).populate([
+        {
+          path: "candidate",
+          select: " ",
+          populate: {
+            path: "agency",
+            select: " "
+          }
+        },
+        {
+          path: "emp_job",
+          select: "job_name"
+
+        }
+      ]).select("candidate emp_job createdAt").sort({ _id: -1 });
+
+      let candidateIds = candidatedata.map(e => e.candidate?._id.toString());
+
+      // console.log({candidateIds})
+
+      let hiringData = await HiringDetail.find({ candidate: { $in: candidateIds } }).populate([
+        {
+          path: "employer",
+          sselect: ""
+        },
+        {
+          path: "job",
+          sselect: ""
+        },
+        {
+          path: "candidate",
+          sselect: ""
+        }
+      ]).sort({ _id: -1 })
+
+      return res.status(200).send({
+        error: false,
+        message: "Report update",
+        data: { jobData, agencydata, candidatedata, hiringData }
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+
 }
+
