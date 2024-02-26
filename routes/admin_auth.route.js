@@ -21,9 +21,9 @@ AdminAuthRouter.patch('/job-approval/:jobId', verifyAccessToken, AdminAuthContro
 
 AdminAuthRouter.patch('/agency-approval/:jobId', verifyAccessToken, AdminAuthController.agnecyApproval)
 
-AdminAuthRouter.patch("/payment-status",verifyAccessToken, AdminAuthController.paymentStatusUpdate);
+AdminAuthRouter.patch("/payment-status", verifyAccessToken, AdminAuthController.paymentStatusUpdate);
 
-AdminAuthRouter.patch("/agency-payment-status",verifyAccessToken, AdminAuthController.paymentAgencyStatusUpdate);
+AdminAuthRouter.patch("/agency-payment-status", verifyAccessToken, AdminAuthController.paymentAgencyStatusUpdate);
 
 AdminAuthRouter.post('/refresh-token', AdminAuthController.refreshToken);
 
@@ -31,6 +31,8 @@ AdminAuthRouter.delete('/logout', AdminAuthController.logout);
 
 AdminAuthRouter.patch('/update/:adminId', AdminAuthController.adminUpdate);
 
-AdminAuthRouter.get('/dashboard',verifyAccessToken, AdminAuthController.dashboard)
+AdminAuthRouter.get('/dashboard', verifyAccessToken, AdminAuthController.dashboard);
+
+AdminAuthRouter.get('/report', AdminAuthController.reportlist)
 
 module.exports = AdminAuthRouter
