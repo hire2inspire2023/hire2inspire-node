@@ -108,7 +108,7 @@ module.exports = {
         <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
         <p>If you have any questions or need assistance, feel free to contact our support team at info@hire2inspire.com</p>
         <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-        <p>Thank you and Regards,</p>
+        <p>Thank you and best regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -131,7 +131,7 @@ module.exports = {
 
       sgMail.setApiKey(process.env.SENDGRID)
       const new_msg = {
-        to: "admin@hire2inspire.com", // Change to your recipient
+        to: "hire2inspireh2i@gmail.com", // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
         subject: `New Agency Registration`,
         html: `
@@ -154,7 +154,7 @@ module.exports = {
       <p>If you have any questions or need further information, feel free to contact the administration department at info@hire2inspire.com.</p>
 
      
-      <p>Regards,<br>
+      <p>Best regards,<br>
       Hire2Ispire Team</p>
     </body>
       `
@@ -196,7 +196,7 @@ module.exports = {
         <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
   
         <p>Please click on the following link to verify your email:</p>
-        <a href="https://hire2inspire.com/agencyVerify/${user_id}/${token_id}">Click Here to Verify Email</a>
+        <a href="${process.env.front_url}/agencyVerify/${user_id}/${token_id}">Click Here to Verify Email</a>
 
         <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
         <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
@@ -204,7 +204,7 @@ module.exports = {
         <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
         <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-        <p>Thank you and Regards,</p>
+        <p>Thank you and best regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -355,12 +355,13 @@ module.exports = {
   login: async (req, res, next) => {
     try {
       const result = await agencyLoginSchema.validateAsync(req.body)
+      // console.log({result});
       const AgencyData = await Agency.findOne({ corporate_email: result.email })
       if (!AgencyData) throw createError.NotFound('Agency not registered')
 
       if (AgencyData?.verified == false) throw createError.NotFound('Your Email is not yet verified');
 
-      if (AgencyData?.is_loggedIn == true) throw createError.NotFound('You are already logged In');
+      if (AgencyData?.is_loggedIn == true) return res.status(401).send({ error: true, message: "you are already logged In", systemData: AgencyData?.system, browserType: AgencyData?.browser_type, loginTime: AgencyData?.login_time })
 
       const isMatch = await AgencyData.isValidPassword(result.password)
       if (!isMatch)
@@ -372,7 +373,8 @@ module.exports = {
       AgencyData.password = undefined;
       AgencyData.otp = undefined;
 
-      let updatedAgency = await Agency.findOneAndUpdate({ _id: AgencyData.id }, { "is_loggedIn": true }, { new: true });
+
+      let updatedAgency = await Agency.findOneAndUpdate({ _id: AgencyData.id }, { "is_loggedIn": true, "system": result.system, "browser_type": result.browser_type, "login_time": result.login_time }, { new: true });
 
       res.status(200).send({
         error: false,
@@ -484,7 +486,7 @@ module.exports = {
         <p>Please enter this OTP on the verification page to confirm your account.</p>
         <p>If you did not request this OTP or need any assistance, please don't hesitate to contact our support team at info@hire2inspire.com .</p>
         <p>Thank you for your cooperation.</p>
-        <p>Regards,<br>
+        <p>Best regards,<br>
         Hire2Inspire</p>
       </body>
 `
@@ -659,5 +661,21 @@ module.exports = {
       next(error)
     }
   },
+
+  updateLogout: async (req, res, next) => {
+    try {
+
+      let agencyData = await Agency.findOneAndUpdate({ corporate_email: req.body.corporate_email }, { "is_loggedIn": false }, { new: true });
+      let agencyId = agencyData?._id;
+
+      return res.status(200).send({
+        error: false,
+        message: "Agency logout.",
+        data: agencyData
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 

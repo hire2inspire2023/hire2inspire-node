@@ -41,4 +41,6 @@ AgencyRouter.patch('/verify-email/:userId', AgencyController.verifyEmail)
 
 AgencyRouter.get('/logout', verifyAccessToken, AgencyController.logout)
 
+AgencyRouter.patch('/update-logout', AgencyController.updateLogout)
+
 module.exports = AgencyRouter

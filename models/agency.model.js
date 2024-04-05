@@ -188,6 +188,16 @@ const AgencySchema = new Schema(
                 message: "only 0/1 allowed."
             }
         },
+        system: {
+            type: String
+        },
+        browser_type: {
+            type: String
+        },
+        login_time: {
+            type: String
+        }
+
     },
     { timestamps: true }
 );
