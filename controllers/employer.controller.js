@@ -211,7 +211,7 @@ module.exports = {
       //     <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
 
       //     <p>Please click on the following link to verify your email:</p>
-      //     <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
+      //     <a href="${process.env.front_url}/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
 
       //     <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
       //     <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
@@ -219,7 +219,7 @@ module.exports = {
       //     <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
       //     <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-      //     <p>Thank you and Regards,</p>
+      //     <p>Thank you and best regards,</p>
       //     <p> Hire2Inspire </p>
       // </body>`
       //   }
@@ -260,7 +260,7 @@ module.exports = {
       //         <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
       //         <p>If you have any questions or need assistance, feel free to contact our support team at info@hire2inspire.com</p>
       //         <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-      //         <p>Thank you and Regards,</p>
+      //         <p>Thank you and best regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `
@@ -283,6 +283,7 @@ module.exports = {
       let adminName = AdminData?.name;
 
       sgMail.setApiKey(process.env.SENDGRID)
+      console.log("keyyyyy", process.env.SENDGRID)
       const new_msg = {
         to: "hire2inspireh2i@gmail.com", // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
@@ -302,7 +303,7 @@ module.exports = {
         <li><strong>Email:</strong> ${empEmail}</li>
       </ul>
        <p>Please review the details and ensure that the necessary onboarding procedures are initiated for the new employer.</p>
-      <p>Regards,<br>
+      <p>Best regards,<br>
       Hire2Ispire Team</p>
     </body>
       `
@@ -331,7 +332,7 @@ module.exports = {
               <p>Thank you for choosing Hire2Inspire - the platform that connects talented job seekers with employers like you!</p>
               <p>If you have any questions or need assistance, feel free to contact our support team at info@hire2inspire.com</p>
               <p>We look forward to helping you find the perfect candidates for your job openings!</p>
-              <p>Thank you and Regards,</p>
+              <p>Thank you and best regards,</p>
               <p> Hire2Inspire </p>
           </body>
       `
@@ -363,7 +364,7 @@ module.exports = {
       //         <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
 
       //         <p>Please click on the following link to verify your email:</p>
-      //         <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
+      //         <a href="${process.env.front_url}/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
 
       //         <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
       //         <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
@@ -371,7 +372,7 @@ module.exports = {
       //         <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
       //         <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-      //         <p>Thank you and Regards,</p>
+      //         <p>Thank you and best regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `
@@ -401,7 +402,7 @@ module.exports = {
           <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
 
           <p>Please click on the following link to verify your email:</p>
-          <a href="https://hire2inspire.com/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
+          <a href="${process.env.front_url}/verify/${user_id}/${token_id}">Click Here to Verify Email</a>
 
           <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
           <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
@@ -409,7 +410,7 @@ module.exports = {
           <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
           <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
-          <p>Thank you and Regards,</p>
+          <p>Thank you and best regards,</p>
           <p> Hire2Inspire </p>
       </body>`
       }
@@ -699,7 +700,7 @@ module.exports = {
         <p>Please enter this OTP on the verification page to confirm your account.</p>
         <p>If you did not request this OTP or need any assistance, please don't hesitate to contact our support team at info@hire2inspire.com .</p>
         <p>Thank you for your cooperation.</p>
-        <p>Regards,<br>
+        <p>Best regards,<br>
         Hire2Inspire</p>
       </body>
 `
@@ -893,9 +894,9 @@ module.exports = {
           let currentYearNext = currentYear + 1;
           if (currentMonth > 3 && currentYear != 23) {
             if (currentYear != yearPart.split('-')[0]) {
-              return `H2I/${currentYear}-${currentYearNext}-01`
+              return `H2I/${type}/${currentYear}-${currentYearNext}-01`
             } else {
-              return `H2I/${currentYear}-${currentYearNext}-${(parseInt(numberPart, 10) + 1).toString().padStart(2, '0')}`
+              return `H2I/${type}/${currentYear}-${currentYearNext}-${(parseInt(numberPart, 10) + 1).toString().padStart(2, '0')}`
             }
 
           }
@@ -906,6 +907,9 @@ module.exports = {
 
         }
       }
+
+
+
 
       const generateNextproformaInvoice = (prevInv, type) => {
 
@@ -920,9 +924,9 @@ module.exports = {
           let currentYearNext = currentYear + 1;
           if (currentMonth > 3 && currentYear != 23) {
             if (currentYear != yearPart.split('-')[0]) {
-              return `H2I/${currentYear}-${currentYearNext}-01`
+              return `H2I/${type}/PI/${currentYear}-${currentYearNext}-01`
             } else {
-              return `H2I/${currentYear}-${currentYearNext}-${(parseInt(numberPart, 10) + 1).toString().padStart(2, '0')}`
+              return `H2I/${type}/PI/${currentYear}-${currentYearNext}-${(parseInt(numberPart, 10) + 1).toString().padStart(2, '0')}`
             }
 
           }
@@ -1407,7 +1411,7 @@ module.exports = {
     
         <p>Thank you for choosing us as your recruitment partner.</p>
     
-        <p>Regards,</p>
+        <p>Best regards,</p>
         <p>Hire2Inspire</p>
     </body>
         `

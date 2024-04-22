@@ -27,7 +27,7 @@ module.exports = {
             let getName = getData?.name;
             let getEmail = getData?.emailId;
             let getSubject = getData?.subject;
-            let getQuery = getData?.query
+            let getQuery = getData?.query;
 
 
             //     var mailOptions = {
@@ -38,7 +38,7 @@ module.exports = {
             //     <body>
             //         <p>Dear Hire2Inspire,</p>
             //         <p>${getQuery}</p>
-            //         <p>Thank you and Regards,</p>
+            //         <p>Thank you and best regards,</p>
             //         <p> ${getName} </p>
             //     </body>
             // `
@@ -55,11 +55,12 @@ module.exports = {
 
             sgMail.setApiKey(process.env.SENDGRID)
             const new_msg = {
-                to: 'admin@hire2inspire.com', // Change to your recipient
+                to: 'hire2inspireh2i@gmail.com', // Change to your recipient
                 from: 'info@hire2inspire.com', // Change to your verified sender
                 subject: "User Query",
                 html: `
             <head>
+            
                 <title>Notification:User Query</title>
             </head>
             <body>
@@ -81,7 +82,7 @@ module.exports = {
 
                     <p>Thank you for your prompt attention to this matter.</p>
 
-                    <p>Regards,</p>
+                    <p>Best regards,</p>
                     <p>${getName}<br>
                 </body>         
                 `
@@ -98,7 +99,7 @@ module.exports = {
 
             return res.status(200).send({
                 error: false,
-                message: "Thank you for submit your query",
+                message: "We will respond in 2 business days",
                 data: result
             })
         } catch (error) {
@@ -106,3 +107,4 @@ module.exports = {
         }
     },
 }
+
