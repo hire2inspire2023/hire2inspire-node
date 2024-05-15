@@ -424,13 +424,11 @@ module.exports = {
           <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
           <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
 
-          <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
-
           <p>Thank you for choosing Hire2Inspire.If you have any questions or need further assistance, you can reach out to us at info@hire2inspire.com.</p>
-          <p>Plus if you did not sign up for an account with hire2Inspire, you can report this to us at info@hire2inspire.com. 
-It should not be ignore this mail.</p>
-          <p>Thank you and best regards,</p>
-          <p> Hire2Inspire </p>
+          <p>If you did not sign up for an account with hire2Inspire, you can report this to us at info@hire2inspire.com.</p> 
+<p>It should not be ignore this mail.</p>
+ <p>Thank you and best regards,</p>
+        <p> Hire2Inspire </p>
       </body>`,
       };
 
@@ -787,12 +785,10 @@ It should not be ignore this mail.</p>
         $and: [{ email: req.body.email }, { otp: req.body.otp }],
       });
       if (!EmployerData)
-        return res
-          .status(404)
-          .send({
-            error: true,
-            message: "Employer not found / OTP not correct",
-          });
+        return res.status(404).send({
+          error: true,
+          message: "Employer not found / OTP not correct",
+        });
 
       return res
         .status(200)
