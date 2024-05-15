@@ -389,6 +389,8 @@ module.exports = {
       //const sgMail = require('@sendgrid/mail')
       sgMail.setApiKey(process.env.SENDGRID)
 
+      console.log(process.env.front_url)
+
       let msg2 = {
         to: empEmail, // Change to your recipient
         from: 'info@hire2inspire.com', // Change to your verified sender
