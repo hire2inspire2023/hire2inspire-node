@@ -185,7 +185,7 @@ module.exports = {
       sgMail.setApiKey(process.env.SENDGRID)
       const msg = {
         to: agencyEmail, // Change to your recipient
-        from: 'info@hire2inspire.com',
+        from: "info@hire2inspire.com",
         subject: `Agency Email Verify`,
         html: `
         <head>
@@ -203,12 +203,14 @@ module.exports = {
 
         <p>If you did not sign up for an account with Hire2Inspire, please ignore this email.</p>
 
-        <p>Thank you for choosing Hire2Inspire. If you have any questions or need further assistance,
+         <p>Thank you for choosing Hire2Inspire.If you have any questions or need further assistance, you can reach out to us at info@hire2inspire.com.</p>
+          <p>Plus if you did not sign up for an account with hire2Inspire, you can report this to us at info@hire2inspire.com. 
+It should not be ignore this mail.</p>
         <p>Thank you and best regards,</p>
         <p> Hire2Inspire </p>
     </body>
-`
-      }
+`,
+      };
 
       sgMail
         .send(msg)
