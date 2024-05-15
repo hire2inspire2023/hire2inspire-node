@@ -43,4 +43,6 @@ AgencyRouter.get('/logout', verifyAccessToken, AgencyController.logout)
 
 AgencyRouter.patch('/update-logout', AgencyController.updateLogout)
 
+AgencyRouter.post("/resend-email", AgencyController.resendEmail);
+
 module.exports = AgencyRouter

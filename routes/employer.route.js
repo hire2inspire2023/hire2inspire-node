@@ -35,5 +35,7 @@ EmployerRouter.get('/dashboard', verifyAccessToken, EmployerController.dashboard
 
 EmployerRouter.patch('/verify-email/:userId', EmployerController.verifyEmail)
 
+EmployerRouter.post("/resend-email", EmployerController.resendEmail);
+
 
 module.exports = EmployerRouter

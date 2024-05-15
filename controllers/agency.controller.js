@@ -408,15 +408,13 @@ module.exports = {
         throw createError.NotFound("Your Email is not yet verified");
 
       if (AgencyData?.is_loggedIn == true)
-        return res
-          .status(401)
-          .send({
-            error: true,
-            message: "you are already logged In",
-            systemData: AgencyData?.system,
-            browserType: AgencyData?.browser_type,
-            loginTime: AgencyData?.login_time,
-          });
+        return res.status(401).send({
+          error: true,
+          message: "you are already logged In",
+          systemData: AgencyData?.system,
+          browserType: AgencyData?.browser_type,
+          loginTime: AgencyData?.login_time,
+        });
 
       const isMatch = await AgencyData.isValidPassword(result.password);
       if (!isMatch) throw createError.BadRequest("Password not valid");
@@ -781,4 +779,76 @@ module.exports = {
       next(error);
     }
   },
+
+  resendEmail: async (req, res, next) => {
+    try {
+      const agencyDet = await Agency.findOne({
+        corporate_email: req.body.corporate_email,
+      });
+
+      console.log(agencyDet);
+      if (agencyDet === null) {
+        // No employer found with the provided email address
+        return res.status(404).json({
+          error: true,
+          message: `${req.body.corporate_email} is not registered.`,
+        });
+      }
+
+      const agencyEmail = agencyDet?.corporate_email;
+      const agencyName = agencyDet?.name;
+      const agencyId = agencyDet?._id;
+
+      const tokenData = await Token.findOne({ user_id: agencyId });
+
+      const token_id = tokenData?.token;
+
+      sgMail.setApiKey(process.env.SENDGRID);
+      const msg = {
+        to: agencyEmail, // Change to your recipient
+        from: "info@hire2inspire.com",
+        subject: `Agency Email Verify`,
+        html: `
+        <head>
+            <title>Welcome to Hire2Inspire</title>
+        </head>
+    <body>
+        <p>Dear ${agencyName},</p>
+        <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
+  
+        <p>Please click on the following link to verify your email:</p>
+        <a href="${process.env.front_url}/agencyVerify/${agencyId}/${token_id}">Click Here to Verify Email</a>
+
+        <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
+        <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
+
+        <p>Thank you for choosing Hire2Inspire.If you have any questions or need further assistance, you can reach out to us at info@hire2inspire.com.</p>
+          <p>If you did not sign up for an account with hire2Inspire, you can report this to us at info@hire2inspire.com.</p> 
+<p>It should not be ignore this mail.</p>
+ <p>Thank you and best regards,</p>
+        <p> Hire2Inspire </p>
+    </body>
+`,
+      };
+
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log("Email sent");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
+      res.status(201).send({
+        error: false,
+        message: "Resend Verify mail",
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
+
+
+ 

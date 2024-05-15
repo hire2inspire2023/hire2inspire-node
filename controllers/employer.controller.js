@@ -1639,6 +1639,76 @@ module.exports = {
     }
   },
 
+   resendEmail: async (req, res, next) => {
+    try {
+      console.log(req.body.email);
+      const empDet = await Employer.findOne({ email: req.body.email });
+
+      console.log(empDet);
+
+      if (empDet === null) {
+        // No employer found with the provided email address
+        return res.status(404).json({
+          error: true,
+          message: `${req.body.email} is not registered.`,
+        });
+      }
+
+      const empEmail = empDet?.email;
+      const empFname = empDet?.fname;
+      const empLname = empDet?.lname;
+      const empId = empDet?._id;
+
+      const tokenData = await Token.findOne({ user_id: empId });
+
+      const token_id = tokenData?.token;
+
+      sgMail.setApiKey(process.env.SENDGRID);
+
+      let msg2 = {
+        to: empEmail, // Change to your recipient
+        from: "info@hire2inspire.com", // Change to your verified sender
+        subject: `Employer Email Verify`,
+        html: `
+          <head>
+              <title>Welcome to Hire2Inspire</title>
+          </head>
+      <body>
+          <p>Dear ${empFname} ${empLname},</p>
+          <p>Thank you for signing up with Hire2Inspire. To complete the registration process and ensure the security of your account, we need to verify your email address.</p>
+
+          <p>Please click on the following link to verify your email:</p>
+          <a href="${process.env.front_url}/verify/${empId}/${token_id}">Click Here to Verify Email</a>
+
+          <p>If the link above does not work, copy and paste the following URL into your browser's address bar:</p>
+          <p>Note: This verification link is valid for the next 24 hours. After this period, you will need to request a new verification email.</p>
+
+          <p>Thank you for choosing Hire2Inspire.If you have any questions or need further assistance, you can reach out to us at info@hire2inspire.com.</p>
+          <p>If you did not sign up for an account with hire2Inspire, you can report this to us at info@hire2inspire.com.</p> 
+<p>It should not be ignore this mail.</p>
+ <p>Thank you and best regards,</p>
+        <p> Hire2Inspire </p>
+      </body>`,
+      };
+      sgMail
+        .send(msg2)
+        .then(() => {
+          console.log("Email sent");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
+      res.status(201).send({
+        error: false,
+        message: "Resend Verify mail",
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+
   //   empdetail: async (req, res, next) => {
   //   try {
   //     let token = req.headers['authorization']?.split(" ")[1];
