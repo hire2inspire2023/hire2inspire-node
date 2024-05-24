@@ -71,11 +71,11 @@ update: async (req, res, next) => {
     try {
         const job_data = await DraftJob.findOneAndUpdate({_id:req.params.id},req.body,{new:true});
 
-        if(!job_data) return res.status(200).send({ error: false, message: "Draft job not updated" })
+        if(!job_data) return res.status(200).send({ error: false, message: "Draft job not saved" })
 
         return res.status(200).send({
             error: false,
-            message: "Draft job update",
+            message: "Draft job saved",
             data: job_data
         })
     } catch (error) {
