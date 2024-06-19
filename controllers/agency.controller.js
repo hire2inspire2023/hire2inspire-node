@@ -397,8 +397,9 @@ module.exports = {
 
   login: async (req, res, next) => {
     try {
+      console.log(":Hiiii");
       const result = await agencyLoginSchema.validateAsync(req.body);
-      // console.log({result});
+      console.log({ result });
       const AgencyData = await Agency.findOne({
         corporate_email: result.email,
       });
@@ -447,6 +448,7 @@ module.exports = {
         updatedAgency,
       });
     } catch (error) {
+      console.log("error", error);
       if (error.isJoi === true)
         return next(createError.BadRequest("Invalid Email/Password"));
       next(error);
@@ -849,6 +851,3 @@ module.exports = {
     }
   },
 };
-
-
- 

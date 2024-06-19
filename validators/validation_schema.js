@@ -1,4 +1,4 @@
-const Joi = require('joi')
+const Joi = require("joi");
 
 /**
  * Admin auth schema
@@ -6,25 +6,27 @@ const Joi = require('joi')
 const adminLoginSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   password: Joi.string().min(2).trim().required(),
-})
+});
 
 const adminRegistartionSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `Password should be a type of string`,
       "string.empty": `Password must contain value`,
       "string.pattern.base": `Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `Password is a required field`
+      "any.required": `Password is a required field`,
     }),
   confirm_password: Joi.string().min(6).trim().required(),
-  type: Joi.string()
-    .valid(1, 2)
-    .required()
-})
+  type: Joi.string().valid(1, 2).required(),
+});
 
 /**
  * Employer validation schema
@@ -47,48 +49,61 @@ const employerRegistrationAuthSchema = Joi.object({
   linkedin_url: Joi.string().trim(),
   company_website_url: Joi.string().trim(),
   comp_name: Joi.string().trim(),
+  // comp_gst: Joi.string().trim(),
   password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `Password should be a type of string`,
       "string.empty": `Password must contain value`,
       "string.pattern.base": `Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `Password is a required field`
+      "any.required": `Password is a required field`,
     }),
   terms_condition_check: Joi.string(),
   confirm_password: Joi.string().min(6).trim().required(),
-  employer_image: Joi.string().allow('')
-})
+  employer_image: Joi.string().allow(""),
+});
 
 const employerLoginSchema = Joi.object({
   email: Joi.string().email().trim().required(),
-  password: Joi.string().min(6).trim().required()
-})
+  password: Joi.string().min(6).trim().required(),
+});
 
 const employerChangePasswordSchema = Joi.object({
   old_password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `Old Password should be a type of string`,
       "string.empty": `Old Password must contain value`,
       "string.pattern.base": `Old Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `Old Password is a required field`
+      "any.required": `Old Password is a required field`,
     }),
   new_password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `New Password should be a type of string`,
       "string.empty": `New Password must contain value`,
       "string.pattern.base": `New Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `New Password is a required field`
-    })
-})
+      "any.required": `New Password is a required field`,
+    }),
+});
 
 /**
  * Agency validation schema
@@ -99,74 +114,97 @@ const agencyRegistrationAuthSchema = Joi.object({
   agency_estd_year: Joi.string().trim().required(),
   type: Joi.string().trim(),
   password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `Password should be a type of string`,
       "string.empty": `Password must contain value`,
       "string.pattern.base": `Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `Password is a required field`
+      "any.required": `Password is a required field`,
     }),
   confirm_password: Joi.string().min(6).trim().required(),
-  terms_condition_check: Joi.string()
-})
+  terms_condition_check: Joi.string(),
+});
 
 const agencyLoginSchema = Joi.object({
   email: Joi.string().email().trim().required(),
-  password: Joi.string().min(6).trim().required()
-})
+  password: Joi.string().min(6).trim().required(),
+  system: Joi.string(),
+  browser_type: Joi.string(),
+  login_time: Joi.string(),
+});
 
 const agencyChangePasswordSchema = Joi.object({
   old_password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `Old Password should be a type of string`,
       "string.empty": `Old Password must contain value`,
       "string.pattern.base": `Old Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `Old Password is a required field`
+      "any.required": `Old Password is a required field`,
     }),
   new_password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `New Password should be a type of string`,
       "string.empty": `New Password must contain value`,
       "string.pattern.base": `New Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `New Password is a required field`
-    })
-})
+      "any.required": `New Password is a required field`,
+    }),
+});
 
 const recruiterLoginSchema = Joi.object({
   email: Joi.string().email().trim().required(),
-  password: Joi.string().min(6).trim().required()
-})
+  password: Joi.string().min(6).trim().required(),
+});
 
 const recruiterChangePasswordSchema = Joi.object({
   old_password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `Old Password should be a type of string`,
       "string.empty": `Old Password must contain value`,
       "string.pattern.base": `Old Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `Old Password is a required field`
+      "any.required": `Old Password is a required field`,
     }),
   new_password: Joi.string()
-    .regex(RegExp(/(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/))
+    .regex(
+      RegExp(
+        /(?=.*)(?=.*[!@#$%+_^&*(){}])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}/
+      )
+    )
     .trim()
     .required()
     .messages({
       "string.base": `New Password should be a type of string`,
       "string.empty": `New Password must contain value`,
       "string.pattern.base": `New Password must contains 8 characters with 1 lowercase, 1 uppercase, 1 digit, 1 special character`,
-      "any.required": `New Password is a required field`
-    })
-})
+      "any.required": `New Password is a required field`,
+    }),
+});
 
 module.exports = {
   adminLoginSchema,
@@ -178,5 +216,5 @@ module.exports = {
   agencyLoginSchema,
   agencyChangePasswordSchema,
   recruiterLoginSchema,
-  recruiterChangePasswordSchema
-}
+  recruiterChangePasswordSchema,
+};
