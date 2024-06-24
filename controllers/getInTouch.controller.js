@@ -55,18 +55,18 @@ module.exports = {
 
             sgMail.setApiKey(process.env.SENDGRID)
             const new_msg = {
-                // to: 'hire2inspireh2i@gmail.com', // Change to your recipient
-                to: 'info@hire2inspire.com',
-                from: 'info@hire2inspire.com', // Change to your verified sender
-                subject: "User Query",
-                html: `
+              // to: 'hire2inspireh2i@gmail.com', // Change to your recipient
+              to: "info@hire2inspire.com",
+              from: "info@hire2inspire.com", // Change to your verified sender
+              subject: "User Query",
+              html: `
             <head>
             
                 <title>Notification:User Query</title>
             </head>
             <body>
 
-                    <p>Dear Admin,</p>
+                    <p>Dear Hire2inspire,</p>
 
                     <p>I hope this email finds you well. I recently received a user query that requires your attention and expertise. Below are the details of the query:</p>
 
@@ -86,8 +86,8 @@ module.exports = {
                     <p>Best regards,</p>
                     <p>${getName}<br>
                 </body>         
-                `
-            }
+                `,
+            };
             sgMail
                 .sendMultiple(new_msg)
                 .then(() => {
@@ -160,6 +160,6 @@ module.exports = {
     //     } catch (error) {
     //       next(error);
     //     }
-     }
+    //  }
 }
 
