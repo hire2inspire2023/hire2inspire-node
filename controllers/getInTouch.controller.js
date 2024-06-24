@@ -73,7 +73,7 @@ module.exports = {
 
                     <p>I hope this email finds you well. I recently received a user query that requires your attention and expertise. Below are the details of the query:</p>
 
-                    <h4>Form : ${getEmail}</h6>
+                    <h4>From : ${getEmail}</h6>
                     <h4>Subject : ${getSubject}</h6>
                     <h5>Query :</h5>
                     <p>${getQuery}</p>
