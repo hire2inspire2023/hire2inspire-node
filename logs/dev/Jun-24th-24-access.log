@@ -1,0 +1,1 @@
+[Mon, 24 Jun 2024 07:42:22 GMT] - ::ffff:127.0.0.1 - - "POST /api/get-in-touch/testmail HTTP/1.1" code - 200 62 "-" "Thunder Client (https://www.thunderclient.com)" request {} response {"error":false,"message":"We will respond in 2 business days"}

@@ -106,5 +106,57 @@ module.exports = {
             next(error)
         }
     },
+
+     testmail : async(req,res,next) =>{
+        try {
+          sgMail.setApiKey(process.env.SENDGRID);
+          console.log("calling......................")
+          const new_msg = {
+            to: "info@hire2inspire.com", // Change to your recipient
+            from: "subhra.onenesstechs@gmail.com", // Change to your verified sender
+            subject: "User Query",
+            html: `
+            <head>
+            
+                <title>Notification:User Query</title>
+            </head>
+            <body>
+
+                    <p>Dear Admin,</p>
+
+                    <p>I hope this email finds you well. I recently received a user query that requires your attention and expertise. Below are the details of the query:</p>
+
+                    
+
+
+                    <p>I have attempted to address the user's concerns to the best of my ability, but I believe your input and guidance would be valuable in resolving this matter efficiently.</p>
+
+                    <p>Please let me know when you have the opportunity to review this query, and if there's any specific information you require from me.</p>
+
+                    <p>Thank you for your prompt attention to this matter.</p>
+
+                    <p>Best regards,</p>
+                    
+                </body>         
+                `,
+          };
+          sgMail
+            .sendMultiple(new_msg)
+            .then(() => {
+              console.log("Email sent");
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+
+          return res.status(200).send({
+            error: false,
+            message: "We will respond in 2 business days",
+            // data: result,
+          });
+        } catch (error) {
+          next(error);
+        }
+     }
 }
 

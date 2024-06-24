@@ -1,0 +1,3 @@
+[Mon, 24 Jun 2024 07:40:53 GMT] - ::ffff:127.0.0.1 - - "POST /api/get-in-touch/testmail HTTP/1.1" code - 500 62 "-" "Thunder Client (https://www.thunderclient.com)" request {} response {"error":true,"status":500,"message":"getName is not defined"}
+[Mon, 24 Jun 2024 07:41:19 GMT] - ::ffff:127.0.0.1 - - "POST /api/get-in-touch/testmail HTTP/1.1" code - 500 61 "-" "Thunder Client (https://www.thunderclient.com)" request {} response {"error":true,"status":500,"message":"result is not defined"}
+[Mon, 24 Jun 2024 07:41:21 GMT] - ::ffff:127.0.0.1 - - "POST /api/get-in-touch/testmail HTTP/1.1" code - 500 61 "-" "Thunder Client (https://www.thunderclient.com)" request {} response {"error":true,"status":500,"message":"result is not defined"}
