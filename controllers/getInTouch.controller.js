@@ -114,7 +114,7 @@ module.exports = {
           const new_msg = {
             // to: "info@hire2inspire.com", // Change to your recipient
             // from: "subhra.onenesstechs@gmail.com", // Change to your verified sender
-            to: "subhra.onenesstechs@gmail.com", // Change to your recipient
+            to: "info@hire2inspire.com", // Change to your recipient
             from: "info@hire2inspire.com", // Change to your verified sender
             subject: "User Query",
             html: `
