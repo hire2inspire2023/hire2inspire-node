@@ -75,10 +75,10 @@ module.exports = {
 
                     <h4>From : ${getEmail}</h6>
                     <h4>Subject : ${getSubject}</h6>
-                    <h5>Query :</h5>
+                    <h4>Query :</h5>
                     <p>${getQuery}</p>
                     <p>Best regards,</p>
-                    <h5>${getName}<h5><br>
+                    <h4>${getName}<h5><br>
                 </body>         
                 `,
             };
