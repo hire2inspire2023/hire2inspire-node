@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-const NotificationSchema = mongoose.Schema({
+const adminNotificationSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'users'
+        ref: 'admins'
     },
     title: {
         type: String,
@@ -16,10 +16,10 @@ const NotificationSchema = mongoose.Schema({
     type:{
         type:String
     },
-    agency:{
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'agencies'
-    },
+    // agency:{
+    //     type: mongoose.Schema.Types.ObjectId, 
+    //     ref: 'agencies'
+    // },
     seen:{
         type: Boolean,
         default: false
@@ -32,4 +32,4 @@ const NotificationSchema = mongoose.Schema({
 
 
 
-module.exports = mongoose.model("notifications", NotificationSchema);
+module.exports = mongoose.model("adminnotifications", adminNotificationSchema);

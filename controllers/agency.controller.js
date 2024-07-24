@@ -397,9 +397,8 @@ module.exports = {
 
   login: async (req, res, next) => {
     try {
-      console.log(":Hiiii");
       const result = await agencyLoginSchema.validateAsync(req.body);
-      console.log({ result });
+      // console.log({result});
       const AgencyData = await Agency.findOne({
         corporate_email: result.email,
       });
@@ -448,7 +447,6 @@ module.exports = {
         updatedAgency,
       });
     } catch (error) {
-      console.log("error", error);
       if (error.isJoi === true)
         return next(createError.BadRequest("Invalid Email/Password"));
       next(error);
@@ -846,6 +844,29 @@ module.exports = {
         error: false,
         message: "Resend Verify mail",
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  agencydelete: async (req, res, next) => {
+    try {
+      const result = await Agency.deleteOne({
+        _id: req.params.agId,
+      });
+      if (result.deletedCount == 1) {
+        message = {
+          error: false,
+          message: "Agency deleted successfully!",
+        };
+        res.status(200).send(message);
+      } else {
+        message = {
+          error: true,
+          message: "Operation failed!",
+        };
+        res.status(500).send(message);
+      }
     } catch (error) {
       next(error);
     }

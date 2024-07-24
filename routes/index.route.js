@@ -23,7 +23,8 @@ const CreditNoteRouter = require('./creditnote.route');
 const DraftJobRouter = require('./draftJob.route');
 const GetInTouchRouter = require('./getInTouch.route');
 const PhonePayrouter = require('./phonePay.route');
-
+const LogoRouter = require('./logo.route');
+const AdminNotificationRouter = require('./adminNotification.route');
 
 
 router.use("/admin", AdminAuthRouter);
@@ -48,6 +49,8 @@ router.use("/credit-note", CreditNoteRouter);
 router.use("/draft-job", DraftJobRouter);
 router.use("/get-in-touch", GetInTouchRouter);
 router.use("/phone-pay", PhonePayrouter);
+router.use("/logo", LogoRouter);
+router.use("/admin-notification", AdminNotificationRouter);
 
 
 module.exports = router;

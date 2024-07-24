@@ -5,20 +5,20 @@ const bcrypt = require("bcrypt");
 
 const RecruiterSchema = new Schema(
 	{
-		agency: {
-			type: ObjectId,
-			ref: 'agencies'
-		},
+        agency: {
+            type: ObjectId,
+            ref: 'agencies'
+        },
 		employer: {
-			type: ObjectId,
-			ref: 'employers'
-		},
-		fname: {
-			type: String
-		},
-		lname: {
-			type: String
-		},
+            type: ObjectId,
+            ref: 'employers'
+        },
+        fname: {
+            type: String
+        },
+        lname: {
+            type: String
+        },
 		email: {
 			type: String,
 			required: true,
@@ -31,9 +31,9 @@ const RecruiterSchema = new Schema(
 				}
 			},
 		},
-		phone: {
-			type: String
-		},
+        phone: {
+            type: String
+        },
 		password: {
 			type: String,
 			required: true,
@@ -51,7 +51,7 @@ const RecruiterSchema = new Schema(
 		invitation_status: {
 			type: String,
 			enum: {
-				values: [0, 1, 2],
+				values: [0,1,2],
 				message: "only 0:(invited)/1:(accepted)/3:(login) allowed."
 			},
 			default: 0,
@@ -63,10 +63,10 @@ const RecruiterSchema = new Schema(
 		token: {
 			type: String
 		},
-		is_loggedIn: {
-			type: Boolean,
-			default: false
-		},
+		is_loggedIn:{
+            type:Boolean,
+            default:false
+        },
 	},
 	{ timestamps: true }
 );

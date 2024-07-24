@@ -1,237 +1,264 @@
 const mongoose = require("mongoose");
 const UserSubscription = require("../models/user_subscription.model");
-const UserCredit = require('../models/user_credit.model');
+const UserCredit = require("../models/user_credit.model");
 const Package = require("../models/package.model");
 const PackageType = require("../models/package_type.model");
 const path = require("path");
 const fs = require("fs");
-const { generateInvoicePdf } = require('../utils/pdf-generator');
-const moment = require('moment-timezone');
+const { generateInvoicePdf } = require("../utils/pdf-generator");
+const moment = require("moment-timezone");
 const nodemailer = require("nodemailer");
-const sgMail = require('@sendgrid/mail');
+const sgMail = require("@sendgrid/mail");
 
 module.exports = {
-    listbyId: async (req, res, next) => {
-        try {
-            const subscription_data = await UserSubscription.find({ employer: req.params.id }).populate([
-                {
-                    path: "employer",
-                    select: ""
-                },
-                {
-                    path: "package",
-                    select: ""
-                }
-            ]);
+  listbyId: async (req, res, next) => {
+    try {
+      const subscription_data = await UserSubscription.find({
+        employer: req.params.id,
+      }).populate([
+        {
+          path: "employer",
+          select: "",
+        },
+        {
+          path: "package",
+          select: "",
+        },
+      ]);
 
-            return res.status(200).send({
-                error: false,
-                message: "List of all user subscription",
-                data: subscription_data
-            })
-        } catch (error) {
-            next(error);
+      return res.status(200).send({
+        error: false,
+        message: "List of all user subscription",
+        data: subscription_data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  create: async (req, res, next) => {
+    try {
+      let subscriptionList = await UserSubscription.find({});
+      let packageId = req.body.package;
+      // console.log({packageId})
+      let packageData = await Package.findOne({ _id: packageId });
+      let packageTypeId = packageData?.package_type;
+
+      let packageNameData = await PackageType.findOne({ _id: packageTypeId });
+      let packageName = packageNameData?.name;
+      console.log({ packageName });
+
+      const generateNextInvoice = (prevInv) => {
+        if (prevInv === undefined) {
+          return `H2I/SC/24-25-01`;
+        } else {
+          const [, yearPart, numberPart] = prevInv.match(
+            /(\d{2}-\d{2})-(\d{2})/
+          );
+          let newNumberPart = (parseInt(numberPart, 10) + 1)
+            .toString()
+            .padStart(2, "0");
+          const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+          let currentYear = new Date().getFullYear() % 100;
+          let currentYearNext = currentYear + 1;
+
+          if (
+            currentMonth > 3 &&
+            currentYear !== parseInt(yearPart.split("-")[0], 10)
+          ) {
+            return `H2I/SC/${currentYear}-${currentYearNext}-01`;
+          } else {
+            return `H2I/SC/${yearPart}-${(parseInt(numberPart, 10) + 1)
+              .toString()
+              .padStart(2, "0")}`;
+          }
         }
-    },
+      };
 
+      let PrevInvoiceId =
+        subscriptionList.length > 0
+          ? subscriptionList[subscriptionList.length - 1].invoice_No
+          : undefined;
 
-    create: async (req, res, next) => {
-        try {
-            let subscriptionList = await UserSubscription.find({});
-            let packageId = req.body.package;
-            // console.log({packageId})
-            let packageData = await Package.findOne({ _id: packageId });
-            let packageTypeId = packageData?.package_type;
+      if (packageName == "PAY AS YOU GO") {
+        let packageAmount = packageData?.payAsYou_detail?.amount;
+        let gstAmount = packageAmount * req.body.quantity * (18 / 100);
+        req.body.total_amount = (
+          packageAmount * req.body.quantity +
+          gstAmount
+        ).toFixed(2);
+      } else if (packageName == "BUSINESS") {
+        let packageAmount = packageData?.business_detail?.amount;
+        let gstAmount = packageAmount * (18 / 100);
+        req.body.total_amount = (packageAmount + gstAmount).toFixed(2);
+      } else if (packageName == "SCALE") {
+        if (packageData?.scale_detail[0].type == "monthly") {
+          let packageAmount = packageData?.scale_detail[0]?.amount;
+          let gstAmount = packageAmount * (18 / 100);
+          req.body.total_amount = (packageAmount + gstAmount).toFixed(2);
+        } else if (packageData?.scale_detail[1]?.type == "quaterly") {
+          let packageAmount = packageData?.scale_detail[1]?.amount;
+          let gstAmount = packageAmount * (18 / 100);
+          req.body.total_amount = (packageAmount + gstAmount).toFixed(2);
+        }
+      }
 
-            let packageNameData = await PackageType.findOne({ _id: packageTypeId });
-            let packageName = packageNameData?.name;
-            console.log({ packageName });
+      if (req.body.state_code == "KA") {
+        req.body.gst_type = "CGST + SGST";
+      } else {
+        req.body.gst_type = "IGST";
+      }
+      req.body.hsn_code = "998311";
+      req.body.invoice_No = generateNextInvoice(PrevInvoiceId);
+      const subscription_data = new UserSubscription(req.body);
+      const result = await subscription_data.save();
 
-            const generateNextInvoice = (prevInv) => {
-                if (prevInv === undefined) {
-                    return `H2I/SC/24-25-01`;
-                } else {
-                    const [, yearPart, numberPart] = prevInv.match(/(\d{2}-\d{2})-(\d{2})/);
-                    let newNumberPart = (parseInt(numberPart, 10) + 1).toString().padStart(2, '0');
-                    const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
-                    let currentYear = new Date().getFullYear() % 100;
-                    let currentYearNext = currentYear + 1;
+      //console.log({result});
 
-                    if (currentMonth > 3 && currentYear !== parseInt(yearPart.split('-')[0], 10)) {
-                        return `H2I/SC/${currentYear}-${currentYearNext}-01`;
-                    } else {
-                        return `H2I/SC/${yearPart}-${(parseInt(numberPart, 10) + 1).toString().padStart(2, '0')}`;
-                    }
-                }
-            }
+      let subscriptionData = await UserSubscription.findOne({
+        _id: result?._id,
+      }).populate([
+        {
+          path: "package",
+          select: "",
+          populate: {
+            path: "package_type",
+            select: "name",
+          },
+        },
+        {
+          path: "employer",
+          select: "",
+        },
+      ]);
 
+      //console.log({subscriptionData})
 
-            let PrevInvoiceId = subscriptionList.length > 0 ? subscriptionList[subscriptionList.length - 1].invoice_No : undefined;
+      let employerData;
+      let packageDet;
+      let purchaseData;
+      if (packageName == "PAY AS YOU GO") {
+        employerData = subscriptionData?.employer;
+        packageDet = subscriptionData?.package;
+        purchaseData =
+          subscriptionData?.package?.payAsYou_detail?.job_credit *
+          subscriptionData?.quantity;
+        console.log({ purchaseData });
+      } else if (packageName == "BUSINESS") {
+        employerData = subscriptionData?.employer;
+        packageDet = subscriptionData?.package;
+        purchaseData = subscriptionData?.package?.business_detail?.job_credit;
+      } else if (packageName == "SCALE") {
+        if (packageData?.scale_detail[0].type == "monthly") {
+          employerData = subscriptionData?.employer;
+          packageDet = subscriptionData?.package;
+          purchaseData = subscriptionData?.package?.scale_detail[0]?.job_credit;
+        } else if (packageData?.scale_detail[1]?.type == "quaterly") {
+          employerData = subscriptionData?.employer;
+          packageDet = subscriptionData?.package;
+          purchaseData = subscriptionData?.package?.scale_detail[1]?.job_credit;
+        }
+      }
 
-            if (packageName == "PAY AS YOU GO") {
-                let packageAmount = packageData?.payAsYou_detail?.amount;
-                let gstAmount = (packageAmount * req.body.quantity) * (18 / 100);
-                req.body.total_amount = (packageAmount * req.body.quantity + gstAmount).toFixed(2);
+      const creditUser = await UserCredit.findOne({ employer: employerData });
+      console.log({ creditUser });
+      let creditData;
+      if (creditUser) {
+        creditData = await UserCredit.findOneAndUpdate(
+          { employer: employerData },
+          { $inc: { purchased_count: purchaseData } },
+          { new: true }
+        );
+      } else {
+        const creditAmt = new UserCredit({
+          employer: employerData,
+          package: packageData,
+          purchased_count: purchaseData,
+        });
+        creditAdd = await creditAmt.save();
+      }
 
-            } else if (packageName == "BUSINESS") {
-                let packageAmount = packageData?.business_detail?.amount;
-                let gstAmount = packageAmount * (18 / 100);
-                req.body.total_amount = (packageAmount + gstAmount).toFixed(2);
+      //  console.log({subscriptionData})
 
-            } else if (packageName == "SCALE") {
-                if (packageData?.scale_detail[0].type == "monthly") {
-                    let packageAmount = packageData?.scale_detail[0]?.amount;
-                    let gstAmount = packageAmount * (18 / 100);
-                    req.body.total_amount = (packageAmount + gstAmount).toFixed(2);
-                } else if (packageData?.scale_detail[1]?.type == "quaterly") {
-                    let packageAmount = packageData?.scale_detail[1]?.amount;
-                    let gstAmount = packageAmount * (18 / 100);
-                    req.body.total_amount = (packageAmount + gstAmount).toFixed(2);
-                }
-            }
+      let empEmail = subscriptionData?.employer?.email;
 
-            if (req.body.state_code == "KA") {
-                req.body.gst_type = "CGST + SGST"
-            } else {
-                req.body.gst_type = "IGST"
-            }
-            req.body.hsn_code = "998311"
-            req.body.invoice_No = generateNextInvoice(PrevInvoiceId)
-            const subscription_data = new UserSubscription(req.body)
-            const result = await subscription_data.save();
+      let empPhoneNo = subscriptionData?.employer?.mobile;
 
-            //console.log({result});
+      let packageList = await Package.findOne({
+        _id: subscriptionData?.package,
+      });
 
-            let subscriptionData = await UserSubscription.findOne({ _id: result?._id }).populate([
-                {
-                    path: "package",
-                    select: "",
-                    populate: {
-                        path: "package_type",
-                        select: "name"
-                    }
-                },
-                {
-                    path: "employer",
-                    select: ""
-                }
-            ]);
+      let packageTypeData = await PackageType.findOne({
+        _id: subscriptionData?.package?.package_type,
+      });
 
-            //console.log({subscriptionData})
+      let packaeName = packageTypeData?.name;
 
+      // console.log({packaeName});
 
-            let employerData;
-            let packageDet;
-            let purchaseData;
-            if (packageName == "PAY AS YOU GO") {
-                employerData = subscriptionData?.employer;
-                packageDet = subscriptionData?.package;
-                purchaseData = (subscriptionData?.package?.payAsYou_detail?.job_credit) * (subscriptionData?.quantity);
-                console.log({ purchaseData })
-            } else if (packageName == "BUSINESS") {
-                employerData = subscriptionData?.employer;
-                packageDet = subscriptionData?.package;
-                purchaseData = subscriptionData?.package?.business_detail?.job_credit
+      let amount;
+      if (packaeName == "PAY AS YOU GO") {
+        amount =
+          packageList?.payAsYou_detail?.amount * subscriptionData?.quantity;
+      } else if (packaeName == "BUSINESS") {
+        amount = packageList?.business_detail?.amount;
+      } else if (packaeName == "SCALE") {
+        amount = packageList?.scale_detail?.amount;
+      }
+      // console.log({amount})
 
-            } else if (packageName == "SCALE") {
-                if (packageData?.scale_detail[0].type == "monthly") {
-                    employerData = subscriptionData?.employer;
-                    packageDet = subscriptionData?.package;
-                    purchaseData = subscriptionData?.package?.scale_detail[0]?.job_credit
+      const invoiceNo = "INV" + Math.floor(Math.random() * 90000) + 10000;
+      const subDate = moment(subscriptionData?.createdAt).format("DD/MM/YYYY");
+      const totalAmount = subscriptionData?.total_amount;
+      // console.log({totalAmount})
 
-                } else if (packageData?.scale_detail[1]?.type == "quaterly") {
-                    employerData = subscriptionData?.employer;
-                    packageDet = subscriptionData?.package;
-                    purchaseData = subscriptionData?.package?.scale_detail[1]?.job_credit
+      const fileName = Date.now() + ".pdf";
 
-                }
+      const filePath = path.join(__dirname, `../uploads/invoices/${fileName}`);
 
-            };
+      console.log({ filePath });
 
-            const creditUser = await UserCredit.findOne({ employer: employerData });
-            console.log({ creditUser });
-            let creditData
-            if (creditUser) {
-                creditData = await UserCredit.findOneAndUpdate({ employer: employerData }, { '$inc': { 'purchased_count': purchaseData } }, { new: true })
-            } else {
-                const creditAmt = new UserCredit({ employer: employerData, package: packageData, purchased_count: purchaseData });
-                creditAdd = await creditAmt.save();
-            }
+      const invoiceDetails = {
+        invoiceNo,
+        subDate,
+        packaeName,
+        totalAmount,
+        amount,
+        empEmail,
+        empPhoneNo,
+      };
+      generateInvoicePdf(invoiceDetails, filePath);
 
+      //const fileContent = fs.readFileSync(filePath);
 
+      // var transport = nodemailer.createTransport({
+      //     host: process.env.EMAIL_HOST,
+      //     port: 465,
+      //     secure: true,
+      //     auth: {
+      //         user: process.env.EMAIL_NAME,
+      //         pass: process.env.EMAIL_PASSWORD
+      //     },
+      //     requireTLS: true,
+      // });
 
-            //  console.log({subscriptionData})
+      // var transport = nodemailer.createTransport({
+      //     host: "mail.demo91.co.in",
+      //      port: 465,
+      //     // secure: false, // StartTLS should be enabled
+      //      auth: {
+      //             user: "developer@demo91.co.in",
+      //             pass: "Developer@2023"
+      //          },
+      //      requireTLS: true,
+      // });
 
-            let empEmail = subscriptionData?.employer?.email;
-
-            let empPhoneNo = subscriptionData?.employer?.mobile;
-
-
-            let packageList = await Package.findOne({ _id: subscriptionData?.package });
-
-            let packageTypeData = await PackageType.findOne({ _id: subscriptionData?.package?.package_type });
-
-            let packaeName = packageTypeData?.name;
-
-            // console.log({packaeName});
-
-            let amount;
-            if (packaeName == "PAY AS YOU GO") {
-                amount = (packageList?.payAsYou_detail?.amount) * subscriptionData?.quantity
-            } else if (packaeName == "BUSINESS") {
-                amount = (packageList?.business_detail?.amount)
-            } else if (packaeName == "SCALE") {
-                amount = (packageList?.scale_detail?.amount)
-            }
-            // console.log({amount})
-
-
-
-            const invoiceNo = "INV" + Math.floor(Math.random() * 90000) + 10000;
-            const subDate = moment(subscriptionData?.createdAt).format("DD/MM/YYYY");
-            const totalAmount = subscriptionData?.total_amount;
-            // console.log({totalAmount})
-
-
-            const fileName = Date.now() + '.pdf'
-
-            const filePath = path.join(__dirname, `../uploads/invoices/${fileName}`);
-
-            console.log({ filePath });
-
-            const invoiceDetails = { invoiceNo, subDate, packaeName, totalAmount, amount, empEmail, empPhoneNo };
-            generateInvoicePdf(invoiceDetails, filePath);
-
-            //const fileContent = fs.readFileSync(filePath);
-
-            // var transport = nodemailer.createTransport({
-            //     host: process.env.EMAIL_HOST,
-            //     port: 465,
-            //     secure: true,
-            //     auth: {
-            //         user: process.env.EMAIL_NAME,
-            //         pass: process.env.EMAIL_PASSWORD
-            //     },
-            //     requireTLS: true,
-            // });
-
-            // var transport = nodemailer.createTransport({
-            //     host: "mail.demo91.co.in",
-            //      port: 465,
-            //     // secure: false, // StartTLS should be enabled
-            //      auth: {
-            //             user: "developer@demo91.co.in",
-            //             pass: "Developer@2023"
-            //          },
-            //      requireTLS: true,
-            // });
-
-            sgMail.setApiKey(process.env.SENDGRID)
-            const msg = {
-                to: empEmail, // Change to your recipient
-                from: 'info@hire2inspire.com',
-                subject: `Package purchase successfully`,
-                html: `
+      sgMail.setApiKey(process.env.SENDGRID);
+      const msg = {
+        to: empEmail, // Change to your recipient
+        from: "info@hire2inspire.com",
+        subject: `Package purchase successfully`,
+        html: `
                       <head>
                       <meta charset="UTF-8">
                       <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -270,76 +297,93 @@ module.exports = {
                               [Your Contact Information]</p>
                           </body>
                       `,
-                attachments: [
-                    {
-                        filename: fileName,
-                        content: filePath
-                    }
-                ]
-            }
+        attachments: [
+          {
+            filename: fileName,
+            content: filePath,
+          },
+        ],
+      };
 
-            sgMail
-                .send(msg)
-                .then(() => {
-                    console.log('Email sent')
-                })
-                .catch((error) => {
-                    console.error(error)
-                })
+      sgMail
+        .send(msg)
+        .then(() => {
+          console.log("Email sent");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
 
-            return res.status(200).send({
-                error: false,
-                message: "User subscribed successfully",
-                data: result
-            })
-        } catch (error) {
-            next(error)
-        }
-    },
+      return res.status(200).send({
+        error: false,
+        message: "User subscribed successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
-    update: async (req, res, next) => {
-        try {
-            const result = await UserSubscription.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true });
+  update: async (req, res, next) => {
+    try {
+      const result = await UserSubscription.findOneAndUpdate(
+        { _id: req.params.id },
+        req.body,
+        { new: true }
+      );
 
-            if (!result) return res.status(200).send({ error: false, message: "User subscription not updated" })
+      if (!result)
+        return res
+          .status(200)
+          .send({ error: false, message: "User subscription not updated" });
 
-            return res.status(200).send({
-                error: false,
-                message: "User subscription updated",
-                data: result
-            })
-        } catch (error) {
-            next(error)
-        }
-    },
+      return res.status(200).send({
+        error: false,
+        message: "User subscription updated",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
-    statusupdate: async (req, res, next) => {
-        try {
-            const result = await UserSubscription.findOneAndUpdate({ _id: req.params.id }, { status: req.body.status }, { new: true });
+  statusupdate: async (req, res, next) => {
+    try {
+      const result = await UserSubscription.findOneAndUpdate(
+        { _id: req.params.id },
+        { status: req.body.status },
+        { new: true }
+      );
 
-            if (!result) return res.status(200).send({ error: false, message: "User subscription status not updated" })
+      if (!result)
+        return res
+          .status(200)
+          .send({
+            error: false,
+            message: "User subscription status not updated",
+          });
 
-            return res.status(200).send({
-                error: false,
-                message: "User subscription status updated",
-                data: result
-            })
-        } catch (error) {
-            next(error)
-        }
-    },
+      return res.status(200).send({
+        error: false,
+        message: "User subscription status updated",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
-    detail: async (req, res, next) => {
-        try {
-            const result = await UserSubscription.findOne({ _id: req.params.id });
+  detail: async (req, res, next) => {
+    try {
+      const result = await UserSubscription.findOne({ _id: req.params.id });
 
-            return res.status(200).send({
-                error: false,
-                message: "Detail of User Subscription",
-                data: result
-            })
-        } catch (error) {
-            next(error)
-        }
-    },
-}
+      return res.status(200).send({
+        error: false,
+        message: "Detail of User Subscription",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+};

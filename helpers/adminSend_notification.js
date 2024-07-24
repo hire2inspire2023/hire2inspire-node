@@ -1,5 +1,5 @@
 require('dotenv').config()
-const Notification = require('../models/notification.model');
+const AdminNotification = require('../models/adminNotification.model');
 const CronJob = require('cron').CronJob;
 const fetch = require('node-fetch')
 const FormData = require('form-data');
@@ -121,14 +121,14 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 //     // }
 // }
 
-const sendNotification = async (req, res) => {
+const adminsendNotification = async (req, res) => {
     const user = req.user
     const title = req.title
     const description = req.description
     const type = req.type
-    const notificationData = new Notification({user, title,type, description})
-    const result = await notificationData.save();
+    const adminnotificationData = new AdminNotification({user, title,type, description})
+    const result = await adminnotificationData.save();
     return result;
 }
 
-module.exports = sendNotification
+module.exports = adminsendNotification

@@ -41,19 +41,19 @@ module.exports = {
         status: true,
       }).populate([
         {
-          path: "agency",
-          select: ""
+          path:"agency",
+          select:""
         }
       ]);
       if (!recruiterData)
         throw createError.NotFound("recruiter not registered");
 
-      if (recruiterData?.is_loggedIn == true) throw createError.NotFound("You are already logged in");
+      if (recruiterData?.is_loggedIn == true)throw createError.NotFound("You are already logged in");
 
       const isMatch = await recruiterData.isValidPassword(result.password);
       if (!isMatch) throw createError.BadRequest("Password not valid");
 
-      const updatedRecruiter = await RecruiterModel.findOneAndUpdate({ _id: recruiterData.id }, { "is_loggedIn": true }, { new: true });
+      const updatedRecruiter = await RecruiterModel.findOneAndUpdate({_id:recruiterData.id},{"is_loggedIn":true},{new:true});
 
       const accessToken = await signAccessToken(recruiterData.id, "recruiters");
       const refreshToken = await signRefreshToken(
@@ -172,7 +172,7 @@ module.exports = {
   <p>
    password: secret
 </p>
-        <p>Thank you and Regards,</p>
+        <p>Thank you and best regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -189,12 +189,12 @@ module.exports = {
       let adminName = adminData?.name;
 
 
-      //  const sgMail = require('@sendgrid/mail');
+    //  const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID);
-      // console.log(emails, 'emails')
+     // console.log(emails, 'emails')
 
       const new_msg = {
-        to: "admin@hire2inspire.com", // replace these with your email addresses
+        to: "hire2inspireh2i@gmail.com", // replace these with your email addresses
         from: 'info@hire2inspire.com',
         subject: `Notification for Agency-Recruiter Invitation`,
         html: `
@@ -208,7 +208,7 @@ module.exports = {
         emails are ${emails}</p>
         <p>Please review the invitations and their statuses. Let me know if there are any discrepancies or if further action is required from my end.</p>
         <p>Thank you for your attention to this matter.</p>
-        <p>Regards,<br>
+        <p>Best regards,<br>
         Hire2Inspire</p>
     </body>
 `
@@ -256,7 +256,7 @@ module.exports = {
       //   <p>
       //    password: secret
       // </p>
-      //         <p>Thank you and Regards,</p>
+      //         <p>Thank you and best regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `
@@ -295,8 +295,8 @@ module.exports = {
       const checkAgency = await Agency.findOne({ _id: userId });
       const checkRecruiter = await RecruiterModel.findOne({ _id: userId }).populate([
         {
-          path: "agency",
-          select: ""
+          path:"agency",
+          select:""
         }
       ]);
       if (
@@ -311,8 +311,8 @@ module.exports = {
         _id: req.params.id,
       }).select("-password -otp").populate([
         {
-          path: "agency",
-          select: ""
+          path:"agency",
+          select:""
         }
       ]);
 
@@ -494,7 +494,7 @@ module.exports = {
   <p>
    password: secret
 </p>
-        <p>Thank you and Regards,</p>
+        <p>Thank you and best regards,</p>
         <p> Hire2Inspire </p>
     </body>
 `
@@ -504,19 +504,19 @@ module.exports = {
         console.log('emails sent successfully!');
       }).catch(error => {
         console.log(error);
-      });
-
+      });  
+      
       let adminData = await Admin.findOne({});
 
       let adminName = adminData?.name;
 
 
-      //  const sgMail = require('@sendgrid/mail');
+    //  const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID);
-      // console.log(emails, 'emails')
+     // console.log(emails, 'emails')
 
       const new_msg = {
-        to: "admin@hire2inspire.com", // replace these with your email addresses
+        to: "hire2inspireh2i@gmail.com", // replace these with your email addresses
         from: 'info@hire2inspire.com',
         subject: `Notification for Employer-Recruiter Invitation`,
         html: `
@@ -530,7 +530,7 @@ module.exports = {
         emails are ${emails}</p>
         <p>Please review the invitations and their statuses. Let me know if there are any discrepancies or if further action is required from my end.</p>
         <p>Thank you for your attention to this matter.</p>
-        <p>Regards,<br>
+        <p>Best regards,<br>
         Hire2Inspire</p>
     </body>
 `
@@ -542,56 +542,56 @@ module.exports = {
         console.log(error);
       });
 
-      //       var mailOptions = {
-      //         from: 'Info@hire2inspire.com',
-      //         subject: `Recruiter Invitation`,
-      //         html: `
-      //         <head>
-      //             <title>Welcome to Hire2Inspire</title>
-      //         </head>
-      //     <body>
-      //     <p>Dear Recruiter,</p>
+//       var mailOptions = {
+//         from: 'Info@hire2inspire.com',
+//         subject: `Recruiter Invitation`,
+//         html: `
+//         <head>
+//             <title>Welcome to Hire2Inspire</title>
+//         </head>
+//     <body>
+//     <p>Dear Recruiter,</p>
 
-      //     <p>
-      //         I hope this message finds you well. We're thrilled to extend a warm and exclusive invitation to your esteemed recruiter
-      //         to become a part of the Hire2inspire platform - a dynamic community dedicated to connecting exceptional agencies with
-      //         clients seeking top-notch services.
-      //     </p>
+//     <p>
+//         I hope this message finds you well. We're thrilled to extend a warm and exclusive invitation to your esteemed recruiter
+//         to become a part of the Hire2inspire platform - a dynamic community dedicated to connecting exceptional agencies with
+//         clients seeking top-notch services.
+//     </p>
 
-      //     <p>
-      //         At Hire2inspire, we believe in the power of collaboration and innovation, and we see your recruiter as a perfect fit for
-      //         our community. We are impressed by your talents and capabilities, and we are confident that your involvement will
-      //         greatly enrich our platform.
-      //     </p>
+//     <p>
+//         At Hire2inspire, we believe in the power of collaboration and innovation, and we see your recruiter as a perfect fit for
+//         our community. We are impressed by your talents and capabilities, and we are confident that your involvement will
+//         greatly enrich our platform.
+//     </p>
 
-      //     <p>
-      //         To start this exciting journey, all you need to do is click the link below to create your recruiter's profile on our
-      //         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
-      //         every step.
-      //     </p>
-      //     <a href="https://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
-      //   </p>
-      //   <p>
-      //    password: secret
-      // </p>
-      //         <p>Thank you and Regards,</p>
-      //         <p> Hire2Inspire </p>
-      //     </body>
-      // `
-      //       };
+//     <p>
+//         To start this exciting journey, all you need to do is click the link below to create your recruiter's profile on our
+//         platform. The onboarding process is designed to be straightforward, and our support team is available to assist you at
+//         every step.
+//     </p>
+//     <a href="${process.env.front_url}/recruiter/login" target="blank">Registration Link</a>
+//   </p>
+//   <p>
+//    password: secret
+// </p>
+//         <p>Thank you and best regards,</p>
+//         <p> Hire2Inspire </p>
+//     </body>
+// `
+//       };
 
 
-      //       data.forEach((recipient) => {
-      //         mailOptions.to = recipient?.email;
+//       data.forEach((recipient) => {
+//         mailOptions.to = recipient?.email;
 
-      //         transport.sendMail(mailOptions, (error, info) => {
-      //           if (error) {
-      //             console.error(`Error sending email to ${recipient}: ${error}`);
-      //           } else {
-      //             console.log(`Email sent to ${recipient?.email}: ${info.response}`);
-      //           }
-      //         });
-      //       });
+//         transport.sendMail(mailOptions, (error, info) => {
+//           if (error) {
+//             console.error(`Error sending email to ${recipient}: ${error}`);
+//           } else {
+//             console.log(`Email sent to ${recipient?.email}: ${info.response}`);
+//           }
+//         });
+//       });
       return res.status(200).send({
         error: false,
         message: "Invitation sent successfully",
@@ -783,8 +783,8 @@ module.exports = {
 
       if (checkRecruiter?.is_loggedIn == false) throw createError.NotFound('You are not already logged In yet');
 
-      let recruiterData = await RecruiterModel.findOneAndUpdate({ _id: userId }, { "is_loggedIn": false }, { new: true });
-
+      let recruiterData = await RecruiterModel.findOneAndUpdate({_id:userId},{"is_loggedIn":false},{new:true});
+      
       return res.status(200).send({
         error: false,
         message: "Recruiter logout.",
@@ -794,5 +794,18 @@ module.exports = {
       next(error)
     }
   },
-};
 
+  updateLogout: async(req,res,next) => {
+    try{
+      let recruiterData = await RecruiterModel.findOneAndUpdate({email:req.body.email},{"is_loggedIn":false},{new:true});
+
+      return res.status(200).send({
+        error: false,
+        message: "Recruiter logout.",
+        data: recruiterData
+      })
+    }catch (error){
+      next(error)
+    }
+  }
+};

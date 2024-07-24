@@ -10,3 +10,4 @@ const PackageTypeSchema = mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model("packageTypes", PackageTypeSchema);
+

@@ -1,41 +1,44 @@
 const mongoose = require("mongoose");
 
-const UserSubscriptionSchema = mongoose.Schema({
+const UserSubscriptionSchema = mongoose.Schema(
+  {
     employer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "employers",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "employers",
+      required: true,
     },
     package: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "packages",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "packages",
+      required: true,
     },
     quantity: {
-        type: Number
+      type: Number,
     },
     total_amount: {
-        type: Number
+      type: Number,
     },
     city: {
-        type: String
+      type: String,
     },
     state_code: {
-        type: String
+      type: String,
     },
     invoice_No: {
-        type: String
+      type: String,
     },
     gst_type: {
-        type: String
+      type: String,
     },
     hsn_code: {
-        type: String
+      type: String,
     },
     status: {
-        type: Boolean,
-        default: false
-    }
-}, { timestamps: true });
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("user_subscription", UserSubscriptionSchema);

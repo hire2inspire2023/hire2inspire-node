@@ -1,7 +1,32 @@
 const JWT = require('jsonwebtoken')
 const createError = require('http-errors')
+const Agency = require('../models/agency.model');
 
 module.exports = {
+
+  // signAccessToken: async (userId, dataModel) => {
+  //   try {
+  //     // Set is_loggedIn to false for the user identified by userId
+  //     await Agency.findByIdAndUpdate(userId, { is_loggedIn: false });
+
+  //     // Continue with token signing logic
+  //     const payload = { model: dataModel };
+  //     const secret = process.env.ACCESS_TOKEN_SECRET;
+  //     const options = {
+  //       expiresIn: '1m',
+  //       audience: userId,
+  //     };
+  //     console.log("data",options?.audience)
+
+  //     // Sign the token
+  //     const token = JWT.sign(payload, secret, options);
+  //     return token;
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     throw createError.InternalServerError();
+  //   }
+  // },
+  
   signAccessToken: (userId, dataModel) => {
     return new Promise((resolve, reject) => {
       const payload = {model: dataModel}
@@ -90,5 +115,24 @@ module.exports = {
       )
     })
   },
+
+  // createAccessToken: (userId, dataModel) => {
+  //   return new Promise((resolve, reject) => {
+  //     const payload = {model: dataModel}
+  //     const secret = process.env.ACCESS_TOKEN_SECRET
+  //     const options = {
+  //       expiresIn: new Date(0),
+  //       audience: userId,
+  //     }
+  //     JWT.sign(payload, secret, options, (err, token) => {
+  //       if (err) {
+  //         console.log(err.message)
+  //         reject(createError.InternalServerError())
+  //         return
+  //       }
+  //       resolve(token)
+  //     })
+  //   })
+  // },
 
 }

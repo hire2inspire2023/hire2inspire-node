@@ -5,7 +5,7 @@ const TransactionRouter = express.Router()
 
 TransactionRouter.get('/list', TransactionController.list);
 TransactionRouter.patch('/update/:id', TransactionController.update);
-TransactionRouter.get('/agency-list', verifyAccessToken, TransactionController.agencylist);
+TransactionRouter.get('/agency-list',verifyAccessToken, TransactionController.agencylist);
 TransactionRouter.patch('/transaction-update/:id', TransactionController.transactionempUpdate);
 TransactionRouter.patch('/transaction-ageency-update/:id', TransactionController.transactionagencyUpdate);
 TransactionRouter.post('/send-mail', TransactionController.sendMail);

@@ -19,6 +19,7 @@ const Agency = require("../models/agency.model");
 const { getUserViaToken } = require("../helpers/jwt_helper");
 const Recruiter = require("../models/recruiter.model");
 const CandidateJobModel = require('../models/candidate_job.model');
+const sgMail = require('@sendgrid/mail');
 
 module.exports = {
     /**
@@ -264,21 +265,89 @@ module.exports = {
                     // Candidate log CSV Uppload 
                     resp = await Candidate.insertMany(results);
                     const candidateIds = resp.map( e => e._id );
+                    const candidateEmails = resp.map( e => e.email );
 
                    // console.log("candidateIds",candidateIds)
 
                     for(let i in resp){
-                        req.body.emp_job = resp[i]?.job?._id;
-                        req.body.agency_id = resp[i]?.agency?._id;
-                        req.body.candidate = resp[i]?._id;
-                       // console.log("resp",resp[i]?.agency?._id);
+                        let Emp_job = resp[i]?.job?._id;
+                        let Agency_id = resp[i]?.agency?._id;
+                        let Candidate = resp[i]?._id;
+                       console.log("Emp_job",Emp_job);
 
-                        const candidateJobData = new CandidateJobModel(req.body);
+                        const candidateJobData = new CandidateJobModel({emp_job:Emp_job,candidate:Candidate,agency_id:Agency_id});
                         const condidateJobdatalist = await candidateJobData.save();
                     };
 
 
                     const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate({_id: req.body.agency_job}, {$push: {candidates: candidateIds}}, {new: true})
+
+                    sgMail.setApiKey(process.env.SENDGRID)
+                    const msg = {
+                        to: candidateEmails, // Change to your recipient
+                        from: 'info@hire2inspire.com',
+                        subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
+                        html: `
+                               <head>
+                                   <title>Notification: Candidate Hired - Backend Development Position</title>
+                           </head>
+                           <body>
+                               <p>Dear Candidates ,</p>
+                               <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at ${companyName}. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
+               
+                               <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
+               
+                               <p>Find the link 
+                               <a href="${process.env.front_url}/candidate/apply-job/${candidateId}" target="blank">Find your job</a>
+                             </p>
+               
+                               <p>Best regards,</p>
+                               <p>Hire2Inspire</p>
+                           </body>
+                       `
+                    }
+        
+                    sgMail
+                        .sendMultiple(msg)
+                        .then(() => {
+                            console.log('Email sent')
+                        })
+                        .catch((error) => {
+                            console.error(error)
+                        })
+                        
+                        
+                        sgMail.setApiKey(process.env.SENDGRID)
+                        const newmsg = {
+                            to: empMail, // Change to your recipient
+                            from: 'info@hire2inspire.com',
+                            subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
+                            html: `
+                            <head>
+                                <title>Application for ${jobRole} - ${jobIDS}</title>
+                            </head>
+                            <body>
+                                <p>Dear ${empFname} ${empLname},</p>
+                                <p>I hope this email finds you well. I am writing to express my strong interest in the ${jobRole} position at ${companyName}, as advertised where you found the job posting.</p>
+                                <p>What particularly drew me to this opportunity at ${companyName} is mention something specific about the company that resonates with you. I am eager to be a part of a team that is describe what excites you about the company or its culture.</p>
+                                <p>I am impressed by ${companyName}'s commitment to mention any specific initiatives, values, or projects mentioned by the company. I am eager to bring my mention specific skills or experiences to the team and contribute to ${companyName}'s continued success.</p>
+                                <p>Thank you for considering my application. I have attached my resume for your review. I am available for an interview at your earliest convenience and look forward to the opportunity to discuss how my skills and experiences align with the needs of ${companyName}.</p>
+                                <p>Warm regards,</p>
+                                <p>Hire2Inspires</p>
+                            </body>
+                           `
+                        }
+            
+                        sgMail
+                            .send(newmsg)
+                            .then(() => {
+                                console.log('Email sent')
+                            })
+                            .catch((error) => {
+                                console.error(error)
+                            })
+            
+            
 
                 } else {
                     return res.status(400).send({

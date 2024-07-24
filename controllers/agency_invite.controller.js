@@ -53,7 +53,7 @@ module.exports = {
     try {
       let token = req.headers['authorization']?.split(" ")[1];
       let { userId, dataModel } = await getUserViaToken(token)
-      const checkEmployer = await Employer.findOne({ _id: userId })
+      const checkEmployer = await Employer.findOne({ _id: userId });
       let empFName = checkEmployer?.fname;
       let empLName = checkEmployer?.lname;
       if (!checkEmployer && dataModel != "employers") return res.status(400).send({ error: true, message: "Employer not found." })
@@ -80,12 +80,12 @@ module.exports = {
       const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID)
 
-      console.log(emails, 'emails')
-
+      console.log(emails,'emails')
+ 
       const msg = {
         to: emails, // replace these with your email addresses
         from: 'info@hire2inspire.com',
-        subject: `Invitation from ${empFName} ${empLName}`,
+        subject: `Agency Invited successfully`,
         html: `
           <head>
               <title>Welcome to Hire2Inspire</title>
@@ -113,7 +113,7 @@ module.exports = {
       <p>Find the link 
       <a href="https://hire2inspire.com/agency/login" target="blank">Registration Link</a>
     </p>
-          <p>Thank you and Regards,</p>
+          <p>Thank you and best regards,</p>
           <p> Hire2Inspire </p>
       </body>
   `
@@ -155,7 +155,7 @@ module.exports = {
       //     <p>Find the link 
       //     <a href="https://hire2inspire-dev.netlify.app/agency/login" target="blank">Registration Link</a>
       //   </p>
-      //         <p>Thank you and Regards,</p>
+      //         <p>Thank you and best regards,</p>
       //         <p> Hire2Inspire </p>
       //     </body>
       // `

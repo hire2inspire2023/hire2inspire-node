@@ -150,4 +150,3 @@ EmployerSchema.methods.isValidPassword = async function (password) {
 
 const Employer = mongoose.model("employers", EmployerSchema);
 module.exports = Employer;
-

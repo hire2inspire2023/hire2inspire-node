@@ -1,28 +1,30 @@
-const createError = require('http-errors')
-const Admin = require('../models/admin.model')
-const { adminLoginSchema, adminRegistartionSchema } = require('../validators/validation_schema')
+const createError = require("http-errors");
+const Admin = require("../models/admin.model");
+const {
+  adminLoginSchema,
+  adminRegistartionSchema,
+} = require("../validators/validation_schema");
 const {
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
   getUserViaToken,
-} = require('../helpers/jwt_helper')
-const bcrypt = require('bcrypt')
+} = require("../helpers/jwt_helper");
+const bcrypt = require("bcrypt");
 
 const JobPosting = require("../models/job_posting.model");
 const Agency = require("../models/agency.model");
 const Employer = require("../models/employer.model");
 const Candidate = require("../models/candidate.model");
 const CandidateJobModel = require("../models/candidate_job.model");
-const HiringDetail = require('../models/hiringDetails.model');
+const HiringDetail = require("../models/hiringDetails.model");
 const AgencyJobModel = require("../models/agency_job.model");
 const RecruiterModel = require("../models/recruiter.model");
 const Transaction = require("../models/transaction.model");
-const AgencyTransaction = require('../models/agency_transaction.model');
+const AgencyTransaction = require("../models/agency_transaction.model");
 const nodemailer = require("nodemailer");
-const Billing = require('../models/billing.model')
-const sgMail = require('@sendgrid/mail');
-
+const Billing = require("../models/billing.model");
+const sgMail = require("@sendgrid/mail");
 
 // var transport = nodemailer.createTransport({
 //   host: process.env.EMAIL_HOST,
@@ -39,59 +41,61 @@ module.exports = {
   register: async (req, res, next) => {
     try {
       // const { email, password } = req.body
-      if (req.body.password !== req.body.confirm_password) throw createError.BadRequest("Password confirmation does not match")
-      const result = await adminRegistartionSchema.validateAsync(req.body)
+      if (req.body.password !== req.body.confirm_password)
+        throw createError.BadRequest("Password confirmation does not match");
+      const result = await adminRegistartionSchema.validateAsync(req.body);
 
-      const doesExist = await Admin.findOne({ email: result.email })
+      const doesExist = await Admin.findOne({ email: result.email });
       if (doesExist)
-        throw createError.Conflict(`${result.email} is already been registered`)
+        throw createError.Conflict(
+          `${result.email} is already been registered`
+        );
 
-      const admin = new Admin(result)
-      const savedAdmin = await admin.save()
+      const admin = new Admin(result);
+      const savedAdmin = await admin.save();
       // console.log(savedAdmin.id);
-      const accessToken = await signAccessToken(savedAdmin.id, "admins")
-      const refreshToken = await signRefreshToken(savedAdmin.id, "admins")
+      const accessToken = await signAccessToken(savedAdmin.id, "admins");
+      const refreshToken = await signRefreshToken(savedAdmin.id, "admins");
 
       res.status(201).send({
         error: false,
-        message: 'Admin created',
+        message: "Admin created",
         data: {
           accessToken,
-          refreshToken
-        }
-      })
+          refreshToken,
+        },
+      });
     } catch (error) {
-      if (error.isJoi === true) error.status = 422
-      next(error)
+      if (error.isJoi === true) error.status = 422;
+      next(error);
     }
   },
 
   login: async (req, res, next) => {
     try {
-      const result = await adminLoginSchema.validateAsync(req.body)
-      const admin = await Admin.findOne({ email: result.email })
-      if (!admin) throw createError.NotFound('Admin not registered')
+      const result = await adminLoginSchema.validateAsync(req.body);
+      const admin = await Admin.findOne({ email: result.email });
+      if (!admin) throw createError.NotFound("Admin not registered");
 
-      const isMatch = await admin.isValidPassword(result.password)
-      if (!isMatch)
-        throw createError.BadRequest('Password not valid')
+      const isMatch = await admin.isValidPassword(result.password);
+      if (!isMatch) throw createError.BadRequest("Password not valid");
 
-      const accessToken = await signAccessToken(admin.id, "admins")
-      const refreshToken = await signRefreshToken(admin.id, "admins")
+      const accessToken = await signAccessToken(admin.id, "admins");
+      const refreshToken = await signRefreshToken(admin.id, "admins");
 
       res.status(201).send({
         error: false,
-        message: 'Admin logged in',
+        message: "Admin logged in",
         data: {
           accessToken,
-          refreshToken
+          refreshToken,
         },
-        user: admin
-      })
+        user: admin,
+      });
     } catch (error) {
       if (error.isJoi === true)
-        return next(createError.BadRequest('Invalid Email/Password'))
-      next(error)
+        return next(createError.BadRequest("Invalid Email/Password"));
+      next(error);
     }
   },
 
@@ -101,79 +105,98 @@ module.exports = {
         if (req.body.old_password === req.body.new_password) {
           message = {
             error: true,
-            message: "Old and new password can not be same"
-          }
+            message: "Old and new password can not be same",
+          };
           return res.status(200).send(message);
         }
         const adminData = await Admin.findOne({
-          _id: req.params.adminId
+          _id: req.params.adminId,
         });
         if (adminData === null) {
           message = {
             error: true,
-            message: "Admin not found!"
-          }
+            message: "Admin not found!",
+          };
         } else {
-          passwordCheck = await bcrypt.compare(req.body.old_password, adminData.password);
+          passwordCheck = await bcrypt.compare(
+            req.body.old_password,
+            adminData.password
+          );
           if (passwordCheck) {
-            const result = await Admin.findOneAndUpdate({
-              _id: req.params.adminId
-            }, {
-              password: req.body.new_password
-            }, { new: true });
+            const result = await Admin.findOneAndUpdate(
+              {
+                _id: req.params.adminId,
+              },
+              {
+                password: req.body.new_password,
+              },
+              { new: true }
+            );
             message = {
               error: false,
-              message: "Admin password changed!"
-            }
+              message: "Admin password changed!",
+            };
           } else {
             message = {
               error: true,
-              message: "Old password is not correct!"
-            }
+              message: "Old password is not correct!",
+            };
           }
         }
       } else {
         message = {
           error: true,
-          message: "Old password, new password are required!"
-        }
+          message: "Old password, new password are required!",
+        };
       }
       return res.status(200).send(message);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   forgetPassword: async (req, res, next) => {
     try {
-      if (!req.body.email) return res.status(400).send({ error: true, message: "Email required" });
+      if (!req.body.email)
+        return res.status(400).send({ error: true, message: "Email required" });
 
-      const AdminData = await Admin.findOneAndUpdate({ email: req.body.email }, { otp: 1234 });
-      if (!AdminData) return res.status(404).send({ error: true, message: 'Admin not found' });
+      const AdminData = await Admin.findOneAndUpdate(
+        { email: req.body.email },
+        { otp: 1234 }
+      );
+      if (!AdminData)
+        return res
+          .status(404)
+          .send({ error: true, message: "Admin not found" });
 
-      return res.status(200).send({ error: false, message: 'Otp sent successfully' });
-
+      return res
+        .status(200)
+        .send({ error: false, message: "Otp sent successfully" });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   verifyOtp: async (req, res, next) => {
     try {
-      if (!req.body.email && !req.body.otp) return res.status(400).send({ error: true, message: "Email and OTP required" });
+      if (!req.body.email && !req.body.otp)
+        return res
+          .status(400)
+          .send({ error: true, message: "Email and OTP required" });
 
       const AdminData = await Admin.findOne({
-        $and: [
-          { email: req.body.email },
-          { otp: req.body.otp }
-        ]
+        $and: [{ email: req.body.email }, { otp: req.body.otp }],
       });
-      if (!AdminData) return res.status(404).send({ error: true, message: 'Admin not found' });
+      if (!AdminData)
+        return res
+          .status(404)
+          .send({ error: true, message: "Admin not found" });
 
-      return res.status(200).send({ error: false, message: 'Otp verfied successfully' });
-
+      return res
+        .status(200)
+        .send({ error: false, message: "Otp verfied successfully" });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
@@ -183,61 +206,71 @@ module.exports = {
         if (req.body.new_password !== req.body.confirm_password) {
           message = {
             error: true,
-            message: "new and confirm password are not equal"
-          }
+            message: "new and confirm password are not equal",
+          };
           return res.status(400).send(message);
         }
         const AdminData = await Admin.findOne({
-          email: req.body.email
+          email: req.body.email,
         });
 
         if (AdminData === null) {
           message = {
             error: true,
-            message: "Admin not found!"
-          }
+            message: "Admin not found!",
+          };
           return res.status(404).send(message);
-
         } else {
-          const result = await Admin.findOneAndUpdate({
-            email: req.body.email
-          }, {
-            password: req.body.new_password
-          });
+          const result = await Admin.findOneAndUpdate(
+            {
+              email: req.body.email,
+            },
+            {
+              password: req.body.new_password,
+            }
+          );
 
           console.log("result", result);
 
           message = {
             error: false,
-            message: "Admin password reset successfully!"
-          }
+            message: "Admin password reset successfully!",
+          };
           return res.status(200).send(message);
         }
       } else {
         message = {
           error: true,
-          message: "new password, confirm password are required!"
-        }
+          message: "new password, confirm password are required!",
+        };
         return res.status(404).send(message);
       }
-
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   jobApproval: async (req, res, next) => {
     try {
-      let token = req.headers['authorization']?.split(" ")[1];
-      let { userId, dataModel } = await getUserViaToken(token)
-      const checkAdmin = await Admin.findOne({ _id: userId })
-      if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "Admin not authorized." })
+      let token = req.headers["authorization"]?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token);
+      const checkAdmin = await Admin.findOne({ _id: userId });
+      if (!checkAdmin && dataModel != "admins")
+        return res
+          .status(401)
+          .send({ error: true, message: "Admin not authorized." });
 
-      const jobPostingData = await JobPosting.findOneAndUpdate({ _id: req.params.jobId }, { is_approved: req.body.is_approved }).populate([
+      console.log("data", req.body.is_approved);
+
+      const jobPostingData = await JobPosting.findOneAndUpdate(
+        { _id: req.params.jobId },
+        { is_approved: req.body.is_approved },
+        { new: true }
+      ).populate([
         {
           path: "employer",
-          select: "fname lname email"
-        }
+          select: "fname lname email",
+        },
       ]);
       let empFname = jobPostingData?.employer?.fname;
       let empLname = jobPostingData?.employer?.lname;
@@ -247,14 +280,16 @@ module.exports = {
 
       let jobId = jobPostingData?._id;
 
+      console.log("ressss", jobPostingData?.is_approved);
 
-
-      sgMail.setApiKey(process.env.SENDGRID)
-      const msg = {
-        to: empEmail, // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `Confirmaition for Job Approval`,
-        html: `
+      if (jobPostingData?.is_approved == true) {
+        console.log("hii");
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          to: empEmail, // Change to your recipient
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `Confirmaition for Job Approval`,
+          html: `
       <head>
           <title>Notification: Confirmation for Job approval</title>
       </head>
@@ -276,34 +311,37 @@ module.exports = {
         <p>Hire2Inspire</p>
       </body>
 
-    `
-      }
+    `,
+        };
 
-      sgMail
-        .send(msg)
-        .then(() => {
-          console.log('Email sent to emp')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent to emp");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
 
+        //const agencydata = await Agency.find({"is_approved":true});
+        const agencydata = await Agency.find({});
 
-      //const agencydata = await Agency.find({"is_approved":true});
-      const agencydata = await Agency.find({});
+        let agencyEmails = agencydata.map((e) => e.corporate_email.toString());
+        let jodUID = jobPostingData?.job_id;
 
-      let agencyEmails = agencydata.map(e => e.corporate_email.toString());
-      let jodUID = jobPostingData?.job_id;
+        console.log(
+          `H2I - ${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`
+        );
+        console.log(
+          ` <p>Find your job <a href="https://hire2inspire.com/jobgrid" target="blank" />${jodUID}</a></p>`
+        );
 
-      console.log(`H2I - ${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`)
-      console.log(` <p>Find your job <a href="https://hire2inspire.com/jobgrid" target="blank" />${jodUID}</a></p>`)
-
-      sgMail.setApiKey(process.env.SENDGRID)
-      const new_msg = {
-        to: agencyEmails, // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`,
-        html: `
+        sgMail.setApiKey(process.env.SENDGRID);
+        const new_msg = {
+          to: agencyEmails, // Change to your recipient
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `${jodUID} | Calling All Talent Architects, A New Blueprint Awaits!`,
+          html: `
       <head>
           <title>Notification:New Job Posting</title>
       </head>
@@ -316,86 +354,164 @@ module.exports = {
     <p>hire2Inspire</p>
     <p>&nbsp;</p>
     </body>
-        `
+        `,
+        };
+        sgMail
+          .sendMultiple(new_msg)
+          .then(() => {
+            console.log("Email sent to allagencies");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      } else {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          to: empEmail, // Change to your recipient
+          // to: "emp009@yopmail.com",
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `Job Rejection Mail`,
+          html: `
+      <head>
+          <title>Notification: Job Rejection Mail</title>
+      </head>
+        <body>
+        <p>Dear ${empFname} ${empLname},</p>
+        <p>We hope this message finds you well. Unfortunately, we regret to inform you that your recent job posting did not meet our platform’s guidelines and has not been approved for publication.</p>
+        <p>Here are the details of the job posting that was submitted:</p>
+        <ul>
+          <li><strong>Job Title:</strong> ${jobName}</li>
+          <li><strong>Company:</strong> ${compName}</li>
+        </ul>
+        <p>We encourage you to review our job posting guidelines and make any necessary adjustments to align with our standards. Once you have revised the posting, you are welcome to resubmit it for approval.</p>
+        <p>If you need further clarification on the reasons for this decision or assistance in editing your job posting, please do not hesitate to reach out to our support team. We are here to help you successfully connect with potential candidates.</p>
+        <p>Thank you for your understanding and cooperation.</p>
+        <p>Regards,</p>
+        <p>Hire2Inspire</p>
+      </body>
+
+    `,
+        };
+
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent to emp");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       }
-      sgMail
-        .sendMultiple(new_msg)
-        .then(() => {
-          console.log('Email sent to allagencies')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
 
       if (jobPostingData) {
         return res.status(200).send({
           error: false,
-          message: "Admin approval for job updated."
+          message: "Admin approval for job updated.",
         });
       }
 
       return res.status(400).send({
         error: false,
-        message: "Job approval failed."
+        message: "Job approval failed.",
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   agnecyApproval: async (req, res, next) => {
     try {
-      let token = req.headers['authorization']?.split(" ")[1];
-      let { userId, dataModel } = await getUserViaToken(token)
-      const checkAdmin = await Admin.findOne({ _id: userId })
-      if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "Admin not authorized." })
+      let token = req.headers["authorization"]?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token);
+      const checkAdmin = await Admin.findOne({ _id: userId });
+      if (!checkAdmin && dataModel != "admins")
+        return res
+          .status(401)
+          .send({ error: true, message: "Admin not authorized." });
 
-      const agencyData = await Agency.findOneAndUpdate({ _id: req.params.jobId }, { is_approved: req.body.is_approved }, { new: true }).populate([
+      const agencyData = await Agency.findOneAndUpdate(
+        { _id: req.params.jobId },
+        { is_approved: req.body.is_approved },
+        { new: true }
+      ).populate([
         {
           path: "",
-          select: ""
-        }
+          select: "",
+        },
       ]);
 
-      console.log("agencyData", agencyData)
+      console.log("agencyData", agencyData);
 
       let agencyapprove;
       if (agencyData?.is_approved == false) {
-        agencyapprove = await Agency.findOneAndUpdate({ _id: req.params.jobId }, { is_welcome: false }, { new: true });
-      };
+        agencyapprove = await Agency.findOneAndUpdate(
+          { _id: req.params.jobId },
+          { is_welcome: false },
+          { new: true }
+        );
+      }
 
-      console.log("agencyapprove", agencyapprove)
+      console.log("agencyapprove", agencyapprove);
 
       let agencyName = agencyData?.name;
       let agencyEmail = agencyData?.corporate_email;
 
-      sgMail.setApiKey(process.env.SENDGRID)
-      const msg = {
-        to: agencyEmail, // Change to your recipient
-        from: 'info@hire2inspire.com', // Change to your verified sender
-        subject: `Confirmation of Agency Approval`,
-        html: `
-       <head>
-       <title>Confirmation of Agency Approval</title>
-     </head>
-     <body>
-        <p>Dear ${agencyName},</p>
-        <p>I hope this email finds you well. We are pleased to inform you that your agency's application for approval has been successfully processed and has received the necessary clearance. We are excited to confirm your agency's status as an approved partner with Hire2Inspire.</p>
-        <p>Regards,</p>
-        <p>Hire2Inspire</p>
-      </body>
-`
+      if (agencyData?.is_approved == true) {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          to: agencyEmail, // Change to your recipient
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `Confirmation of Agency Approval`,
+          html: `
+         <head>
+         <title>Confirmation of Agency Approval</title>
+       </head>
+       <body>
+          <p>Dear ${agencyName},</p>
+          <p>I hope this email finds you well. We are pleased to inform you that your agency's application for approval has been successfully processed and has received the necessary clearance. We are excited to confirm your agency's status as an approved partner with Hire2Inspire.</p>
+          <p>Best regards,</p>
+          <p>Hire2Inspire</p>
+        </body>
+  `,
+        };
+
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      } else {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          to: agencyEmail, // Change to your recipient
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `Agency Rejection Email`,
+          html: `
+         <head>
+         <title>Agency Rejection Email</title>
+       </head>
+       <body>
+          <p>Dear ${agencyName},</p>
+          <p>I hope this email finds you well. We regret to inform you that, after careful consideration, your agency's application for approval has not met the necessary criteria at this time. Therefore, we are unable to grant your agency approved partner status with Hire2Inspire.</p>
+          <p>Thank you for your understanding.</p>
+          <p>Best regards,</p>
+          <p>Hire2Inspire</p>
+        </body>
+  `,
+        };
+
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       }
-
-      sgMail
-        .send(msg)
-        .then(() => {
-          console.log('Email sent')
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-
 
       // if(agencyapprove) {
       //   return res.status(200).send({
@@ -403,78 +519,95 @@ module.exports = {
       //     message: "Admin approval for agency updated."
       //   });
       // }
-      return res.status(400).send({
+      return res.status(200).send({
         error: false,
-        message: "Admin approval for agency updated."
+        message: "Admin approval for agency updated.",
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   adminDetail: async (req, res, next) => {
     try {
-      let token = req.headers['authorization']?.split(" ")[1];
-      let { userId, dataModel } = await getUserViaToken(token)
-      const checkAdmin = await Admin.findOne({ _id: userId }).select("-password -otp")
-      if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "Admin not authorized." })
+      let token = req.headers["authorization"]?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token);
+      const checkAdmin = await Admin.findOne({ _id: userId }).select(
+        "-password -otp"
+      );
+      if (!checkAdmin && dataModel != "admins")
+        return res
+          .status(401)
+          .send({ error: true, message: "Admin not authorized." });
 
       return res.status(200).send({
         error: false,
         message: "Admin detail found.",
-        data: checkAdmin
+        data: checkAdmin,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   adminUpdate: async (req, res, next) => {
     try {
-      const result = await Admin.findOneAndUpdate({ _id: req.params.adminId }, req.body, { new: true });
+      const result = await Admin.findOneAndUpdate(
+        { _id: req.params.adminId },
+        req.body,
+        { new: true }
+      );
 
-      if (!result) return res.status(200).send({ error: false, message: "Admin not updated" })
+      if (!result)
+        return res
+          .status(200)
+          .send({ error: false, message: "Admin not updated" });
 
       return res.status(200).send({
         error: false,
         message: "Admin Updated",
-        data: result
-      })
+        data: result,
+      });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
-
   paymentStatusUpdate: async (req, res, next) => {
     try {
-      let token = req.headers['authorization']?.split(" ")[1];
-      let { userId, dataModel } = await getUserViaToken(token)
-      const checkAdmin = await Admin.findOne({ _id: userId }).select("-password -otp")
-      if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "Admin not authorized." })
+      let token = req.headers["authorization"]?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token);
+      const checkAdmin = await Admin.findOne({ _id: userId }).select(
+        "-password -otp"
+      );
+      if (!checkAdmin && dataModel != "admins")
+        return res
+          .status(401)
+          .send({ error: true, message: "Admin not authorized." });
 
       let transactionId = req.body.transactionId;
       let type = req.body.type;
 
       let description = req.body.description;
 
-      console.log("description", description)
+      console.log("description", description);
 
       let emp_id = req.body.emp_id;
 
       // console.log(invoice_file,"msg")
 
-      const getEmpData = await Transaction.find({ employer: emp_id })
+      const getEmpData = await Transaction.find({ employer: emp_id });
 
-
-      function addPaymentRes(transactions, targetTransactionId, invoiceValue, desc) {
-
+      function addPaymentRes(
+        transactions,
+        targetTransactionId,
+        invoiceValue,
+        desc
+      ) {
         for (let i = 0; i < transactions.length; i++) {
           if (transactions[i].transaction_id == targetTransactionId) {
-
             transactions[i]["type"] = invoiceValue;
             transactions[i]["description"] = desc;
-
           }
         }
         return transactions;
@@ -482,30 +615,42 @@ module.exports = {
         //    console.log(transactions,'transactions')
       }
 
-      const updatedData = addPaymentRes(getEmpData[0].passbook_amt, transactionId
-        , "paid", description);
+      const updatedData = addPaymentRes(
+        getEmpData[0].passbook_amt,
+        transactionId,
+        "paid",
+        description
+      );
       //   console.log(req.body,"msg")
       //console.log(updatedData);
 
-      const result = await Transaction.findOneAndUpdate({ employer: emp_id }, { passbook_amt: updatedData }, { new: true });
+      const result = await Transaction.findOneAndUpdate(
+        { employer: emp_id },
+        { passbook_amt: updatedData },
+        { new: true }
+      );
 
       return res.status(200).send({
         error: false,
         message: "payment status update.",
-        data: result
+        data: result,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
-
   paymentAgencyStatusUpdate: async (req, res, next) => {
     try {
-      let token = req.headers['authorization']?.split(" ")[1];
-      let { userId, dataModel } = await getUserViaToken(token)
-      const checkAdmin = await Admin.findOne({ _id: userId }).select("-password -otp")
-      if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "Admin not authorized." })
+      let token = req.headers["authorization"]?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token);
+      const checkAdmin = await Admin.findOne({ _id: userId }).select(
+        "-password -otp"
+      );
+      if (!checkAdmin && dataModel != "admins")
+        return res
+          .status(401)
+          .send({ error: true, message: "Admin not authorized." });
 
       let transactionId = req.body.transactionId;
       let type = req.body.type;
@@ -516,17 +661,18 @@ module.exports = {
 
       // console.log(invoice_file,"msg")
 
-      const getEmpData = await AgencyTransaction.find({ agency: agencyId })
+      const getEmpData = await AgencyTransaction.find({ agency: agencyId });
 
-
-      function addPaymentRes(transactions, targetTransactionId, invoiceValue, desc) {
-
+      function addPaymentRes(
+        transactions,
+        targetTransactionId,
+        invoiceValue,
+        desc
+      ) {
         for (let i = 0; i < transactions.length; i++) {
           if (transactions[i].transaction_id == targetTransactionId) {
-
             transactions[i]["type"] = invoiceValue;
             transactions[i]["description"] = desc;
-
           }
         }
         return transactions;
@@ -534,65 +680,72 @@ module.exports = {
         //    console.log(transactions,'transactions')
       }
 
-      const updatedData = addPaymentRes(getEmpData[0].passbook_amt, transactionId
-        , "paid", description);
+      const updatedData = addPaymentRes(
+        getEmpData[0].passbook_amt,
+        transactionId,
+        "paid",
+        description
+      );
       //   console.log(req.body,"msg")
       console.log(updatedData);
 
-      const result = await AgencyTransaction.findOneAndUpdate({ agency: agencyId }, { passbook_amt: updatedData, description: req.body.description }, { new: true });
+      const result = await AgencyTransaction.findOneAndUpdate(
+        { agency: agencyId },
+        { passbook_amt: updatedData, description: req.body.description },
+        { new: true }
+      );
 
       return res.status(200).send({
         error: false,
         message: "payment status update.",
-        data: result
+        data: result,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   refreshToken: async (req, res, next) => {
     try {
-      const { refreshToken } = req.body
-      if (!refreshToken) throw createError.BadRequest()
-      const userId = await verifyRefreshToken(refreshToken)
+      const { refreshToken } = req.body;
+      if (!refreshToken) throw createError.BadRequest();
+      const userId = await verifyRefreshToken(refreshToken);
 
-      const accessToken = await signAccessToken(userId, "admins")
-      const refToken = await signRefreshToken(userId, "admins")
-      res.send({ accessToken: accessToken, refreshToken: refToken })
+      const accessToken = await signAccessToken(userId, "admins");
+      const refToken = await signRefreshToken(userId, "admins");
+      res.send({ accessToken: accessToken, refreshToken: refToken });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   dashboard: async (req, res, next) => {
     try {
-      let token = req.headers['authorization']?.split(" ")[1];
-      let { userId, dataModel } = await getUserViaToken(token)
-      const checkEmployer = await Employer.findOne({ _id: userId })
-      if (!checkEmployer && dataModel != "employers") return res.status(400).send({ error: true, message: "Employer not found." })
+      let token = req.headers["authorization"]?.split(" ")[1];
+      let { userId, dataModel } = await getUserViaToken(token);
+      const checkEmployer = await Employer.findOne({ _id: userId });
+      if (!checkEmployer && dataModel != "employers")
+        return res
+          .status(400)
+          .send({ error: true, message: "Employer not found." });
 
       const hiringData = await HiringDetail.find({ employer: userId });
 
       const billingData = await Billing.find({ employer: userId });
-
 
       let totalHireAmount = 0;
       if (billingData.length != null) {
         //console.log("hii")
         // let totalHireAmount = 0;
         hiringData.forEach((element, index) => {
-          totalHireAmount += element?.comp_offered
+          totalHireAmount += element?.comp_offered;
         });
       }
-
-
 
       // let totalHireAmount = 0;
       // hiringData.forEach((element,index)=>{
       //   totalHireAmount += element?.comp_offered
       // });
-
 
       let totalHired = hiringData.length;
 
@@ -606,12 +759,14 @@ module.exports = {
       }
 
       let totalgiveto = 0;
-      const agencyTransactionData = await AgencyTransaction.find({ "passbook_amt.employer": userId });
+      const agencyTransactionData = await AgencyTransaction.find({
+        "passbook_amt.employer": userId,
+      });
       for (let i = 0; i < agencyTransactionData?.length; i++) {
         if (agencyTransactionData[i]?.total_amount !== undefined) {
           totalgiveto = totalgiveto + agencyTransactionData[i]?.total_amount;
         }
-      };
+      }
 
       let totalSaving = totalSpend - totalgiveto;
 
@@ -623,97 +778,106 @@ module.exports = {
           averageSalary: (totalHireAmount / totalHired).toFixed(2),
           averagePlacementFee: 0.5,
           totalSpend: totalSpend,
-          totalSaving: totalSaving
-
-        }
-      })
+          totalSaving: totalSaving,
+        },
+      });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   logout: async (req, res, next) => {
     try {
-      const { refreshToken } = req.body
-      if (!refreshToken) throw createError.BadRequest()
-      const userId = await verifyRefreshToken(refreshToken)
-      res.sendStatus(204)
-
+      const { refreshToken } = req.body;
+      if (!refreshToken) throw createError.BadRequest();
+      const userId = await verifyRefreshToken(refreshToken);
+      res.sendStatus(204);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
 
   reportlist: async (req, res, next) => {
     try {
-      const jobData = await JobPosting.find({ is_approved: true }).populate([
-        {
-          path: "employer",
-          select: " "
-        }
-      ]).sort({ _id: -1 });
+      const jobData = await JobPosting.find({ is_approved: true })
+        .populate([
+          {
+            path: "employer",
+            select: " ",
+          },
+        ])
+        .sort({ _id: -1 });
 
-      let jobIds = jobData.map(e => e._id.toString());
+      let jobIds = jobData.map((e) => e._id.toString());
 
       //console.log({jobIds})
 
-      let agencydata = await AgencyJobModel.find({ job: { $in: jobIds } }).populate([
-        {
-          path: "agency",
-          select: ""
-        },
-        {
-          path: "job",
-          select: "job_name"
-        }
-      ]).select("agency job createdAt").sort({ _id: -1 });
+      let agencydata = await AgencyJobModel.find({ job: { $in: jobIds } })
+        .populate([
+          {
+            path: "agency",
+            select: "",
+          },
+          {
+            path: "job",
+            select: "job_name",
+          },
+        ])
+        .select("agency job createdAt")
+        .sort({ _id: -1 });
 
       // console.log({agencydata})
 
-      let candidatedata = await CandidateJobModel.find({ emp_job: { $in: jobIds } }).populate([
-        {
-          path: "candidate",
-          select: " ",
-          populate: {
-            path: "agency",
-            select: " "
-          }
-        },
-        {
-          path: "emp_job",
-          select: "job_name"
+      let candidatedata = await CandidateJobModel.find({
+        emp_job: { $in: jobIds },
+      })
+        .populate([
+          {
+            path: "candidate",
+            select: " ",
+            populate: {
+              path: "agency",
+              select: " ",
+            },
+          },
+          {
+            path: "emp_job",
+            select: "job_name",
+          },
+        ])
+        .select("candidate emp_job createdAt")
+        .sort({ _id: -1 });
 
-        }
-      ]).select("candidate emp_job createdAt").sort({ _id: -1 });
-
-      let candidateIds = candidatedata.map(e => e.candidate?._id.toString());
+      let candidateIds = candidatedata.map((e) => e.candidate?._id.toString());
 
       // console.log({candidateIds})
 
-      let hiringData = await HiringDetail.find({ candidate: { $in: candidateIds } }).populate([
-        {
-          path: "employer",
-          sselect: ""
-        },
-        {
-          path: "job",
-          sselect: ""
-        },
-        {
-          path: "candidate",
-          sselect: ""
-        }
-      ]).sort({ _id: -1 })
+      let hiringData = await HiringDetail.find({
+        candidate: { $in: candidateIds },
+      })
+        .populate([
+          {
+            path: "employer",
+            sselect: "",
+          },
+          {
+            path: "job",
+            sselect: "",
+          },
+          {
+            path: "candidate",
+            sselect: "",
+          },
+        ])
+        .sort({ _id: -1 });
 
       return res.status(200).send({
         error: false,
         message: "Report update",
-        data: { jobData, agencydata, candidatedata, hiringData }
-      })
+        data: { jobData, agencydata, candidatedata, hiringData },
+      });
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
-
-}
-
+};

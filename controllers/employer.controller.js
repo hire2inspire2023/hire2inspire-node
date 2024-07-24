@@ -404,8 +404,6 @@ module.exports = {
       //const sgMail = require('@sendgrid/mail')
       sgMail.setApiKey(process.env.SENDGRID);
 
-      console.log(process.env.front_url);
-
       let msg2 = {
         to: empEmail, // Change to your recipient
         from: "info@hire2inspire.com", // Change to your verified sender
@@ -431,7 +429,6 @@ module.exports = {
         <p> Hire2Inspire </p>
       </body>`,
       };
-
       sgMail
         .send(msg2)
         .then(() => {
@@ -560,22 +557,20 @@ module.exports = {
 
       const employerSubscriptionData = await UserSubscription.find({
         employer: userId,
-      })
-        .populate([
-          {
-            path: "employer",
-            select: "",
-          },
-          {
-            path: "package",
+      }).populate([
+        {
+          path: "employer",
+          select: "",
+        },
+        {
+          path: "package",
+          select: " ",
+          populate: {
+            path: "package_type",
             select: " ",
-            populate: {
-              path: "package_type",
-              select: " ",
-            },
           },
-        ])
-        .sort({ _id: -1 });
+        },
+      ]);
 
       console.log("employerSubscriptionData", employerSubscriptionData);
 
@@ -1639,7 +1634,27 @@ module.exports = {
     }
   },
 
-   resendEmail: async (req, res, next) => {
+  //   empdetail: async (req, res, next) => {
+  //   try {
+  //     let token = req.headers['authorization']?.split(" ")[1];
+  //     let { userId, dataModel } = await getUserViaToken(token)
+  //     const checkAdmin = await Admin.findOne({ _id: userId })
+  //     if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "User unauthorized." })
+  //     const employerData = await Employer.findOne({ _id: req.params.id })
+
+  //     res.status(200).send({
+  //       error: false,
+  //       message: 'Employer detail',
+  //       data: employerData,
+  //       employerSubscriptionData
+  //       // billingData
+  //     })
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // },
+
+  resendEmail: async (req, res, next) => {
     try {
       console.log(req.body.email);
       const empDet = await Employer.findOne({ email: req.body.email });
@@ -1708,24 +1723,26 @@ module.exports = {
     }
   },
 
-
-  //   empdetail: async (req, res, next) => {
-  //   try {
-  //     let token = req.headers['authorization']?.split(" ")[1];
-  //     let { userId, dataModel } = await getUserViaToken(token)
-  //     const checkAdmin = await Admin.findOne({ _id: userId })
-  //     if (!checkAdmin && dataModel != "admins") return res.status(401).send({ error: true, message: "User unauthorized." })
-  //     const employerData = await Employer.findOne({ _id: req.params.id })
-
-  //     res.status(200).send({
-  //       error: false,
-  //       message: 'Employer detail',
-  //       data: employerData,
-  //       employerSubscriptionData
-  //       // billingData
-  //     })
-  //   } catch (error) {
-  //     next(error)
-  //   }
-  // },
+  empdelete: async (req, res, next) => {
+    try {
+      const result = await Employer.deleteOne({
+        _id: req.params.empId,
+      });
+      if (result.deletedCount == 1) {
+        message = {
+          error: false,
+          message: "Employer deleted successfully!",
+        };
+        res.status(200).send(message);
+      } else {
+        message = {
+          error: true,
+          message: "Operation failed!",
+        };
+        res.status(500).send(message);
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
 };

@@ -126,6 +126,9 @@ const JobPostingSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
+    interview_date: {
+      type: Date,
+    },
     screeing_questions: {
       type: Array,
       //required: true
@@ -188,4 +191,3 @@ const JobPostingSchema = mongoose.Schema(
 );
 
 module.exports = mongoose.model("job_postings", JobPostingSchema);
-

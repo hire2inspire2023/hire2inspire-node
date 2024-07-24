@@ -11,13 +11,13 @@ const newPayment = async (req, res) => {
         page = pagetype;
         const data = {
             //merchantId: 'PGTESTPAYUAT',
-            merchantId: 'M22UKH0NQ4M7L',
-            //  merchantTransactionId: merchantTransactionId,
-            merchantTransactionId: "MUID" + Date.now(),
+            merchantId : 'M22UKH0NQ4M7L',
+          //  merchantTransactionId: merchantTransactionId,
+            merchantTransactionId:"MUID" + Date.now(), 
             merchantUserId: req.body.merchantUserId,
             name: req.body.name,
             amount: req.body.amount * 100,
-            //  amount:1*100,
+          //  amount:1*100,
             callbackUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectUrl: `https://hire2inspire-backend-aimfw.kinsta.app/api/phone-pay/status`,
             redirectMode: 'POST',
@@ -29,14 +29,14 @@ const newPayment = async (req, res) => {
         const payload = JSON.stringify(data);
         const payloadMain = Buffer.from(payload).toString('base64');
         //const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'  
-        const key = '22743b48-6e95-4685-bb40-cb9760b00beb'
+        const key = '22743b48-6e95-4685-bb40-cb9760b00beb' 
         const keyIndex = 1;
         const string = payloadMain + '/pg/v1/pay' + key;
         const sha256 = crypto.createHash('sha256').update(string).digest('hex');
         const checksum = sha256 + '###' + keyIndex;
 
-        // const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
-        const prod_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay"
+       // const prod_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+       const prod_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay"
         const options = {
             method: 'POST',
             url: prod_URL,
@@ -55,11 +55,11 @@ const newPayment = async (req, res) => {
             return res.send(response.data.data.instrumentResponse.redirectInfo.url)
         })
             .catch(function (error) {
-                console.error(error.response, 'error');
+                console.error(error.response,'error');
             });
 
     } catch (error) {
-        console.error(error, 'error100');
+        console.error(error,'error100');
         res.status(500).send({
             message: error.message,
             success: false
@@ -74,7 +74,7 @@ const checkStatus = async (req, res) => {
     const merchantId = 'M22UKH0NQ4M7L';
     console.log(res.req.body, "result");
     // const key = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
-    const key = '22743b48-6e95-4685-bb40-cb9760b00beb'
+    const key = '22743b48-6e95-4685-bb40-cb9760b00beb' 
     const keyIndex = 1;
     const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + key;
     const sha256 = crypto.createHash('sha256').update(string).digest('hex');
@@ -163,7 +163,7 @@ const paymentVerify = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error, 'check errror')
+        console.log(error,'check errror')
         next(error);
     }
 }
