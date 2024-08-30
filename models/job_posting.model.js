@@ -38,12 +38,12 @@ const JobPostingSchema = mongoose.Schema(
     min_work_exp: {
       type: String,
       trim: true,
-      required: true,
+      // required: true,
     },
     max_work_exp: {
       type: String,
       trim: false,
-      required: true,
+      // required: true,
     },
     min_compensation: {
       type: String,
@@ -186,6 +186,10 @@ const JobPostingSchema = mongoose.Schema(
     urgent_mesg: {
       type: String,
     },
+    isFresher : {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
