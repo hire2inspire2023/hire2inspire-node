@@ -180,11 +180,14 @@ const agencyTransactionSchema = mongoose.Schema({
     is_active:{
         type:Boolean,
         default:true
-    }
+    },
 }],
     total_amount:{
         type:Number
     },
+    invoiceUrl : {
+        type : String
+    }
 
 }, {timestamps: true});
 

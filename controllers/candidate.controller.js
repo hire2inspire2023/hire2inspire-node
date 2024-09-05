@@ -25,12 +25,15 @@ const sgMail = require("@sendgrid/mail");
 //     requireTLS: true,
 // });
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-  storageBucket: process.env.BUCKET_URL,
-});
-app.locals.bucket = admin.storage().bucket();
+const {bucket} = require('./../config/fireBaseConfig')
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: process.env.FIREBASE_DATABASE_URL,
+//   storageBucket: process.env.BUCKET_URL,
+// });
+// app.locals.bucket = admin.storage().bucket();
+
+
 
 module.exports = {
   /**
@@ -430,7 +433,13 @@ module.exports = {
           .send({ error: true, message: "Only pdf file is allowed." });
 
       const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;
-      const fileData = await app.locals.bucket
+
+      // const fileData = await app.locals.bucket
+      // .file(fileName)
+      // .createWriteStream()
+      // .end(req.file.buffer);
+
+      const fileData = await bucket
         .file(fileName)
         .createWriteStream()
         .end(req.file.buffer);

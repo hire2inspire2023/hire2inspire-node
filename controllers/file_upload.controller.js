@@ -1,15 +1,16 @@
 const mongoose = require("mongoose");
 const path = require('path')
-var admin = require("firebase-admin");
-var serviceAccount = require("../hire2inspire-firebase-adminsdk.json");
+// var admin = require("firebase-admin");
+// var serviceAccount = require("../hire2inspire-firebase-adminsdk.json");
 const express = require('express')
 const app = express()
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-    storageBucket: process.env.BUCKET_URL
-}, "default");
-app.locals.bucket = admin.storage().bucket()
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+//     databaseURL: process.env.FIREBASE_DATABASE_URL,
+//     storageBucket: process.env.BUCKET_URL
+// }, "default");
+// app.locals.bucket = admin.storage().bucket()
+const {bucket} = require('../config/fireBaseConfig')
 
 const csv = require('csv-parser');
 const fs = require('fs');
@@ -31,7 +32,8 @@ module.exports = {
     upload: async (req, res, next) => {
         try {
             const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;
-            const fileData = await app.locals.bucket.file(fileName).createWriteStream().end(req.file.buffer);
+            // const fileData = await app.locals.bucket.file(fileName).createWriteStream().end(req.file.buffer);
+            const fileData = await bucket.file(fileName).createWriteStream().end(req.file.buffer);
             
             fileurl = `https://firebasestorage.googleapis.com/v0/b/hire2inspire-62f96.appspot.com/o/${fileName}?alt=media`;
             

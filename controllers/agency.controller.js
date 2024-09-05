@@ -21,6 +21,11 @@ const Token = require("../models/token.model");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
+const config = require('./../config/config')
+const {bucket} = require('./../config/fireBaseConfig')
+
+const { sendRes , sendError } = require('./../utils/res_handler')
+
 
 // var transport = nodemailer.createTransport({
 //   host: process.env.EMAIL_HOST,
@@ -869,6 +874,41 @@ module.exports = {
       }
     } catch (error) {
       next(error);
+    }
+  },
+
+  invoiceUpload: async (req, res, next) => {
+    try {
+
+      let { id } = req.params;
+      if (!id) {
+        throw new Error("Id not found");
+      }
+
+      let agencyObj = await AgencyTransaction.findOne({ _id: id });
+
+      if (!agencyObj) {
+        throw new Error("Agency Transaction id Not Found");
+      }
+
+      if (!req.file) {
+        throw new Error("Pleas Upload Invoice");
+      }
+
+      const fileName = `AGENCY_INVOICE_${agencyObj?._id}_${req.file.originalname}`;
+        bucket
+        .file(fileName)
+        .createWriteStream()
+        .end(req.file.buffer);
+
+      let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
+
+      await AgencyTransaction.findOneAndUpdate({ _id: id } ,{ invoiceUrl: fileurl });
+
+      return sendRes(res, "File Uploaded Succesfully", fileurl);
+    } catch (err) {
+      console.log(err)
+      return sendError(res, 403, typeof err == "string" ? err : err.message);
     }
   },
 };
