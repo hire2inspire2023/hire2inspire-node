@@ -64,6 +64,6 @@ AgencyRouter.post("/resend-email", AgencyController.resendEmail);
 
 AgencyRouter.delete("/delete/:agId", AgencyController.agencydelete);
 
-AgencyRouter.post("/invoiceUpload/:id", verifyAccessToken, fileUpload.single('invoiceRaised'), AgencyController.invoiceUpload);
+AgencyRouter.post("/invoiceUpload/:id", fileUpload.single('invoiceRaised'), AgencyController.invoiceUpload);
 
 module.exports = AgencyRouter;
