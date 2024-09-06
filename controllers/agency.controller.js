@@ -885,7 +885,13 @@ module.exports = {
         throw new Error("Id not found");
       }
 
-      let agencyObj = await AgencyTransaction.findOne({ _id: id });
+      let agencyObj = await AgencyTransaction.findOne({
+        passbook_amt: {
+          $elemMatch: {
+            _id: id,
+          },
+        },
+      });
 
       if (!agencyObj) {
         throw new Error("Agency Transaction id Not Found");
@@ -903,7 +909,17 @@ module.exports = {
 
       let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
 
-      await AgencyTransaction.findOneAndUpdate({ _id: id } ,{ invoiceUrl: fileurl });
+      await AgencyTransaction.updateOne(
+        {
+          _id: agencyObj?._id,
+          "passbook_amt._id": id,
+        },
+        {
+          $set: {
+            "passbook_amt.$.invoice_file": fileurl,
+          },
+        }
+      );
 
       return sendRes(res, "File Uploaded Succesfully", fileurl);
     } catch (err) {
