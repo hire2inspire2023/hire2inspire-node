@@ -23,7 +23,7 @@ const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
 const config = require('./../config/config')
 const {bucket} = require('./../config/fireBaseConfig')
-
+const pdfToBase64 = require('../config/pdfbase64')
 const { sendRes , sendError } = require('./../utils/res_handler')
 
 
@@ -879,7 +879,6 @@ module.exports = {
 
   invoiceUpload: async (req, res, next) => {
     try {
-
       let { id } = req.params;
       if (!id) {
         throw new Error("Id not found");
@@ -891,7 +890,11 @@ module.exports = {
             _id: id,
           },
         },
-      });
+      }).populate([
+        {
+          path: "agency",
+        },
+      ]);
 
       if (!agencyObj) {
         throw new Error("Agency Transaction id Not Found");
@@ -902,10 +905,7 @@ module.exports = {
       }
 
       const fileName = `AGENCY_INVOICE_${agencyObj?._id}_${req.file.originalname}`;
-        bucket
-        .file(fileName)
-        .createWriteStream()
-        .end(req.file.buffer);
+      bucket.file(fileName).createWriteStream().end(req.file.buffer);
 
       let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
 
@@ -921,9 +921,46 @@ module.exports = {
         }
       );
 
+      const pdfBase64 = await pdfToBase64(fileurl);
+
+      if (agencyObj.agency.corporate_email) {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          cc: agencyObj.agency.corporate_email,
+          to: config.emailInfoHire2Inspire, // Change to your recipient
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `Tax Invoice for Candidate hired`,
+          html: `
+        <p>Hello,</p>
+        <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
+        <p>Download Invoice Link: <a href="${fileurl}">Click Here To Download Invoice</a> <br>or<br> copy the link and paste : ${fileurl}</p>
+        <p>Should you have any questions or require further clarification regarding the invoice, please don't hesitate to reach out to me.</p>
+        <p>Thank you for your prompt attention to this matter.</p>
+        <p>Regards,<br/>Hire2Inspire</p>
+        `,
+        attachments: [
+          {
+            content: pdfBase64,
+            filename: 'taxinvoice.pdf',
+            type: 'application/pdf',
+            disposition: 'attachment',
+          },
+        ],
+  
+        };
+        await sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent for Agency");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+
       return sendRes(res, "File Uploaded Succesfully", fileurl);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return sendError(res, 403, typeof err == "string" ? err : err.message);
     }
   },
