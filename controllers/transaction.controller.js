@@ -4,6 +4,7 @@ const AgencyTransaction = require("../models/agency_transaction.model");
 const Agency = require("../models/agency.model");
 const { getUserViaToken, verifyAccessToken } = require("../helpers/jwt_helper");
 const sgMail = require("@sendgrid/mail");
+const fetch = require('node-fetch')
 
 module.exports = {
   list: async (req, res, next) => {
@@ -418,6 +419,9 @@ module.exports = {
 
       let transctionData = await Transaction.findOne({
         "passbook_amt.transaction_id": transactionId,
+      }).populate({
+        path : 'employer',
+        select : 'email'
       });
 
       console.log({ transctionData });
@@ -434,8 +438,13 @@ module.exports = {
 
       console.log({ invoiceNo });
 
+      const response = await fetch(file);
+      const fileBuffer = await response.buffer(); // Get the file as a buffer
+      const base64File = fileBuffer.toString('base64');
+
       sgMail.setApiKey(process.env.SENDGRID);
       const newmsg = {
+        cc : transctionData?.employer?.email || '',
         to: recipents, // Change to your recipient
         from: "info@hire2inspire.com",
         subject: `Invoice for Candidate hired ${invoiceNo}`,
@@ -448,6 +457,15 @@ module.exports = {
         <p>Thank you for your prompt attention to this matter.</p>
         <p>Regards,<br/>Hire2Inspire</p>
         `,
+        attachments: [
+          {
+            content: base64File,
+            filename: 'taxinvoice.pdf',
+            type: 'application/pdf',
+            disposition: 'attachment',
+          },
+        ],
+        
       };
 
       sgMail
