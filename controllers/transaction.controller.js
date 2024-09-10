@@ -447,7 +447,7 @@ module.exports = {
         cc : transctionData?.employer?.email || '',
         to: recipents, // Change to your recipient
         from: "info@hire2inspire.com",
-        subject: `Invoice for Candidate hired ${invoiceNo}`,
+        subject: `Tax Invoice for Candidate hired ${invoiceNo}`,
         html: `
         <p>Hello,</p>
         <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
