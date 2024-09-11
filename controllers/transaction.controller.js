@@ -4,7 +4,7 @@ const AgencyTransaction = require("../models/agency_transaction.model");
 const Agency = require("../models/agency.model");
 const { getUserViaToken, verifyAccessToken } = require("../helpers/jwt_helper");
 const sgMail = require("@sendgrid/mail");
-const fetch = require('node-fetch')
+const pdfToBase64Helpers = require('../helpers/pdfbase64')
 
 module.exports = {
   list: async (req, res, next) => {
@@ -424,7 +424,7 @@ module.exports = {
         select : 'email'
       });
 
-      console.log({ transctionData });
+      // console.log({ transctionData });
 
       let invoiceNo;
       transctionData.passbook_amt.forEach((transaction) => {
@@ -436,11 +436,9 @@ module.exports = {
 
       // let invoiceNo = transctionData?.passbook_amt?.invoice_No;
 
-      console.log({ invoiceNo });
+      // console.log({ invoiceNo });
 
-      const response = await fetch(file);
-      const fileBuffer = await response.buffer(); // Get the file as a buffer
-      const base64File = fileBuffer.toString('base64');
+      const base64File = await pdfToBase64Helpers(file);
 
       sgMail.setApiKey(process.env.SENDGRID);
       const newmsg = {

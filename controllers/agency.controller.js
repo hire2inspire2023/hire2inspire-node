@@ -23,7 +23,7 @@ const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
 const config = require('./../config/config')
 const {bucket} = require('./../config/fireBaseConfig')
-const pdfToBase64 = require('../config/pdfbase64')
+const pdfToBase64Helpers = require('../helpers/pdfbase64')
 const { sendRes , sendError } = require('./../utils/res_handler')
 
 
@@ -921,7 +921,7 @@ module.exports = {
         }
       );
 
-      const pdfBase64 = await pdfToBase64(fileurl);
+      const pdfBase64 = await pdfToBase64Helpers(fileurl);
 
       if (agencyObj.agency.corporate_email) {
         sgMail.setApiKey(process.env.SENDGRID);
