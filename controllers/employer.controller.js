@@ -529,7 +529,7 @@ module.exports = {
             select: " ",
             populate: {
               path: "job",
-              select: "job_name job_id min_work_exp max_work_exp",
+              select: "job_name job_id min_work_exp max_work_exp isFresher",
             },
           },
         },
@@ -549,7 +549,7 @@ module.exports = {
             select: " ",
             populate: {
               path: "job",
-              select: "job_name job_id min_work_exp max_work_exp",
+              select: "job_name job_id min_work_exp max_work_exp isFresher",
             },
           },
         },
