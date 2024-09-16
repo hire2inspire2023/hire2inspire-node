@@ -437,10 +437,20 @@ module.exports = {
                 .send({ error: true, message: "Invalid CSV headers." });
             }
 
+            const agencyJobExist = await AgencyJobModel.findOne({
+              _id: req.body.agency_job,
+            });
+      
+            // if corresponding agency job not exist
+            if (!agencyJobExist)
+              return res
+                .status(400)
+                .send({ error: true, message: "AGgency job does not exist" });
+
             results.map((e) => {
-              e.agency_job = req.body.agency_job;
-              e.job = req.body.job;
-              e.agency = req.body.agency;
+              e.agency_job = agencyJobExist?._id;
+              e.job = agencyJobExist?.job;
+              e.agency = agencyJobExist?.agency;
               e.fname = e["First Name"];
               (e.lname = e["Last Name"]),
                 (e.phone = e["Phone Number"]),
@@ -509,32 +519,39 @@ module.exports = {
             const candidateEmails = resp.map((e) => e.email);
 
             for (let i in resp) {
-              let Emp_job = resp[i]?.job?._id;
-              let Agency_id = resp[i]?.agency?._id;
-              let Candidate = resp[i]?._id;
 
               const candidateJobData = new CandidateJobModel({
-                emp_job: Emp_job,
-                candidate: Candidate,
-                agency_id: Agency_id,
+                emp_job: resp[i]?.job,
+                candidate: resp[i]?._id,
+                agency_id: resp[i]?.agency,
               });
-              const condidateJobdatalist = await candidateJobData.save();
+
+              const candidateJobId = await candidateJobData.save();
+
+              const condidateJobdatalist = await CandidateJobModel
+                .findOne({
+                  _id: candidateJobId?._id
+                })
+                .populate([
+                  {
+                    path: "emp_job",
+                    select: "comp_name job_name",
+                    populate: {
+                      path: "employer",
+                      select: "email",
+                    },
+                  },
+                ]); 
 
               let companyName = condidateJobdatalist?.emp_job?.comp_name;
               let jobRole = condidateJobdatalist?.emp_job?.job_name;
               let empMail = condidateJobdatalist?.emp_job?.employer?.email;
 
-              // console.log(resp[i].email)
-              // console.log(companyName)
-              // console.log(jobRole)
-              // console.log(condidateJobdatalist.Candidate)
-              // console.log(empMail)
-
               sgMail.setApiKey(process.env.SENDGRID);
               const msg = {
                 cc: empMail,
                 to: resp[i].email, // Change to your recipient
-                from: config.emailInfoHire2Inspire,
+                from: 'info@hire2inspire.com',
                 subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
                 html: `
                                  <head>
@@ -555,6 +572,15 @@ module.exports = {
                              </body>
                          `,
               };
+              sgMail
+                .send(msg)
+                .then(() => {
+                  console.log("Email sent");
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
+
             }
 
             const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate(
