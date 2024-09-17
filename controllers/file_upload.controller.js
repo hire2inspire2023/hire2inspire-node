@@ -382,10 +382,10 @@ module.exports = {
 
       const results = [];
       const expectedHeaders = [
-        "First Name",
-        "Last Name",
-        "Phone Number",
-        "Email",
+        "First Name*",
+        "Last Name*",
+        "Phone Number*",
+        "Email*",
         "Country",
         "City",
         "State",
@@ -451,10 +451,10 @@ module.exports = {
               e.agency_job = agencyJobExist?._id;
               e.job = agencyJobExist?.job;
               e.agency = agencyJobExist?.agency;
-              e.fname = e["First Name"];
-              (e.lname = e["Last Name"]),
-                (e.phone = e["Phone Number"]),
-                (e.email = e["Email"]),
+              e.fname = e["First Name*"];
+              (e.lname = e["Last Name*"]),
+                (e.phone = e["Phone Number*"]),
+                (e.email = e["Email*"]),
                 (e.country = e["Country"]),
                 (e.city = e["City"]),
                 (e.state = e["State"]),
