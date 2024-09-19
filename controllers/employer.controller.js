@@ -913,7 +913,7 @@ module.exports = {
         employer: result?.employer,
       });
       const subsData = await Package.findOne({
-        package: subscription?.package,
+        _id : subscription?.package,
       });
       // console.log("subsData", subsData);
       const packageData = await PackageType.findOne({
