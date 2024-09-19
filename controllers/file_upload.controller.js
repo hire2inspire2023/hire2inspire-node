@@ -399,10 +399,11 @@ module.exports = {
         "Relevant Experience(In Number)",
       ];
       const headers = [];
-      if (!req?.file || req.file?.mimetype != "text/csv")
+      // req.file?.mimetype != "text/csv"
+      if (!req?.file || req.file?.mimetype != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         return res.status(400).send({
           error: true,
-          message: "Only CSV file is allowed to upload.",
+          message: "Only Excel file is allowed to upload.",
         });
 
       const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;

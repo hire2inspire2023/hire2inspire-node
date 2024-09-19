@@ -13,12 +13,28 @@ const acceptedFileTypes = [
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ]
 
+const excelUpload = [
+  'application/vnd.ms-excel', // for .xls
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+]
+
 const upload = multer({ 
     // dest: 'uploads/',
     storage: multer.memoryStorage(),
     fileFilter: (req, file, cb) => {
         if (!acceptedFileTypes.includes(file.mimetype)) {
           return cb(new Error('Only .png, .jpg, .jpeg, .pdf, .csv, .doc, .docx format allowed!'))
+        }
+        cb(null, true)
+    }
+})
+
+const onlyExcel = multer({ 
+    // dest: 'uploads/',
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+        if (!excelUpload.includes(file.mimetype)) {
+          return cb(new Error('Only Excel file allowed!'))
         }
         cb(null, true)
     }
@@ -33,6 +49,6 @@ fileUploadRouter.post("/upload", upload.single('file'), FileUploadController.upl
 /**
  * This method is used import CSV file to database
  */
-fileUploadRouter.post('/save-csv-to-db/:csvType', upload.single('file'), FileUploadController.saveCsvToDB);
+fileUploadRouter.post('/save-csv-to-db/:csvType', onlyExcel.single('file'), FileUploadController.saveCsvToDB);
 
 module.exports = fileUploadRouter;
