@@ -5,6 +5,7 @@ const Agency = require("../models/agency.model");
 const { getUserViaToken, verifyAccessToken } = require("../helpers/jwt_helper");
 const sgMail = require("@sendgrid/mail");
 const pdfToBase64Helpers = require('../helpers/pdfbase64')
+const config = require('../config/config')
 
 module.exports = {
   list: async (req, res, next) => {
@@ -442,7 +443,7 @@ module.exports = {
 
       sgMail.setApiKey(process.env.SENDGRID);
       const newmsg = {
-        cc : transctionData?.employer?.email || '',
+        cc : `${transctionData?.employer?.email},${config.emailInfoHire2Inspire}`,
         to: recipents, // Change to your recipient
         from: "info@hire2inspire.com",
         subject: `Tax Invoice for Candidate hired ${invoiceNo}`,
