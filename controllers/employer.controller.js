@@ -930,11 +930,11 @@ module.exports = {
         console.log("hii");
         amount = billinglist?.hire_id?.comp_offered * (10.83 / 100);
         // agency_amount = (billinglist?.hire_id?.comp_offered) * (9.83 / 100);
-        agency_amount = billinglist?.hire_id?.comp_offered * (10.33 / 100);
+        agency_amount = billinglist?.hire_id?.comp_offered * (10 / 100);
         h2i_amount = billinglist?.hire_id?.comp_offered * (0.5 / 100);
       } else {
         amount = billinglist?.hire_id?.comp_offered * (8.83 / 100);
-        agency_amount = billinglist?.hire_id?.comp_offered * (8.33 / 100);
+        agency_amount = billinglist?.hire_id?.comp_offered * (8 / 100);
         h2i_amount = billinglist?.hire_id?.comp_offered * (0.5 / 100);
       }
       let designation = billinglist?.hire_id?.desg_offered;
