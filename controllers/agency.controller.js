@@ -114,7 +114,7 @@ module.exports = {
           },
         ]);
         agencyReviewsMap[agencies[i]._id] = agencyReview[0]?.total_avg_score
-        ? parseFloat(agencyReview[0].total_avg_score).toFixed(2)
+        ? parseFloat(agencyReview[0].total_avg_score).toFixed(1)
         : ""
       }
 
