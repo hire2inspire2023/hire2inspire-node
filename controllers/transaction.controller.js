@@ -418,11 +418,17 @@ module.exports = {
       recipents = req.body.recipents;
       let file = req.body.file;
 
-      let transctionData = await Transaction.findOne({
-        "passbook_amt.transaction_id": transactionId,
-      }).populate({
-        path : 'employer',
-        select : 'email'
+      let transctionData = await Transaction.findOneAndUpdate(
+        {
+          "passbook_amt.transaction_id": transactionId,
+        },
+        {
+          $set: { "passbook_amt.$.employer_invoice_file": file }
+        },
+        { new: true } 
+      ).populate({
+        path: "employer",
+        select: "email",
       });
 
       // console.log({ transctionData });
@@ -430,7 +436,6 @@ module.exports = {
       let invoiceNo;
       transctionData.passbook_amt.forEach((transaction) => {
         if (transaction.transaction_id === transactionId) {
-          console.log("hii");
           invoiceNo = transaction?.invoice_No;
         }
       });

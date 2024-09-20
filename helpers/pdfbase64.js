@@ -34,7 +34,7 @@ async function pdfToBase64(fileUrl, retries = 3, delay = 1000) {
       return base64File;
     } catch (error) {
       attempt += 1;
-      console.error(`Attempt ${attempt} failed: ${error.message}`);
+      // console.error(`Attempt ${attempt} failed: ${error.message}`);
       if (attempt >= retries) {
         throw error; // Re-throw the error if all attempts fail
       }

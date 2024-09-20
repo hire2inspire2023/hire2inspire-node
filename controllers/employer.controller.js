@@ -572,7 +572,7 @@ module.exports = {
         },
       ]);
 
-      console.log("employerSubscriptionData", employerSubscriptionData);
+      //console.log("employerSubscriptionData", employerSubscriptionData);
 
       const employerCreditData = await UserCredit.findOne({
         employer: userId,
