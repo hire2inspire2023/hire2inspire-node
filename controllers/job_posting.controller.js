@@ -1228,12 +1228,73 @@ module.exports = {
 
       //  console.log("agencyIds",agencyIds)
 
-      let agencyList = await Agency.find({ _id: { $in: agencyIds } });
+      let agencies = await Agency.find({ _id: { $in: agencyIds } });
+      const agencyReviewsMap = {};
+      for (let i = 0 ; i < agencies.length ; i++) {
+        const agencyReview = await CandidateJobModel.aggregate([
+          {
+            // Step 1: Filter out documents where the candidate._id is null or review is missing
+            $match: {
+              candidate: { $exists: true, $ne: null }, // Ensure candidate._id exists and is not null
+              "review.communication_skill": { $exists: true, $ne: null }, // Ensure review fields exist
+              "review.position_knwdlg": { $exists: true, $ne: null },
+              "review.proffesioalsm": { $exists: true, $ne: null },
+              agency_id : agencies[i]._id
+            },
+          },
+          {
+            // Step 2: Calculate the average review score for each document
+            $addFields: {
+              average_review_score: {
+                $avg: [
+                  { $toDouble: "$review.communication_skill" },
+                  { $toDouble: "$review.position_knwdlg" },
+                  { $toDouble: "$review.proffesioalsm" },
+                ],
+              },
+            },
+          },
+          {
+            // Step 3: Group by candidate._id and calculate the overall average score for each candidate
+            $group: {
+              _id: "$candidate",
+              avgCandidateScore: { $avg: "$average_review_score" }, // Average review score for each candidate
+              count: { $sum: 1 }, // Count of reviews per candidate
+            },
+          },
+          {
+            // Step 4: Calculate the total average score across all candidates
+            $group: {
+              _id: null,
+              total_avg_score: { $avg: "$avgCandidateScore" }, // Average of all candidate averages
+              totalCandidates: { $sum: 1 }, // Total number of candidates
+              sum_of_scores: { $sum: "$avgCandidateScore" }, // Sum of all avgCandidateScores (for reference)
+            },
+          },
+          {
+            // Step 5: Project final results
+            $project: {
+              _id: 0, // Suppress the _id field
+              total_avg_score: 1, // The overall average across all candidates
+              totalCandidates: 1,
+              sum_of_scores: 1,
+            },
+          },
+        ]);
+        agencyReviewsMap[agencies[i]._id] = agencyReview[0]?.total_avg_score
+        ? parseFloat(agencyReview[0].total_avg_score).toFixed(1)
+        : ""
+      }
+
+      const agenciesWithReviews = agencies.map((agency) => ({
+        ...agency.toObject(), // Convert Mongoose document to plain object
+        agencyReview: agencyReviewsMap[agency._id.toString()] // Add agencyReview data
+      }));
 
       return res.status(200).send({
         error: false,
         message: "Agency list",
-        data: agencyList,
+        data: agenciesWithReviews,
       });
     } catch (error) {
       next(error);
