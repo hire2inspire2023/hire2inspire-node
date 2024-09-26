@@ -533,21 +533,39 @@ module.exports = {
   requestUpdate: async (req, res, next) => {
     try {
       // Status update
+
+      let updateFields = {
+        request: req.body.request
+      }
+
+      if (req.body.request == "4") {
+        if (!req.body.reasonReject) {
+          return res
+            .status(400)
+            .send({ error: true, message: "Please Provide Reject Reason" });
+        }
+        updateFields.reasonReject = req.body.reasonReject;
+        if (req.body.reasonReject == "Other") {
+          if (!req.body.otherReason) {
+            return res
+              .status(400)
+              .send({ error: true, message: "Please Provide Other Reason For Rejection" });
+          }
+          updateFields.otherReason = req.body.otherReason;
+        }
+      }
+
       const candidateJobData = await CandidateJobModel.findOneAndUpdate(
         { candidate: req.params.candidateId },
-        { request: req.body.request },
+        updateFields,
         { new: true }
       );
-
-      console.log({ candidateJobData });
 
       const candidateData = await CandidateModel.findOneAndUpdate(
         { _id: req.params.candidateId },
         { status: candidateJobData?.request },
         { new: true }
       );
-
-      console.log("candidateJobData", candidateJobData?.request);
 
       if (candidateJobData?.request == "1") {
         const jobData = await JobPosting.findOneAndUpdate(

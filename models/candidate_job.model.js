@@ -79,6 +79,12 @@ const CandidateJobSchema = mongoose.Schema(
         type: String,
       },
     },
+    reasonReject : {
+      type: String,
+    },
+    otherReason : {
+      type: String,
+    }
   },
   { timestamps: true }
 );
