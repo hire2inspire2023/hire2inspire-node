@@ -15,7 +15,8 @@ const acceptedFileTypes = [
 
 const excelUpload = [
   'application/vnd.ms-excel', // for .xls
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv' 
 ]
 
 const upload = multer({ 
