@@ -538,6 +538,10 @@ module.exports = {
         request: req.body.request
       }
 
+      if (req.body.request == "NO_SHOW") {
+        updateFields.noShow = true
+      }
+
       if (req.body.request == "4") {
         if (!req.body.reasonReject) {
           return res

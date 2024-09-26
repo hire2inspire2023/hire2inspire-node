@@ -84,6 +84,10 @@ const CandidateJobSchema = mongoose.Schema(
     },
     otherReason : {
       type: String,
+    },
+    noShow : {
+      type: Boolean,
+      default: false,
     }
   },
   { timestamps: true }
