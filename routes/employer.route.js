@@ -2,6 +2,7 @@ const express = require("express");
 const EmployerController = require("../controllers/employer.controller");
 const { verifyAccessToken } = require("../helpers/jwt_helper");
 const EmployerRouter = express.Router();
+const fileUpload = require('./../utils/pdfUpload')
 
 EmployerRouter.get("/list", verifyAccessToken, EmployerController.list);
 
@@ -54,5 +55,9 @@ EmployerRouter.patch("/verify-email/:userId", EmployerController.verifyEmail);
 EmployerRouter.post("/resend-email", EmployerController.resendEmail);
 
 EmployerRouter.delete("/delete/:empId", EmployerController.empdelete);
+
+EmployerRouter.post("/subScriptionUpload/:id", fileUpload.single('subScriptionUpload'), EmployerController.subScriptionUpload);
+
+EmployerRouter.post("/creditNoteUpload/:id", fileUpload.single('creditNoteUpload'), EmployerController.creditNoteUpload);
 
 module.exports = EmployerRouter;

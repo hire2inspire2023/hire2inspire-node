@@ -27,6 +27,7 @@ const HiringDetail = require("../models/hiringDetails.model");
 const nodemailer = require("nodemailer");
 const Token = require("../models/token.model");
 const sgMail = require("@sendgrid/mail");
+const CreditNote = require("../models/creditnote.model");
 
 module.exports = {
   list: async (req, res, next) => {
@@ -602,6 +603,156 @@ module.exports = {
       });
     } catch (error) {
       next(error);
+    }
+  },
+
+  subScriptionUpload: async (req, res, next) => {
+    try {
+      let { id } = req.params;
+      if (!id) {
+        throw new Error("Id not found");
+      }
+
+      let userObj = await UserSubscription.findOne({_id: id })
+
+      if (!userObj) {
+        throw new Error("Subscription id Not Found");
+      }
+
+      if (!req.file) {
+        throw new Error("Pleas Upload Subscription Invoice");
+      }
+
+      const fileName = `SUBSCRIPTION_INVOICE_${userObj?._id}_${req.file.originalname}`;
+      bucket.file(fileName).createWriteStream().end(req.file.buffer);
+
+      let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
+
+      await UserSubscription.updateOne(
+        {
+          _id: id
+        },
+        {
+          subscription_invoice : fileurl
+        }
+      );
+
+      // const pdfBase64 = await pdfToBase64Helpers(fileurl);
+
+      // if (agencyObj.agency.corporate_email) {
+      //   sgMail.setApiKey(process.env.SENDGRID);
+      //   const msg = {
+      //     cc: agencyObj.agency.corporate_email,
+      //     to: config.emailInfoHire2Inspire, // Change to your recipient
+      //     from: "info@hire2inspire.com", // Change to your verified sender
+      //     subject: `Tax Invoice for Candidate hired`,
+      //     html: `
+      //   <p>Hello,</p>
+      //   <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
+      //   <p>Download Invoice Link: <a href="${fileurl}">Click Here To Download Invoice</a> <br>or<br> copy the link and paste : ${fileurl}</p>
+      //   <p>Should you have any questions or require further clarification regarding the invoice, please don't hesitate to reach out to me.</p>
+      //   <p>Thank you for your prompt attention to this matter.</p>
+      //   <p>Regards,<br/>Hire2Inspire</p>
+      //   `,
+      //   attachments: [
+      //     {
+      //       content: pdfBase64,
+      //       filename: 'taxinvoice.pdf',
+      //       type: 'application/pdf',
+      //       disposition: 'attachment',
+      //     },
+      //   ],
+  
+      //   };
+      //   await sgMail
+      //     .send(msg)
+      //     .then(() => {
+      //       console.log("Email sent for Agency");
+      //     })
+      //     .catch((error) => {
+      //       console.error(error);
+      //     });
+      // }
+
+      return sendRes(res, "File Uploaded Succesfully", fileurl);
+    } catch (err) {
+      console.log(err);
+      return sendError(res, 403, typeof err == "string" ? err : err.message);
+    }
+  },
+
+  creditNoteUpload: async (req, res, next) => {
+    try {
+      let { id } = req.params;
+      if (!id) {
+        throw new Error("Id not found");
+      }
+
+      let userObj = await CreditNote.findOne({_id: id })
+
+      if (!userObj) {
+        throw new Error("Credit Note id Not Found");
+      }
+
+      if (!req.file) {
+        throw new Error("Pleas Upload Credit Note Invoice");
+      }
+
+      const fileName = `CREDITNOTE_INVOICE_${userObj?._id}_${req.file.originalname}`;
+      bucket.file(fileName).createWriteStream().end(req.file.buffer);
+
+      let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
+
+      await CreditNote.updateOne(
+        {
+          _id: id
+        },
+        {
+          creditnote_invoice_employer : fileurl
+        }
+      );
+
+      // const pdfBase64 = await pdfToBase64Helpers(fileurl);
+
+      // if (agencyObj.agency.corporate_email) {
+      //   sgMail.setApiKey(process.env.SENDGRID);
+      //   const msg = {
+      //     cc: agencyObj.agency.corporate_email,
+      //     to: config.emailInfoHire2Inspire, // Change to your recipient
+      //     from: "info@hire2inspire.com", // Change to your verified sender
+      //     subject: `Tax Invoice for Candidate hired`,
+      //     html: `
+      //   <p>Hello,</p>
+      //   <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
+      //   <p>Download Invoice Link: <a href="${fileurl}">Click Here To Download Invoice</a> <br>or<br> copy the link and paste : ${fileurl}</p>
+      //   <p>Should you have any questions or require further clarification regarding the invoice, please don't hesitate to reach out to me.</p>
+      //   <p>Thank you for your prompt attention to this matter.</p>
+      //   <p>Regards,<br/>Hire2Inspire</p>
+      //   `,
+      //   attachments: [
+      //     {
+      //       content: pdfBase64,
+      //       filename: 'taxinvoice.pdf',
+      //       type: 'application/pdf',
+      //       disposition: 'attachment',
+      //     },
+      //   ],
+  
+      //   };
+      //   await sgMail
+      //     .send(msg)
+      //     .then(() => {
+      //       console.log("Email sent for Agency");
+      //     })
+      //     .catch((error) => {
+      //       console.error(error);
+      //     });
+      // }
+
+      return sendRes(res, "File Uploaded Succesfully", fileurl);
+    } catch (err) {
+      console.log(err);
+      return sendError(res, 403, typeof err == "string" ? err : err.message);
     }
   },
 
