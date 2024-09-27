@@ -151,6 +151,10 @@ const CandidateSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isUploadedFromexcel: {
+      type: Boolean,
+      default: false,
+    },
     updated_by: {
       type: String,
       enum: {

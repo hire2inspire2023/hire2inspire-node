@@ -22,6 +22,7 @@ const { getUserViaToken } = require("../helpers/jwt_helper");
 const Recruiter = require("../models/recruiter.model");
 const CandidateJobModel = require('../models/candidate_job.model');
 const sgMail = require('@sendgrid/mail');
+const xlsx = require('xlsx')
 
 module.exports = {
   /**
@@ -366,6 +367,245 @@ module.exports = {
   //     }
   // }
 
+  // saveCsvToDB: async (req, res, next) => {
+  //   try {
+  //     let token = req.headers["authorization"]?.split(" ")[1];
+  //     let { userId, dataModel } = await getUserViaToken(token);
+  //     const checkAgency = await Agency.findOne({ _id: userId });
+  //     const checkRecruiter = await Recruiter.findOne({ _id: userId });
+  //     if (
+  //       (!checkAgency || !checkRecruiter) &&
+  //       !["agency", "recruiters"].includes(dataModel)
+  //     )
+  //       return res
+  //         .status(401)
+  //         .send({ error: true, message: "User unauthorized." });
+
+  //     const results = [];
+  //     const expectedHeaders = [
+  //       "First Name*",
+  //       "Last Name*",
+  //       "Phone Number*",
+  //       "Email*",
+  //       "Country",
+  //       "City",
+  //       "State",
+  //       "Pin Code",
+  //       "Linkedin Url",
+  //       "Current Ctc(In lakhs)",
+  //       "Expected Ctc(In lakhs)",
+  //       "Notice Period(In Days)",
+  //       "Negotiable(In Days)",
+  //       "Total Experience(In Number)",
+  //       "Relevant Experience(In Number)",
+  //     ];
+  //     const headers = [];
+
+  //     const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;
+  //     fs.writeFile(
+  //       fileName,
+  //       Buffer.from(req.file.buffer, req.file.encoding).toString(),
+  //       (err) => {
+  //         if (err)
+  //           return res.status(400).send({ error: true, message: String(err) });
+  //       }
+  //     );
+
+  //     fs.createReadStream(fileName, "utf8")
+  //       .pipe(csv({}))
+  //       .on("data", (data) => results.push(data))
+  //       .on("headers", (csvHeaders) => {
+  //         headers.push(...csvHeaders);
+  //       })
+  //       .on("end", async () => {
+  //         let resp;
+  //         let filterResult = [];
+  //         if (req.params.csvType == "bulk-candidate") {
+
+  //           const isValidHeaders = expectedHeaders.every((header) =>
+  //             headers.includes(header)
+  //           );
+
+  //           if (!isValidHeaders) {
+  //             await fs.promises.unlink(fileName); // Clean up temporary file
+  //             return res
+  //               .status(400)
+  //               .send({ error: true, message: "Invalid CSV headers." });
+  //           }
+
+  //           const agencyJobExist = await AgencyJobModel.findOne({
+  //             _id: req.body.agency_job,
+  //           });
+
+  //           // if corresponding agency job not exist
+  //           if (!agencyJobExist)
+  //             return res
+  //               .status(400)
+  //               .send({ error: true, message: "AGgency job does not exist" });
+
+  //           results.map((e) => {
+  //             e.agency_job = agencyJobExist?._id;
+  //             e.job = agencyJobExist?.job;
+  //             e.agency = agencyJobExist?.agency;
+  //             e.fname = e["First Name*"];
+  //             (e.lname = e["Last Name*"]),
+  //               (e.phone = e["Phone Number*"]),
+  //               (e.email = e["Email*"]),
+  //               (e.country = e["Country"]),
+  //               (e.city = e["City"]),
+  //               (e.state = e["State"]),
+  //               (e.pin = e["Pin Code"]),
+  //               (e.linkedin_url = e["Linkedin Url"]),
+  //               (e.current_CTC = e["Current Ctc(In lakhs)"]),
+  //               (e.expected_CTC = e["Expected Ctc(In lakhs)"]),
+  //               (e.notice_period = e["Notice Period(In Days)"]),
+  //               (e.negotiable_upto = e["Negotiable(In Days)"]),
+  //               (e.total_experience = e["Total Experience(In Number)"]),
+  //               (e.relevant_experience = e["Relevant Experience(In Number)"]);
+  //           });
+
+  //           // If firstname , lastname , phone , email is not empty then only insert row
+  //           filterResult = results.filter(
+  //             (entry) =>
+  //               entry.fname && entry.lname && entry.phone && entry.email
+  //           );
+
+  //           // removing temporary CSV file
+  //           fs.unlink(fileName, (err) => {
+  //             if (err) {
+  //               console.error(err);
+  //               next(err);
+  //             }
+  //           });
+
+  //           let candidateExist;
+  //           let candidateExist1;
+
+  //           for (let i = 0; i < filterResult.length; i++) {
+  //             candidateExist = await Candidate.findOne({
+  //               $and: [
+  //                 { email: filterResult[i]?.email },
+  //                 { agency_job: req.body.agency_job },
+  //               ],
+  //             });
+  //             candidateExist1 = await Candidate.findOne({
+  //               $and: [
+  //                 { phone: filterResult[i]?.phone },
+  //                 { agency_job: req.body.agency_job },
+  //               ],
+  //             });
+  //           }
+
+  //           if (candidateExist) {
+  //             console.log("in..");
+  //             return res.status(400).send({
+  //               error: true,
+  //               message: `Candidate data already exist with this email ${candidateExist?.email}`,
+  //             });
+  //           } else if (candidateExist1) {
+  //             return res.status(400).send({
+  //               error: true,
+  //               message: `Candidate data already exist with this phone no ${candidateExist1?.phone}`,
+  //             });
+  //           }
+
+  //           // Candidate log CSV Uppload
+  //           resp = await Candidate.insertMany(filterResult);
+  //           const candidateIds = resp.map((e) => e._id);
+  //           const candidateEmails = resp.map((e) => e.email);
+
+  //           for (let i in resp) {
+
+  //             const candidateJobData = new CandidateJobModel({
+  //               emp_job: resp[i]?.job,
+  //               candidate: resp[i]?._id,
+  //               agency_id: resp[i]?.agency,
+  //             });
+
+  //             const candidateJobId = await candidateJobData.save();
+
+  //             const condidateJobdatalist = await CandidateJobModel
+  //               .findOne({
+  //                 _id: candidateJobId?._id
+  //               })
+  //               .populate([
+  //                 {
+  //                   path: "emp_job",
+  //                   select: "comp_name job_name",
+  //                   populate: {
+  //                     path: "employer",
+  //                     select: "email",
+  //                   },
+  //                 },
+  //               ]);
+
+  //             let companyName = condidateJobdatalist?.emp_job?.comp_name;
+  //             let jobRole = condidateJobdatalist?.emp_job?.job_name;
+  //             let empMail = condidateJobdatalist?.emp_job?.employer?.email;
+
+  //             sgMail.setApiKey(process.env.SENDGRID);
+  //             const msg = {
+  //               cc: empMail,
+  //               to: resp[i].email, // Change to your recipient
+  //               from: 'info@hire2inspire.com',
+  //               subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
+  //               html: `
+  //                                <head>
+  //                                    <title>Notification: Candidate Hired - Backend Development Position</title>
+  //                            </head>
+  //                            <body>
+  //                                <p>Dear Candidates ,</p>
+  //                                <p>I hope this email finds you well. I am writing to confirm that we have received your application for the ${jobRole} at ${companyName}. We appreciate your interest in joining our team and taking the time to submit your CV. Your application is currently being reviewed by our recruitment team.</p>
+
+  //                                <p>As we move forward in the selection process, we would like to gather some additional information from you. Please take a moment to answer the following screening questions. Your responses will help us better understand your qualifications and suitability for the role. Once we review your answers, we will determine the next steps in the process.</p>
+
+  //                                <p>Find the link
+  //                                <a href="${process.env.front_url}/candidate/apply-job/${condidateJobdatalist.Candidate}" target="blank">Find your job</a>
+  //                              </p>
+
+  //                                <p>Best regards,</p>
+  //                                <p>Hire2Inspire</p>
+  //                            </body>
+  //                        `,
+  //             };
+  //             sgMail
+  //               .send(msg)
+  //               .then(() => {
+  //                 console.log("Email sent");
+  //               })
+  //               .catch((error) => {
+  //                 console.error(error);
+  //               });
+
+  //           }
+
+  //           const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate(
+  //             { _id: req.body.agency_job },
+  //             { $push: { candidates: candidateIds } },
+  //             { new: true }
+  //           );
+  //         } else {
+  //           return res.status(400).send({
+  //             error: true,
+  //             message: `${req.params.csvType} type not valid one. Use (bulk-candidate / single-candidate)`,
+  //           });
+  //         }
+
+  //         return res.status(201).send({
+  //           error: false,
+  //           message: `${req.params.csvType} Data stored`,
+  //           data: filterResult,
+  //         });
+  //       });
+  //   } catch (error) {
+  //     // throw error
+  //     res.status(200).send({
+  //       error: true,
+  //       message: String(error),
+  //     });
+  //   }
+  // },
+
   saveCsvToDB: async (req, res, next) => {
     try {
       let token = req.headers["authorization"]?.split(" ")[1];
@@ -380,7 +620,6 @@ module.exports = {
           .status(401)
           .send({ error: true, message: "User unauthorized." });
 
-      const results = [];
       const expectedHeaders = [
         "First Name*",
         "Last Name*",
@@ -391,164 +630,145 @@ module.exports = {
         "State",
         "Pin Code",
         "Linkedin Url",
-        "Current Ctc(In lakhs)",
-        "Expected Ctc(In lakhs)",
-        "Notice Period(In Days)",
-        "Negotiable(In Days)",
-        "Total Experience(In Number)",
-        "Relevant Experience(In Number)",
+        "Current CTC (In lakhs)",
+        "Expected CTC (In lakhs)",
+        "Notice Period (In Days)",
+        "Negotiable (In Days)",
+        "Total Experience (In Years)",
+        "Relevant Experience (In Years)",
       ];
-      const headers = [];
 
-      const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;
-      fs.writeFile(
-        fileName,
-        Buffer.from(req.file.buffer, req.file.encoding).toString(),
-        (err) => {
-          if (err)
-            return res.status(400).send({ error: true, message: String(err) });
+      const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+
+      // Get the first sheet
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+
+      // Convert sheet to JSON
+      const headers = xlsx.utils.sheet_to_json(worksheet, { header: 1 })[0];
+      const results = xlsx.utils.sheet_to_json(worksheet);
+
+      if (!results.length) {
+        return res
+        .status(400)
+        .send({ error: true, message: "No Data Found." });
+      }
+
+      let filterResult = [];
+      if (req.params.csvType == "bulk-candidate") {
+        for (let i = 0 ; i < expectedHeaders.length ; i++) {
+          if (!headers.includes(expectedHeaders[i])) {
+            return res
+              .status(400)
+              .send({ error: true, message: "Invalid CSV headers." });
+          }
         }
-      );
 
-      fs.createReadStream(fileName, "utf8")
-        .pipe(csv({}))
-        .on("data", (data) => results.push(data))
-        .on("headers", (csvHeaders) => {
-          headers.push(...csvHeaders);
-        })
-        .on("end", async () => {
-          let resp;
-          let filterResult = [];
-          if (req.params.csvType == "bulk-candidate") {
+        const agencyJobExist = await AgencyJobModel.findOne({
+          _id: req.body.agency_job,
+        });
 
-            const isValidHeaders = expectedHeaders.every((header) =>
-              headers.includes(header)
-            );
+        // if corresponding agency job not exist
+        if (!agencyJobExist)
+          return res
+            .status(400)
+            .send({ error: true, message: "AGgency job does not exist" });
 
-            if (!isValidHeaders) {
-              await fs.promises.unlink(fileName); // Clean up temporary file
-              return res
-                .status(400)
-                .send({ error: true, message: "Invalid CSV headers." });
-            }
+        results.map((e) => {
+          e.agency_job = agencyJobExist?._id;
+          e.job = agencyJobExist?.job;
+          e.agency = agencyJobExist?.agency;
+          e.isUploadedFromexcel = true
+          e.fname = e["First Name*"];
+          (e.lname = e["Last Name*"]),
+            (e.phone = e["Phone Number*"]),
+            (e.email = e["Email*"]),
+            (e.country = e["Country"]),
+            (e.city = e["City"]),
+            (e.state = e["State"]),
+            (e.pin = e["Pin Code"]),
+            (e.linkedin_url = e["Linkedin Url"]),
+            (e.current_CTC = e["Current CTC (In lakhs)"]),
+            (e.expected_CTC = e["Expected CTC (In lakhs)"]),
+            (e.notice_period = e["Notice Period (In Days)"]),
+            (e.negotiable_upto = e["Negotiable (In Days"]),
+            (e.total_experience = e["Total Experience (In Years)"]),
+            (e.relevant_experience = e["Relevant Experience (In Years)"]);
+        });
 
-            const agencyJobExist = await AgencyJobModel.findOne({
-              _id: req.body.agency_job,
-            });
-      
-            // if corresponding agency job not exist
-            if (!agencyJobExist)
-              return res
-                .status(400)
-                .send({ error: true, message: "AGgency job does not exist" });
+        // If firstname , lastname , phone , email is not empty then only insert row
+        filterResult = results.filter(
+          (entry) => entry.fname && entry.lname && entry.phone && entry.email
+        );
 
-            results.map((e) => {
-              e.agency_job = agencyJobExist?._id;
-              e.job = agencyJobExist?.job;
-              e.agency = agencyJobExist?.agency;
-              e.fname = e["First Name*"];
-              (e.lname = e["Last Name*"]),
-                (e.phone = e["Phone Number*"]),
-                (e.email = e["Email*"]),
-                (e.country = e["Country"]),
-                (e.city = e["City"]),
-                (e.state = e["State"]),
-                (e.pin = e["Pin Code"]),
-                (e.linkedin_url = e["Linkedin Url"]),
-                (e.current_CTC = e["Current Ctc(In lakhs)"]),
-                (e.expected_CTC = e["Expected Ctc(In lakhs)"]),
-                (e.notice_period = e["Notice Period(In Days)"]),
-                (e.negotiable_upto = e["Negotiable(In Days)"]),
-                (e.total_experience = e["Total Experience(In Number)"]),
-                (e.relevant_experience = e["Relevant Experience(In Number)"]);
-            });
+        let candidateExist;
+        let candidateExist1;
 
-            // If firstname , lastname , phone , email is not empty then only insert row
-            filterResult = results.filter(
-              (entry) =>
-                entry.fname && entry.lname && entry.phone && entry.email
-            );
+        for (let i = 0; i < filterResult.length; i++) {
+          candidateExist = await Candidate.findOne({
+            $and: [
+              { email: filterResult[i]?.email },
+              { agency_job: req.body.agency_job },
+            ],
+          });
+          candidateExist1 = await Candidate.findOne({
+            $and: [
+              { phone: filterResult[i]?.phone },
+              { agency_job: req.body.agency_job },
+            ],
+          });
+        }
 
-            // removing temporary CSV file
-            fs.unlink(fileName, (err) => {
-              if (err) {
-                console.error(err);
-                next(err);
-              }
-            });
+        if (candidateExist) {
+          return res.status(400).send({
+            error: true,
+            message: `Candidate data already exist with this email ${candidateExist?.email}`,
+          });
+        } else if (candidateExist1) {
+          return res.status(400).send({
+            error: true,
+            message: `Candidate data already exist with this phone no ${candidateExist1?.phone}`,
+          });
+        }
 
-            let candidateExist;
-            let candidateExist1;
+        // Candidate log CSV Uppload
+        let resp = await Candidate.insertMany(filterResult);
+        const candidateIds = resp.map((e) => e._id);
+        const candidateEmails = resp.map((e) => e.email);
 
-            for (let i = 0; i < filterResult.length; i++) {
-              candidateExist = await Candidate.findOne({
-                $and: [
-                  { email: filterResult[i]?.email },
-                  { agency_job: req.body.agency_job },
-                ],
-              });
-              candidateExist1 = await Candidate.findOne({
-                $and: [
-                  { phone: filterResult[i]?.phone },
-                  { agency_job: req.body.agency_job },
-                ],
-              });
-            }
+        for (let i in resp) {
+          const candidateJobData = new CandidateJobModel({
+            emp_job: resp[i]?.job,
+            candidate: resp[i]?._id,
+            agency_id: resp[i]?.agency,
+          });
 
-            if (candidateExist) {
-              console.log("in..");
-              return res.status(400).send({
-                error: true,
-                message: `Candidate data already exist with this email ${candidateExist?.email}`,
-              });
-            } else if (candidateExist1) {
-              return res.status(400).send({
-                error: true,
-                message: `Candidate data already exist with this phone no ${candidateExist1?.phone}`,
-              });
-            }
+          const candidateJobId = await candidateJobData.save();
 
-            // Candidate log CSV Uppload
-            resp = await Candidate.insertMany(filterResult);
-            const candidateIds = resp.map((e) => e._id);
-            const candidateEmails = resp.map((e) => e.email);
+          const condidateJobdatalist = await CandidateJobModel.findOne({
+            _id: candidateJobId?._id,
+          }).populate([
+            {
+              path: "emp_job",
+              select: "comp_name job_name",
+              populate: {
+                path: "employer",
+                select: "email",
+              },
+            },
+          ]);
 
-            for (let i in resp) {
+          let companyName = condidateJobdatalist?.emp_job?.comp_name;
+          let jobRole = condidateJobdatalist?.emp_job?.job_name;
+          let empMail = condidateJobdatalist?.emp_job?.employer?.email;
 
-              const candidateJobData = new CandidateJobModel({
-                emp_job: resp[i]?.job,
-                candidate: resp[i]?._id,
-                agency_id: resp[i]?.agency,
-              });
-
-              const candidateJobId = await candidateJobData.save();
-
-              const condidateJobdatalist = await CandidateJobModel
-                .findOne({
-                  _id: candidateJobId?._id
-                })
-                .populate([
-                  {
-                    path: "emp_job",
-                    select: "comp_name job_name",
-                    populate: {
-                      path: "employer",
-                      select: "email",
-                    },
-                  },
-                ]); 
-
-              let companyName = condidateJobdatalist?.emp_job?.comp_name;
-              let jobRole = condidateJobdatalist?.emp_job?.job_name;
-              let empMail = condidateJobdatalist?.emp_job?.employer?.email;
-
-              sgMail.setApiKey(process.env.SENDGRID);
-              const msg = {
-                cc: empMail,
-                to: resp[i].email, // Change to your recipient
-                from: 'info@hire2inspire.com',
-                subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
-                html: `
+          sgMail.setApiKey(process.env.SENDGRID);
+          const msg = {
+            cc: empMail,
+            to: resp[i].email, // Change to your recipient
+            from: "info@hire2inspire.com",
+            subject: `Your Talent Spark: Ignite Opportunity with ${companyName}`,
+            html: `
                                  <head>
                                      <title>Notification: Candidate Hired - Backend Development Position</title>
                              </head>
@@ -566,36 +786,34 @@ module.exports = {
                                  <p>Hire2Inspire</p>
                              </body>
                          `,
-              };
-              sgMail
-                .send(msg)
-                .then(() => {
-                  console.log("Email sent");
-                })
-                .catch((error) => {
-                  console.error(error);
-                });
-
-            }
-
-            const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate(
-              { _id: req.body.agency_job },
-              { $push: { candidates: candidateIds } },
-              { new: true }
-            );
-          } else {
-            return res.status(400).send({
-              error: true,
-              message: `${req.params.csvType} type not valid one. Use (bulk-candidate / single-candidate)`,
+          };
+          sgMail
+            .send(msg)
+            .then(() => {
+              console.log("Email sent");
+            })
+            .catch((error) => {
+              console.error(error);
             });
-          }
+        }
 
-          return res.status(201).send({
-            error: false,
-            message: `${req.params.csvType} Data stored`,
-            data: filterResult,
-          });
+        const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate(
+          { _id: req.body.agency_job },
+          { $push: { candidates: candidateIds } },
+          { new: true }
+        );
+      } else {
+        return res.status(400).send({
+          error: true,
+          message: `${req.params.csvType} type not valid one. Use (bulk-candidate / single-candidate)`,
         });
+      }
+
+      return res.status(201).send({
+        error: false,
+        message: `${req.params.csvType} Data stored`,
+        data: filterResult,
+      });
     } catch (error) {
       // throw error
       res.status(200).send({

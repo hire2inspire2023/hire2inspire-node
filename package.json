@@ -40,7 +40,8 @@
     "nodemailer": "^6.9.4",
     "pdfkit": "^0.13.0",
     "razorpay": "^2.9.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
