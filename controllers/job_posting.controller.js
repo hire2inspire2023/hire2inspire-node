@@ -221,8 +221,6 @@ module.exports = {
 
       let jobIds = job_postings.map((e) => e._id.toString());
 
-      console.log({ jobIds });
-
       const CandidateJobData = await CandidateJobModel.find({
         emp_job: { $in: jobIds },
       }).populate([
@@ -236,7 +234,27 @@ module.exports = {
         },
       ]);
 
-      console.log({ CandidateJobData });
+      const updatedCandidateJobData = await Promise.all(
+        CandidateJobData.map(async (ele) => {
+          // Convert the Mongoose document to a plain object so you can modify it
+          let candidateJobObject = ele.toObject();
+      
+          if (candidateJobObject?.candidate?._id) {
+            let candidateId = candidateJobObject.candidate._id;
+            let hireDetails = await HiringDetail.findOne({
+              candidate: candidateId,
+              employer: userId,
+            }).select("date_of_joining");
+      
+            // Attach the new field
+            candidateJobObject.dateOfJoining = hireDetails?.date_of_joining || null;
+          }
+      
+          // Return the modified object
+          return candidateJobObject;
+        })
+      );
+
 
       // const CandidateData = await Candidate.find( {job: {$in: jobIds}}).populate([
       //     {
@@ -259,7 +277,7 @@ module.exports = {
         error: false,
         message: "Job posting list",
         data: job_postings,
-        CandidateJobData,
+        CandidateJobData : updatedCandidateJobData,
         //  CandidateData
       });
     } catch (error) {
