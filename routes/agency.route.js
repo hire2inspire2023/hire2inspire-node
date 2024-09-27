@@ -66,4 +66,6 @@ AgencyRouter.delete("/delete/:agId", AgencyController.agencydelete);
 
 AgencyRouter.post("/invoiceUpload/:id", fileUpload.single('invoiceRaised'), AgencyController.invoiceUpload);
 
+AgencyRouter.post("/creditNoteUploadAgency/:id", fileUpload.single('creditNoteUploadAgency'), AgencyController.creditNoteUploadAgency);
+
 module.exports = AgencyRouter;
