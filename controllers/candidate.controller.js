@@ -540,6 +540,7 @@ module.exports = {
 
       if (req.body.request == "5") {
         updateFields.noShow = true
+        updateFields.noShowDate = req.body.noShowDate
       }
 
       if (req.body.request == "4") {
