@@ -189,7 +189,14 @@ const JobPostingSchema = mongoose.Schema(
     isFresher : {
       type: Boolean,
       default: false,
-    }
+    },
+    isJobReposted : {
+      type: Boolean,
+      default: false,
+    },
+    ref_job_id: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

@@ -397,7 +397,6 @@ module.exports = {
 
       function generateIncrementalJobId(prejob) {
         if (prejob == undefined) {
-          console.log("here1");
           const now = new Date();
           const year = now.getFullYear().toString();
           const month = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -407,8 +406,6 @@ module.exports = {
           let currentNumeric = JobList?.job_id;
           let cn = [...currentNumeric];
           let currentNumericPart = cn[cn?.length - 2] + cn[cn?.length - 1];
-          console.log("here2");
-          console.log("currentNumericPart", currentNumericPart);
           const now = new Date();
           const year = now.getFullYear().toString();
           const month = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -430,14 +427,14 @@ module.exports = {
       let JobList = await JobPosting.findOne({
         employer: req.body.employer,
       }).sort({ _id: -1 });
-      console.log({ JobList });
-      let preJobId = JobList?.job_id;
 
-      console.log({ preJobId });
+      let preJobId = JobList?.job_id;
 
       req.body.job_id = generateIncrementalJobId(preJobId);
 
-      console.log("job_id", req.body.job_id);
+      if (req.body?.isJobReposted) {
+        req.body.ref_job_id = req.body?.ref_job_id
+      }
 
       let userCreditData = await UserCredit.findOne({ employer: userId });
       // console.log({userCreditData})
