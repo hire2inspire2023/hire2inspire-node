@@ -538,7 +538,7 @@ module.exports = {
         request: req.body.request
       }
 
-      if (req.body.request == "NO_SHOW") {
+      if (req.body.request == "5") {
         updateFields.noShow = true
       }
 
