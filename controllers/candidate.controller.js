@@ -548,7 +548,7 @@ module.exports = {
             .send({ error: true, message: "Please Provide Reject Reason" });
         }
         updateFields.reasonReject = req.body.reasonReject;
-        if (req.body.reasonReject == "Other") {
+        if (req.body.reasonReject == "other") {
           if (!req.body.otherReason) {
             return res
               .status(400)
