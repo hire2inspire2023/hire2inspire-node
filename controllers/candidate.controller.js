@@ -578,6 +578,12 @@ module.exports = {
           select: "email fname lname",
         }])
 
+        const candidateData = await CandidateModel.findOneAndUpdate(
+          { _id: req.params.candidateId },
+          { status: candidateJobData?.request , ...updateFields},
+          { new: true }
+        );
+
       let fullname = `${candidateJobData?.candidate?.fname} ${candidateJobData?.candidate?.lname}`
 
       if (mailSent) {

@@ -400,7 +400,7 @@ module.exports = {
       }
 
       const agencyJobs = await AgencyJobModel.find(findFilter)
-        .populate([{ path: "job" }, { path: "candidates" , populate: { path: "candidatejobs" } }])
+      .populate([{ path: "job" }, { path: "candidates" }])
         .sort({ _id: -1 });
 
       return res.status(200).send({

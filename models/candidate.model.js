@@ -176,6 +176,22 @@ const CandidateSchema = new Schema(
         type: String,
       },
     },
+    reasonReject : {
+      type: String,
+    },
+    otherReason : {
+      type: String,
+    },
+    noShow : {
+      type: Boolean,
+      default: false,
+    },
+    noShowDate : {
+      type: Date
+    },
+    scheduleDate : {
+      type: Date
+    }
   },
   { timestamps: true }
 );
