@@ -25,15 +25,13 @@ const sgMail = require("@sendgrid/mail");
 //     requireTLS: true,
 // });
 
-const {bucket} = require('./../config/fireBaseConfig')
+const { bucket } = require("./../config/fireBaseConfig");
 // admin.initializeApp({
 //   credential: admin.credential.cert(serviceAccount),
 //   databaseURL: process.env.FIREBASE_DATABASE_URL,
 //   storageBucket: process.env.BUCKET_URL,
 // });
 // app.locals.bucket = admin.storage().bucket();
-
-
 
 module.exports = {
   /**
@@ -535,12 +533,12 @@ module.exports = {
       // Status update
 
       let updateFields = {
-        request: req.body.request
-      }
+        request: req.body.request,
+      };
 
       if (req.body.request == "5") {
-        updateFields.noShow = true
-        updateFields.noShowDate = req.body.noShowDate
+        updateFields.noShow = true;
+        updateFields.noShowDate = req.body.noShowDate;
       }
 
       if (req.body.request == "4") {
@@ -554,23 +552,60 @@ module.exports = {
           if (!req.body.otherReason) {
             return res
               .status(400)
-              .send({ error: true, message: "Please Provide Other Reason For Rejection" });
+              .send({
+                error: true,
+                message: "Please Provide Other Reason For Rejection",
+              });
           }
           updateFields.otherReason = req.body.otherReason;
         }
+      }
+
+      let mailSent = false;
+
+      if (req.body?.scheduleDate) {
+        updateFields.scheduleDate = req.body.scheduleDate;
+        mailSent = true;
       }
 
       const candidateJobData = await CandidateJobModel.findOneAndUpdate(
         { candidate: req.params.candidateId },
         updateFields,
         { new: true }
-      );
+      ).populate([
+        {
+          path: "candidate",
+          select: "email fname lname",
+        }])
 
-      const candidateData = await CandidateModel.findOneAndUpdate(
-        { _id: req.params.candidateId },
-        { status: candidateJobData?.request },
-        { new: true }
-      );
+      let fullname = `${candidateJobData?.candidate?.fname} ${candidateJobData?.candidate?.lname}`
+
+      if (mailSent) {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          to: candidateJobData?.candidate?.email, // Change to your recipient
+          from: "info@hire2inspire.com",
+          subject: `Interview Scheduled for ${fullname}`,
+          html: `
+          <head>
+              <title>Welcome to Hire2Inspire</title>
+          </head>
+          <body>
+          <p>Dear ${fullname},</p>
+          <p>Greetings of the day , Your Interview is schedule on ${req.body?.scheduleDate}</p>
+          <p>Best of luck,</p>
+          </body>`,
+        }
+
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
 
       if (candidateJobData?.request == "1") {
         const jobData = await JobPosting.findOneAndUpdate(
