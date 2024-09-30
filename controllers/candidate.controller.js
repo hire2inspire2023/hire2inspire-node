@@ -568,6 +568,10 @@ module.exports = {
         mailSent = true;
       }
 
+      if(req.body?.isScheduled && req.body?.request == "7") {
+        updateFields.iScheduled == true
+      }
+
       const candidateJobData = await CandidateJobModel.findOneAndUpdate(
         { candidate: req.params.candidateId },
         updateFields,

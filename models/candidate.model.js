@@ -191,7 +191,11 @@ const CandidateSchema = new Schema(
     },
     scheduleDate : {
       type: Date
-    }
+    },
+    iScheduled : {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
