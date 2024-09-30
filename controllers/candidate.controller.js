@@ -572,6 +572,10 @@ module.exports = {
         updateFields.iScheduled == true
       }
 
+      if(!req.body?.isScheduled && req.body?.request == "8" ) {
+        updateFields.iScheduled == false
+      }
+
       const candidateJobData = await CandidateJobModel.findOneAndUpdate(
         { candidate: req.params.candidateId },
         updateFields,

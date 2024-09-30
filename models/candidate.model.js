@@ -194,7 +194,6 @@ const CandidateSchema = new Schema(
     },
     iScheduled : {
       type: Boolean,
-      default: false,
     },
   },
   { timestamps: true }
