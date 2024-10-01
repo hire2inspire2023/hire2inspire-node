@@ -220,9 +220,20 @@ module.exports = {
         .sort({ _id: -1 });
 
       let jobIds = job_postings.map((e) => e._id.toString());
+      let refId = job_postings.map((e) => {
+        if (e?.ref_id) {
+          e.ref_id.toString()
+        }
+        return e.ref_id
+      });
 
       const CandidateJobData = await CandidateJobModel.find({
-        emp_job: { $in: jobIds },
+        $or: [
+          {
+            emp_job: { $in: jobIds },
+          },
+          { emp_job: { $in: refId } },
+        ],
       }).populate([
         {
           path: "candidate",
@@ -434,6 +445,7 @@ module.exports = {
 
       if (req.body?.isJobReposted) {
         req.body.ref_job_id = req.body?.ref_job_id
+        req.body.ref_id = req.body?.ref_id
       }
 
       let userCreditData = await UserCredit.findOne({ employer: userId });

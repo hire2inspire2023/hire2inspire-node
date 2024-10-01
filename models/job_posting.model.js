@@ -197,6 +197,9 @@ const JobPostingSchema = mongoose.Schema(
     ref_job_id: {
       type: String,
     },
+    ref_id: {
+      type: ObjectId,
+    },
   },
   { timestamps: true }
 );
