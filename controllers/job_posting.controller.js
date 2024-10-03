@@ -217,7 +217,7 @@ module.exports = {
             select: "fname lname email employer_image",
           },
         ])
-        .sort({ _id: -1 });
+        .sort({ createdAt: -1 });
 
       let jobIds = job_postings.map((e) => e._id.toString());
       let refId = job_postings.map((e) => {
@@ -243,7 +243,7 @@ module.exports = {
           path: "agency_id",
           select: " ",
         },
-      ]);
+      ]).sort({ createdAt: -1 , updatedAt: -1 });
 
       const updatedCandidateJobData = await Promise.all(
         CandidateJobData.map(async (ele) => {
