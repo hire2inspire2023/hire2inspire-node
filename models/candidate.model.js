@@ -189,6 +189,9 @@ const CandidateSchema = new Schema(
     noShowDate : {
       type: Date
     },
+    noShowReason : {
+      type : String
+    },
     scheduleDate : {
       type: Date
     },
