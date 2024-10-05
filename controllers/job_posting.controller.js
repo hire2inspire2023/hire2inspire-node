@@ -519,7 +519,7 @@ module.exports = {
 
       var today = new Date();
       req.body.expired_on = new Date(
-        new Date().setDate(today.getDate() + (JobPosting ? 30 : 15))
+        new Date().setDate(today.getDate() + (JobPosting ? 45 : 15))
       );
 
       const jobPostingData = new JobPosting(req.body);
@@ -1444,7 +1444,7 @@ module.exports = {
 
       var today = new Date();
       req.body.expired_on = new Date(
-        new Date().setDate(today.getDate() + (JobPosting ? 30 : 15))
+        new Date().setDate(today.getDate() + (JobPosting ? 45 : 15))
       );
 
       const jobPostingData = new JobPosting(req.body);
