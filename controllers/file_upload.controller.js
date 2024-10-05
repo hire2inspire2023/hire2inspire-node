@@ -625,17 +625,18 @@ module.exports = {
         "Last Name*",
         "Phone Number*",
         "Email*",
-        "Country",
-        "City",
-        "State",
-        "Pin Code",
+        "Country*",
+        "City*",
+        "State*",
+        "Pin Code*",
         "Linkedin Url",
-        "Current CTC (In lakhs)",
-        "Expected CTC (In lakhs)",
-        "Notice Period (In Days)",
-        "Negotiable (In Days)",
-        "Total Experience (In Years)",
-        "Relevant Experience (In Years)",
+        "Current CTC (In lakhs)*",
+        "Expected CTC (In lakhs)*",
+        "Notice Period (In Days)*",
+        "Negotiable (In Days)*",
+        "Total Experience (In Years)*",
+        "Relevant Experience (In Years)*",
+        "Resume Link*"
       ];
 
       const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
@@ -683,22 +684,23 @@ module.exports = {
           (e.lname = e["Last Name*"]),
             (e.phone = e["Phone Number*"]),
             (e.email = e["Email*"]),
-            (e.country = e["Country"]),
-            (e.city = e["City"]),
-            (e.state = e["State"]),
-            (e.pin = e["Pin Code"]),
+            (e.country = e["Country*"]),
+            (e.city = e["City*"]),
+            (e.state = e["State*"]),
+            (e.pin = e["Pin Code*"]),
             (e.linkedin_url = e["Linkedin Url"]),
-            (e.current_CTC = e["Current CTC (In lakhs)"]),
-            (e.expected_CTC = e["Expected CTC (In lakhs)"]),
-            (e.notice_period = e["Notice Period (In Days)"]),
-            (e.negotiable_upto = e["Negotiable (In Days"]),
-            (e.total_experience = e["Total Experience (In Years)"]),
-            (e.relevant_experience = e["Relevant Experience (In Years)"]);
+            (e.current_CTC = e["Current CTC (In lakhs)*"]),
+            (e.expected_CTC = e["Expected CTC (In lakhs)*"]),
+            (e.notice_period = e["Notice Period (In Days)*"]),
+            (e.negotiable_upto = e["Negotiable (In Days*"]),
+            (e.total_experience = e["Total Experience (In Years)*"]),
+            (e.relevant_experience = e["Relevant Experience (In Years)*"]);
+            e.resume = e["Resume Link*"]
         });
 
         // If firstname , lastname , phone , email is not empty then only insert row
         filterResult = results.filter(
-          (entry) => entry.fname && entry.lname && entry.phone && entry.email
+          (entry) => entry.fname && entry.lname && entry.phone && entry.email && entry.country && entry.city && entry.state && entry.pin && entry.current_CTC && entry.expected_CTC && entry.notice_period && entry.negotiable_upto && entry.total_experience && entry.relevant_experience && entry.resume
         );
 
         let candidateExist;

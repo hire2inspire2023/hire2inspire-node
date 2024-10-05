@@ -595,6 +595,8 @@ module.exports = {
 
       let fullname = `${candidateJobData?.candidate?.fname} ${candidateJobData?.candidate?.lname}`
 
+      let dateFormat = req.body?.scheduleDate && await formatDateTime(req.body?.scheduleDate)
+
       if (mailSent) {
         sgMail.setApiKey(process.env.SENDGRID);
         const msg = {
@@ -607,7 +609,7 @@ module.exports = {
           </head>
           <body>
           <p>Dear ${fullname},</p>
-          <p>Greetings of the day , Your Interview is schedule on ${req.body?.scheduleDate}</p>
+          <p>Greetings of the day , Your Interview is schedule on ${dateFormat}</p>
           <p>Best of luck,</p>
           </body>`,
         }
@@ -1307,3 +1309,31 @@ module.exports = {
     }
   },
 };
+
+async function formatDateTime(dateTimeString) {
+  // Create a Date object from the input string
+  const date = new Date(dateTimeString);
+  
+  // Extract day, month, and year
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  
+  // Extract hours and minutes
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  // Determine AM or PM
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  
+  // Convert to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // If hour is 0, set to 12
+  
+  // Construct the formatted date and time
+  const formattedDate = `${day}/${month}/${year}`;
+  const formattedTime = `${hours}:${minutes} ${ampm}`;
+  
+  return `${formattedDate} ${formattedTime}`;
+}
+
