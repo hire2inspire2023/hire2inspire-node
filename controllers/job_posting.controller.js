@@ -439,6 +439,7 @@ module.exports = {
         employer: req.body.employer,
       }).sort({ _id: -1 });
 
+  
       let preJobId = JobList?.job_id;
 
       req.body.job_id = generateIncrementalJobId(preJobId);
@@ -446,6 +447,18 @@ module.exports = {
       if (req.body?.isJobReposted) {
         req.body.ref_job_id = req.body?.ref_job_id
         req.body.ref_id = req.body?.ref_id
+
+        let checkJobExist = await JobPosting.findOne({
+          ref_job_id: req.body?.ref_job_id,
+        });
+
+        
+        if (checkJobExist?.ref_job_id == req.body.ref_job_id) {
+          return res
+          .status(400)
+          .send({ error: true, message: "Jobs Already Exist." });
+        }
+
       }
 
       let userCreditData = await UserCredit.findOne({ employer: userId });
