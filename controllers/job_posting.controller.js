@@ -1028,11 +1028,17 @@ module.exports = {
         invitation_date: Date.now(),
       });
 
+      const jobId = await JobPosting.findOne({ _id : req.body.jobId})
+      
+      const CandidateJobData = await CandidateJobModel.find({ emp_job : jobId?.ref_id})
+
+      let candidateId = CandidateJobData.map(candidate => candidate?.candidate)
+
       // Allocate job to a agency here
       const agencyJobData = await AgencyJobModel.findOneAndUpdate(
         { agency: userId, job: req.body.jobId },
-        { status: req.body.status },
-        { upsert: true, new: true }
+        { status: req.body.status , $push: { candidates: candidateId?.length ? candidateId : []  }  },
+        { upsert: true, new: true },
       );
 
       let agencyJobs = await AgencyJobModel.find({ agency: userId });
