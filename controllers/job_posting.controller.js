@@ -456,7 +456,7 @@ module.exports = {
         if (checkJobExist?.ref_job_id == req.body.ref_job_id) {
           return res
           .status(400)
-          .send({ error: true, message: "Jobs Already Exist." });
+          .send({ error: true, message: "Job Already Exist." });
         }
 
       }
