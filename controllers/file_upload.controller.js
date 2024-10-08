@@ -813,7 +813,7 @@ module.exports = {
 
       return res.status(201).send({
         error: false,
-        message: `${req.params.csvType} Data stored`,
+        message: `File uploaded successfully`,
         data: filterResult,
       });
     } catch (error) {
