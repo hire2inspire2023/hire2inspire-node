@@ -1029,10 +1029,13 @@ module.exports = {
       });
 
       const jobId = await JobPosting.findOne({ _id : req.body.jobId})
-      
-      const CandidateJobData = await CandidateJobModel.find({ emp_job : jobId?.ref_id})
 
-      let candidateId = CandidateJobData.map(candidate => candidate?.candidate)
+      let candidateId = []
+
+      if (jobId?.ref_id) {
+         const CandidateJobData = await CandidateJobModel.find({ emp_job : jobId?.ref_id})
+         candidateId = CandidateJobData.map(candidate => candidate?.candidate)
+      }
 
       // Allocate job to a agency here
       const agencyJobData = await AgencyJobModel.findOneAndUpdate(
