@@ -656,6 +656,8 @@ module.exports = {
       }
 
       let filterResult = [];
+      let valideCandidates = []
+      let duplicateProfiles = []
       if (req.params.csvType == "bulk-candidate") {
         for (let i = 0 ; i < expectedHeaders.length ; i++) {
           if (!headers.includes(expectedHeaders[i])) {
@@ -699,38 +701,40 @@ module.exports = {
         });
 
         // If firstname , lastname , phone , email is not empty then only insert row
-        filterResult = results.filter(
+        valideCandidates = results.filter(
           (entry) => entry.fname && entry.lname && entry.phone && entry.email && entry.country && entry.city && entry.state && entry.pin && entry.current_CTC && entry.expected_CTC && entry.notice_period && entry.negotiable_upto && entry.total_experience && entry.relevant_experience && entry.resume
         );
 
         let candidateExist;
         let candidateExist1;
 
-        for (let i = 0; i < filterResult.length; i++) {
+        for (let i = 0; i < valideCandidates.length; i++) {
+          let flag = true
           candidateExist = await Candidate.findOne({
             $and: [
-              { email: filterResult[i]?.email },
-              { agency_job: req.body.agency_job },
+              { email: valideCandidates[i]?.email },
             ],
           });
           candidateExist1 = await Candidate.findOne({
             $and: [
-              { phone: filterResult[i]?.phone },
-              { agency_job: req.body.agency_job },
+              { phone: valideCandidates[i]?.phone },
             ],
           });
-        }
 
-        if (candidateExist) {
-          return res.status(400).send({
-            error: true,
-            message: `Candidate data already exist with this email ${candidateExist?.email}`,
-          });
-        } else if (candidateExist1) {
-          return res.status(400).send({
-            error: true,
-            message: `Candidate data already exist with this phone no ${candidateExist1?.phone}`,
-          });
+          if (candidateExist) {
+            flag = false
+            duplicateProfiles.push({
+              message: `Duplicate profile detected`,
+            });
+          } else if (candidateExist1) {
+            flag = false
+            duplicateProfiles.push({
+              message: `Duplicate profile detected`,
+            });
+          }
+          else if (flag) {
+            filterResult.push(valideCandidates[i])
+          }
         }
 
         // Candidate log CSV Uppload
@@ -811,11 +815,28 @@ module.exports = {
         });
       }
 
-      return res.status(201).send({
-        error: false,
-        message: `File uploaded successfully`,
-        data: filterResult,
-      });
+      // return res.status(201).send({
+      //   error: false,
+      //   message: `File uploaded successfully`,
+      //   data: filterResult,
+      // });
+
+      if (duplicateProfiles.length > 0) {
+        // Sending combined response with both duplicates and valid candidates
+        return res.status(201).send({
+          error: false,
+          message: 'Duplicate profile detected',
+          data: filterResult
+        });
+      } else {
+        // If no duplicates found, proceed with valid candidates
+        return res.status(201).send({
+          error: false,
+          message: 'File uploaded successfully',
+          data: filterResult,
+        });
+      }
+
     } catch (error) {
       // throw error
       res.status(200).send({
