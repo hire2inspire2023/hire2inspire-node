@@ -23,6 +23,7 @@ const Recruiter = require("../models/recruiter.model");
 const CandidateJobModel = require('../models/candidate_job.model');
 const sgMail = require('@sendgrid/mail');
 const xlsx = require('xlsx')
+const axios = require('axios')
 
 module.exports = {
   /**
@@ -803,6 +804,8 @@ module.exports = {
             });
         }
 
+        await findCandidateAccuracy(resp[i])
+
         const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate(
           { _id: req.body.agency_job },
           { $push: { candidates: candidateIds } },
@@ -846,3 +849,39 @@ module.exports = {
     }
   },
 };
+
+async function findCandidateAccuracy(data) {
+  let payLoad = await Candidate.findOne({ _id : data._id}).populate(
+    [
+      {
+        path: "job",
+      }
+    ]
+  )
+
+  if (payLoad && payLoad?.job) {
+    let jobDescription = payLoad.job
+    delete payLoad.Job
+    let candidateDetail = payLoad
+
+    let body = {
+      jobDescription : jobDescription,
+      candidateDetail : candidateDetail
+    }
+
+    const heading = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        // Add other headers if Postman sends more, e.g., Authorization
+      }
+    };
+
+    axios
+      .post(`${config.pythonApi}/evaluate_resume`, body , heading)
+      .then( async (response) => {
+        await Candidate.findOneAndUpdate({ _id : data._id }, response.data)
+      })
+      .catch((err) => console.log(err));
+  }
+}
