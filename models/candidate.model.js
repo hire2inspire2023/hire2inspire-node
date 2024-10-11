@@ -198,6 +198,15 @@ const CandidateSchema = new Schema(
     iScheduled : {
       type: Boolean,
     },
+    evaluation: {
+      diversityMatch:{ type : String},
+      locationMatch: { type : String},
+      totalMatchPercentage: { type: Number },
+      reason: { type : String },
+      skillMatch: { type : Array},
+      skillPercentage: { type : Number },
+      workExpPercentage: { type : Number}
+    }
   },
   { timestamps: true }
 );
