@@ -769,6 +769,8 @@ module.exports = {
           let jobRole = condidateJobdatalist?.emp_job?.job_name;
           let empMail = condidateJobdatalist?.emp_job?.employer?.email;
 
+          await findCandidateAccuracy(resp[i])
+
           sgMail.setApiKey(process.env.SENDGRID);
           const msg = {
             cc: empMail,
@@ -803,8 +805,6 @@ module.exports = {
               console.error(error);
             });
         }
-
-        await findCandidateAccuracy(resp[i])
 
         const agencyJobUpdate = await AgencyJobModel.findOneAndUpdate(
           { _id: req.body.agency_job },
