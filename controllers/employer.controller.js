@@ -519,7 +519,7 @@ module.exports = {
       }).populate([
         {
           path: "passbook_amt.candidate",
-          select: "fname lname agency",
+          select: "fname lname agency status noShowDate noShowReason",
           populate: {
             path: "agency",
             select: " ",
@@ -539,7 +539,7 @@ module.exports = {
         },
         {
           path: "proforma_passbook_amt.candidate",
-          select: "fname lname agency",
+          select: "fname lname agency status noShowDate noShowReason",
           populate: {
             path: "agency",
             select: " ",
