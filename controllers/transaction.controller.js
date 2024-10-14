@@ -271,7 +271,7 @@ module.exports = {
         },
         {
           path: "passbook_amt.candidate",
-          select: "fname lname",
+          select: "fname lname status noShow noShowDate noShowReason",
           populate: {
             path: "agency",
             select: "name corporate_email gst agency_account_info",
@@ -299,7 +299,7 @@ module.exports = {
         },
         {
           path: "proforma_passbook_amt.candidate",
-          select: "fname lname",
+          select: "fname lname status noShow noShowDate noShowReason",
           populate: {
             path: "agency",
             select: "name corporate_email gst agency_account_info",
