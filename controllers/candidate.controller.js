@@ -609,7 +609,7 @@ module.exports = {
           </head>
           <body>
           <p>Dear ${fullname},</p>
-          <p>Greetings of the day , Your Interview is schedule on ${dateFormat?.formattedDate} at ${dateFormat?.formattedTime} </p>
+          <p>Greetings of the day , Your Interview is scheduled on ${dateFormat?.formattedDate} at ${dateFormat?.formattedTime} </p>
           <p>Best of luck,</p>
           <p>Regards</p>
           <p>hire2Inspire</p>
