@@ -87,6 +87,10 @@ app.get('/', async (req, res, next) => {
   res.send('Welcome to hire2inspire API v1.')
 })
 
+app.get('/env-check', async (req, res, next) => {
+  res.json({env : process.env})
+})
+
 /**
  * Base route always /api
  */
