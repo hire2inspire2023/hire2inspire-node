@@ -21,6 +21,13 @@ const Token = require("../models/token.model");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
+const config = require('./../config/config')
+const {bucket} = require('./../config/fireBaseConfig')
+const pdfToBase64Helpers = require('../helpers/pdfbase64')
+const { sendRes , sendError } = require('./../utils/res_handler')
+const CandidateJobModel = require('../models/candidate_job.model')
+const CreditNote = require("../models/creditnote.model");
+
 
 // var transport = nodemailer.createTransport({
 //   host: process.env.EMAIL_HOST,
@@ -54,10 +61,73 @@ module.exports = {
       const agencies = await Agency.find({})
         .select(["-password", "-otp"])
         .sort("-_id");
+
+      const agencyReviewsMap = {};
+      for (let i = 0 ; i < agencies.length ; i++) {
+        const agencyReview = await CandidateJobModel.aggregate([
+          {
+            // Step 1: Filter out documents where the candidate._id is null or review is missing
+            $match: {
+              candidate: { $exists: true, $ne: null }, // Ensure candidate._id exists and is not null
+              "review.communication_skill": { $exists: true, $ne: null }, // Ensure review fields exist
+              "review.position_knwdlg": { $exists: true, $ne: null },
+              "review.proffesioalsm": { $exists: true, $ne: null },
+              agency_id : agencies[i]._id
+            },
+          },
+          {
+            // Step 2: Calculate the average review score for each document
+            $addFields: {
+              average_review_score: {
+                $avg: [
+                  { $toDouble: "$review.communication_skill" },
+                  { $toDouble: "$review.position_knwdlg" },
+                  { $toDouble: "$review.proffesioalsm" },
+                ],
+              },
+            },
+          },
+          {
+            // Step 3: Group by candidate._id and calculate the overall average score for each candidate
+            $group: {
+              _id: "$candidate",
+              avgCandidateScore: { $avg: "$average_review_score" }, // Average review score for each candidate
+              count: { $sum: 1 }, // Count of reviews per candidate
+            },
+          },
+          {
+            // Step 4: Calculate the total average score across all candidates
+            $group: {
+              _id: null,
+              total_avg_score: { $avg: "$avgCandidateScore" }, // Average of all candidate averages
+              totalCandidates: { $sum: 1 }, // Total number of candidates
+              sum_of_scores: { $sum: "$avgCandidateScore" }, // Sum of all avgCandidateScores (for reference)
+            },
+          },
+          {
+            // Step 5: Project final results
+            $project: {
+              _id: 0, // Suppress the _id field
+              total_avg_score: 1, // The overall average across all candidates
+              totalCandidates: 1,
+              sum_of_scores: 1,
+            },
+          },
+        ]);
+        agencyReviewsMap[agencies[i]._id] = agencyReview[0]?.total_avg_score
+        ? parseFloat(agencyReview[0].total_avg_score).toFixed(1)
+        : ""
+      }
+
+      const agenciesWithReviews = agencies.map((agency) => ({
+        ...agency.toObject(), // Convert Mongoose document to plain object
+        agencyReview: agencyReviewsMap[agency._id.toString()] // Add agencyReview data
+      }));
+
       return res.status(200).send({
         error: false,
         message: "All agencies",
-        data: agencies,
+        data: agenciesWithReviews
       });
     } catch (error) {
       next(error);
@@ -330,7 +400,7 @@ module.exports = {
       }
 
       const agencyJobs = await AgencyJobModel.find(findFilter)
-        .populate([{ path: "job" }, { path: "candidates" }])
+      .populate([{ path: "job" }, { path: "candidates" }])
         .sort({ _id: -1 });
 
       return res.status(200).send({
@@ -869,6 +939,169 @@ module.exports = {
       }
     } catch (error) {
       next(error);
+    }
+  },
+
+  invoiceUpload: async (req, res, next) => {
+    try {
+      let { id } = req.params;
+      if (!id) {
+        throw new Error("Id not found");
+      }
+
+      let agencyObj = await AgencyTransaction.findOne({
+        passbook_amt: {
+          $elemMatch: {
+            _id: id,
+          },
+        },
+      }).populate([
+        {
+          path: "agency",
+        },
+      ]);
+
+      if (!agencyObj) {
+        throw new Error("Agency Transaction id Not Found");
+      }
+
+      if (!req.file) {
+        throw new Error("Pleas Upload Invoice");
+      }
+
+      const fileName = `AGENCY_INVOICE_${agencyObj?._id}_${req.file.originalname}`;
+      bucket.file(fileName).createWriteStream().end(req.file.buffer);
+
+      let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
+
+      await AgencyTransaction.updateOne(
+        {
+          _id: agencyObj?._id,
+          "passbook_amt._id": id,
+        },
+        {
+          $set: {
+            "passbook_amt.$.invoice_file": fileurl,
+          },
+        }
+      );
+
+      const pdfBase64 = await pdfToBase64Helpers(fileurl);
+
+      if (agencyObj.agency.corporate_email) {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          cc: agencyObj.agency.corporate_email,
+          to: config.emailInfoHire2Inspire, // Change to your recipient
+          from: "info@hire2inspire.com", // Change to your verified sender
+          subject: `Tax Invoice for Candidate hired`,
+          html: `
+        <p>Hello,</p>
+        <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
+        <p>Download Invoice Link: <a href="${fileurl}">Click Here To Download Invoice</a> <br>or<br> copy the link and paste : ${fileurl}</p>
+        <p>Should you have any questions or require further clarification regarding the invoice, please don't hesitate to reach out to me.</p>
+        <p>Thank you for your prompt attention to this matter.</p>
+        <p>Regards,<br/>Hire2Inspire</p>
+        `,
+        attachments: [
+          {
+            content: pdfBase64,
+            filename: 'taxinvoice.pdf',
+            type: 'application/pdf',
+            disposition: 'attachment',
+          },
+        ],
+  
+        };
+        await sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent for Agency");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+
+      return sendRes(res, "File Uploaded Succesfully", fileurl);
+    } catch (err) {
+      console.log(err);
+      return sendError(res, 403, typeof err == "string" ? err : err.message);
+    }
+  },
+
+  creditNoteUploadAgency: async (req, res, next) => {
+    try {
+      let { id } = req.params;
+      if (!id) {
+        throw new Error("Id not found");
+      }
+
+      let userObj = await CreditNote.findOne({_id: id })
+
+      if (!userObj) {
+        throw new Error("Credit Note id Not Found");
+      }
+
+      if (!req.file) {
+        throw new Error("Pleas Upload Credit Note Invoice");
+      }
+
+      const fileName = `CREDITNOTE_INVOICE_${userObj?._id}_${req.file.originalname}`;
+      bucket.file(fileName).createWriteStream().end(req.file.buffer);
+
+      let fileurl = `${config.fireBaseUrl}${fileName}?alt=media`;
+
+      await CreditNote.updateOne(
+        {
+          _id: id
+        },
+        {
+          creditnote_invoice_agency : fileurl
+        }
+      );
+
+      // const pdfBase64 = await pdfToBase64Helpers(fileurl);
+
+      // if (agencyObj.agency.corporate_email) {
+      //   sgMail.setApiKey(process.env.SENDGRID);
+      //   const msg = {
+      //     cc: agencyObj.agency.corporate_email,
+      //     to: config.emailInfoHire2Inspire, // Change to your recipient
+      //     from: "info@hire2inspire.com", // Change to your verified sender
+      //     subject: `Tax Invoice for Candidate hired`,
+      //     html: `
+      //   <p>Hello,</p>
+      //   <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
+      //   <p>Download Invoice Link: <a href="${fileurl}">Click Here To Download Invoice</a> <br>or<br> copy the link and paste : ${fileurl}</p>
+      //   <p>Should you have any questions or require further clarification regarding the invoice, please don't hesitate to reach out to me.</p>
+      //   <p>Thank you for your prompt attention to this matter.</p>
+      //   <p>Regards,<br/>Hire2Inspire</p>
+      //   `,
+      //   attachments: [
+      //     {
+      //       content: pdfBase64,
+      //       filename: 'taxinvoice.pdf',
+      //       type: 'application/pdf',
+      //       disposition: 'attachment',
+      //     },
+      //   ],
+  
+      //   };
+      //   await sgMail
+      //     .send(msg)
+      //     .then(() => {
+      //       console.log("Email sent for Agency");
+      //     })
+      //     .catch((error) => {
+      //       console.error(error);
+      //     });
+      // }
+
+      return sendRes(res, "File Uploaded Succesfully", fileurl);
+    } catch (err) {
+      console.log(err);
+      return sendError(res, 403, typeof err == "string" ? err : err.message);
     }
   },
 };

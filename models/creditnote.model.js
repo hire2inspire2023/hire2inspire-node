@@ -30,7 +30,13 @@ const CreditNoteSchema = mongoose.Schema({
     },
     credit_inv_no:{
         type:String
-    }  
+    },
+    creditnote_invoice_agency : {
+        type : String
+    },
+    creditnote_invoice_employer : {
+        type : String
+    } 
 
 }, {timestamps: true});
 

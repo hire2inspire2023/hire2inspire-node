@@ -25,12 +25,13 @@ const sgMail = require("@sendgrid/mail");
 //     requireTLS: true,
 // });
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-  storageBucket: process.env.BUCKET_URL,
-});
-app.locals.bucket = admin.storage().bucket();
+const { bucket } = require("./../config/fireBaseConfig");
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: process.env.FIREBASE_DATABASE_URL,
+//   storageBucket: process.env.BUCKET_URL,
+// });
+// app.locals.bucket = admin.storage().bucket();
 
 module.exports = {
   /**
@@ -430,7 +431,13 @@ module.exports = {
           .send({ error: true, message: "Only pdf file is allowed." });
 
       const fileName = `HIRE2INSPIRE_${Date.now()}_${req.file.originalname}`;
-      const fileData = await app.locals.bucket
+
+      // const fileData = await app.locals.bucket
+      // .file(fileName)
+      // .createWriteStream()
+      // .end(req.file.buffer);
+
+      const fileData = await bucket
         .file(fileName)
         .createWriteStream()
         .end(req.file.buffer);
@@ -524,21 +531,100 @@ module.exports = {
   requestUpdate: async (req, res, next) => {
     try {
       // Status update
+
+      let updateFields = {
+        request: req.body.request,
+      };
+
+      if (req.body.request == "5") {
+        updateFields.noShow = true;
+        updateFields.noShowDate = req.body.noShowDate;
+        updateFields.noShowReason = req.body.noShowReason
+      }
+
+      if (req.body.request == "4") {
+        if (!req.body.reasonReject) {
+          return res
+            .status(400)
+            .send({ error: true, message: "Please Provide Reject Reason" });
+        }
+        updateFields.reasonReject = req.body.reasonReject;
+        if (req.body.reasonReject == "other") {
+          if (!req.body.otherReason) {
+            return res
+              .status(400)
+              .send({
+                error: true,
+                message: "Please Provide Other Reason For Rejection",
+              });
+          }
+          updateFields.otherReason = req.body.otherReason;
+        }
+      }
+
+      let mailSent = false;
+
+      if (req.body?.scheduleDate) {
+        updateFields.scheduleDate = req.body.scheduleDate;
+        mailSent = true;
+      }
+
+      if(req.body?.isScheduled && req.body?.request == "7") {
+        updateFields.iScheduled == true
+      }
+
+      if(!req.body?.isScheduled && req.body?.request == "8" ) {
+        updateFields.iScheduled == false
+      }
+
       const candidateJobData = await CandidateJobModel.findOneAndUpdate(
         { candidate: req.params.candidateId },
-        { request: req.body.request },
+        updateFields,
         { new: true }
-      );
+      ).populate([
+        {
+          path: "candidate",
+          select: "email fname lname",
+        }])
 
-      console.log({ candidateJobData });
+        const candidateData = await CandidateModel.findOneAndUpdate(
+          { _id: req.params.candidateId },
+          { status: candidateJobData?.request , ...updateFields},
+          { new: true }
+        );
 
-      const candidateData = await CandidateModel.findOneAndUpdate(
-        { _id: req.params.candidateId },
-        { status: candidateJobData?.request },
-        { new: true }
-      );
+      let dateFormat = req.body?.scheduleDate && await formatDateTime(req.body?.scheduleDate)
 
-      console.log("candidateJobData", candidateJobData?.request);
+      let fullname = `${candidateJobData?.candidate?.fname} ${candidateJobData?.candidate?.lname}`
+
+      if (mailSent) {
+        sgMail.setApiKey(process.env.SENDGRID);
+        const msg = {
+          to: candidateJobData?.candidate?.email, // Change to your recipient
+          from: "info@hire2inspire.com",
+          subject: `Interview Scheduled for ${fullname}`,
+          html: `
+          <head>
+              <title>Welcome to Hire2Inspire</title>
+          </head>
+          <body>
+          <p>Dear ${fullname},</p>
+          <p>Greetings of the day , Your Interview is scheduled on ${dateFormat?.formattedDate} at ${dateFormat?.formattedTime} </p>
+          <p>Best of luck,</p>
+          <p>Regards</p>
+          <p>hire2Inspire</p>
+          </body>`,
+        }
+
+        sgMail
+          .send(msg)
+          .then(() => {
+            console.log("Email sent");
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
 
       if (candidateJobData?.request == "1") {
         const jobData = await JobPosting.findOneAndUpdate(
@@ -1225,3 +1311,35 @@ module.exports = {
     }
   },
 };
+
+async function formatDateTime(dateTimeString) {
+  // Create a Date object from the input string
+  const date = new Date(dateTimeString);
+
+  let obj = {}
+  
+  // Extract day, month, and year
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  
+  // Extract hours and minutes
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  // Determine AM or PM
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  
+  // Convert to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // If hour is 0, set to 12
+  
+  // Construct the formatted date and time
+  const formattedDate = `${day}/${month}/${year}`;
+  const formattedTime = `${hours}:${minutes} ${ampm}`;
+  obj.formattedDate = formattedDate
+  obj.formattedTime = formattedTime
+  
+  return obj;
+}
+

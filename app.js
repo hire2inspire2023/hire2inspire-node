@@ -9,6 +9,7 @@ require('./helpers/init_mongodb')
 const { verifyAccessToken } = require('./helpers/jwt_helper')
 const router = require('./routes/index.route')
 const moment = require('moment-timezone')
+const { bucket } = require('./config/fireBaseConfig');
 
 const app = express()
 
@@ -95,6 +96,7 @@ app.get('/env-check', async (req, res, next) => {
  * Base route always /api
  */
 app.use('/api', router)
+app.locals.bucket = bucket;
 
 /**
  * Unavailable route handling

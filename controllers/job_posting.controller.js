@@ -217,14 +217,23 @@ module.exports = {
             select: "fname lname email employer_image",
           },
         ])
-        .sort({ _id: -1 });
+        .sort({ createdAt: -1 });
 
       let jobIds = job_postings.map((e) => e._id.toString());
-
-      console.log({ jobIds });
+      let refId = job_postings.map((e) => {
+        if (e?.ref_id) {
+          e.ref_id.toString()
+        }
+        return e.ref_id
+      });
 
       const CandidateJobData = await CandidateJobModel.find({
-        emp_job: { $in: jobIds },
+        $or: [
+          {
+            emp_job: { $in: jobIds },
+          },
+          { emp_job: { $in: refId } },
+        ],
       }).populate([
         {
           path: "candidate",
@@ -234,9 +243,29 @@ module.exports = {
           path: "agency_id",
           select: " ",
         },
-      ]);
+      ]).sort({ createdAt: -1 , updatedAt: -1 });
 
-      console.log({ CandidateJobData });
+      const updatedCandidateJobData = await Promise.all(
+        CandidateJobData.map(async (ele) => {
+          // Convert the Mongoose document to a plain object so you can modify it
+          let candidateJobObject = ele.toObject();
+      
+          if (candidateJobObject?.candidate?._id) {
+            let candidateId = candidateJobObject.candidate._id;
+            let hireDetails = await HiringDetail.findOne({
+              candidate: candidateId,
+              employer: userId,
+            }).select("date_of_joining");
+      
+            // Attach the new field
+            candidateJobObject.dateOfJoining = hireDetails?.date_of_joining || null;
+          }
+      
+          // Return the modified object
+          return candidateJobObject;
+        })
+      );
+
 
       // const CandidateData = await Candidate.find( {job: {$in: jobIds}}).populate([
       //     {
@@ -259,7 +288,7 @@ module.exports = {
         error: false,
         message: "Job posting list",
         data: job_postings,
-        CandidateJobData,
+        CandidateJobData : updatedCandidateJobData,
         //  CandidateData
       });
     } catch (error) {
@@ -379,7 +408,6 @@ module.exports = {
 
       function generateIncrementalJobId(prejob) {
         if (prejob == undefined) {
-          console.log("here1");
           const now = new Date();
           const year = now.getFullYear().toString();
           const month = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -389,8 +417,6 @@ module.exports = {
           let currentNumeric = JobList?.job_id;
           let cn = [...currentNumeric];
           let currentNumericPart = cn[cn?.length - 2] + cn[cn?.length - 1];
-          console.log("here2");
-          console.log("currentNumericPart", currentNumericPart);
           const now = new Date();
           const year = now.getFullYear().toString();
           const month = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -412,14 +438,28 @@ module.exports = {
       let JobList = await JobPosting.findOne({
         employer: req.body.employer,
       }).sort({ _id: -1 });
-      console.log({ JobList });
-      let preJobId = JobList?.job_id;
 
-      console.log({ preJobId });
+  
+      let preJobId = JobList?.job_id;
 
       req.body.job_id = generateIncrementalJobId(preJobId);
 
-      console.log("job_id", req.body.job_id);
+      if (req.body?.isJobReposted) {
+        req.body.ref_job_id = req.body?.ref_job_id
+        req.body.ref_id = req.body?.ref_id
+
+        let checkJobExist = await JobPosting.findOne({
+          ref_job_id: req.body?.ref_job_id,
+        });
+
+        
+        if (checkJobExist?.ref_job_id == req.body.ref_job_id) {
+          return res
+          .status(400)
+          .send({ error: true, message: "Job Already Exist." });
+        }
+
+      }
 
       let userCreditData = await UserCredit.findOne({ employer: userId });
       // console.log({userCreditData})
@@ -492,7 +532,7 @@ module.exports = {
 
       var today = new Date();
       req.body.expired_on = new Date(
-        new Date().setDate(today.getDate() + (JobPosting ? 30 : 15))
+        new Date().setDate(today.getDate() + (JobPosting ? 45 : 15))
       );
 
       const jobPostingData = new JobPosting(req.body);
@@ -988,11 +1028,20 @@ module.exports = {
         invitation_date: Date.now(),
       });
 
+      const jobId = await JobPosting.findOne({ _id : req.body.jobId})
+
+      let candidateId = []
+
+      if (jobId?.ref_id) {
+         const CandidateJobData = await CandidateJobModel.find({ emp_job : jobId?.ref_id})
+         candidateId = CandidateJobData.map(candidate => candidate?.candidate)
+      }
+
       // Allocate job to a agency here
       const agencyJobData = await AgencyJobModel.findOneAndUpdate(
         { agency: userId, job: req.body.jobId },
-        { status: req.body.status },
-        { upsert: true, new: true }
+        { status: req.body.status , $push: { candidates: candidateId?.length ? candidateId : []  }  },
+        { upsert: true, new: true },
       );
 
       let agencyJobs = await AgencyJobModel.find({ agency: userId });
@@ -1228,12 +1277,73 @@ module.exports = {
 
       //  console.log("agencyIds",agencyIds)
 
-      let agencyList = await Agency.find({ _id: { $in: agencyIds } });
+      let agencies = await Agency.find({ _id: { $in: agencyIds } });
+      const agencyReviewsMap = {};
+      for (let i = 0 ; i < agencies.length ; i++) {
+        const agencyReview = await CandidateJobModel.aggregate([
+          {
+            // Step 1: Filter out documents where the candidate._id is null or review is missing
+            $match: {
+              candidate: { $exists: true, $ne: null }, // Ensure candidate._id exists and is not null
+              "review.communication_skill": { $exists: true, $ne: null }, // Ensure review fields exist
+              "review.position_knwdlg": { $exists: true, $ne: null },
+              "review.proffesioalsm": { $exists: true, $ne: null },
+              agency_id : agencies[i]._id
+            },
+          },
+          {
+            // Step 2: Calculate the average review score for each document
+            $addFields: {
+              average_review_score: {
+                $avg: [
+                  { $toDouble: "$review.communication_skill" },
+                  { $toDouble: "$review.position_knwdlg" },
+                  { $toDouble: "$review.proffesioalsm" },
+                ],
+              },
+            },
+          },
+          {
+            // Step 3: Group by candidate._id and calculate the overall average score for each candidate
+            $group: {
+              _id: "$candidate",
+              avgCandidateScore: { $avg: "$average_review_score" }, // Average review score for each candidate
+              count: { $sum: 1 }, // Count of reviews per candidate
+            },
+          },
+          {
+            // Step 4: Calculate the total average score across all candidates
+            $group: {
+              _id: null,
+              total_avg_score: { $avg: "$avgCandidateScore" }, // Average of all candidate averages
+              totalCandidates: { $sum: 1 }, // Total number of candidates
+              sum_of_scores: { $sum: "$avgCandidateScore" }, // Sum of all avgCandidateScores (for reference)
+            },
+          },
+          {
+            // Step 5: Project final results
+            $project: {
+              _id: 0, // Suppress the _id field
+              total_avg_score: 1, // The overall average across all candidates
+              totalCandidates: 1,
+              sum_of_scores: 1,
+            },
+          },
+        ]);
+        agencyReviewsMap[agencies[i]._id] = agencyReview[0]?.total_avg_score
+        ? parseFloat(agencyReview[0].total_avg_score).toFixed(1)
+        : ""
+      }
+
+      const agenciesWithReviews = agencies.map((agency) => ({
+        ...agency.toObject(), // Convert Mongoose document to plain object
+        agencyReview: agencyReviewsMap[agency._id.toString()] // Add agencyReview data
+      }));
 
       return res.status(200).send({
         error: false,
         message: "Agency list",
-        data: agencyList,
+        data: agenciesWithReviews,
       });
     } catch (error) {
       next(error);
@@ -1356,7 +1466,7 @@ module.exports = {
 
       var today = new Date();
       req.body.expired_on = new Date(
-        new Date().setDate(today.getDate() + (JobPosting ? 30 : 15))
+        new Date().setDate(today.getDate() + (JobPosting ? 45 : 15))
       );
 
       const jobPostingData = new JobPosting(req.body);

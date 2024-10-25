@@ -102,7 +102,7 @@ const agencyTransactionSchema = mongoose.Schema({
         is_active:{
             type:Boolean,
             default:true
-        }
+        },
    }],
    proforma_passbook_amt:[{
     transaction_id:{
@@ -180,7 +180,7 @@ const agencyTransactionSchema = mongoose.Schema({
     is_active:{
         type:Boolean,
         default:true
-    }
+    },
 }],
     total_amount:{
         type:Number

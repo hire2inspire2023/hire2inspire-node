@@ -25,6 +25,7 @@ const GetInTouchRouter = require('./getInTouch.route');
 const PhonePayrouter = require('./phonePay.route');
 const LogoRouter = require('./logo.route');
 const AdminNotificationRouter = require('./adminNotification.route');
+const TemplateRouter = require('./template_route')
 
 
 router.use("/admin", AdminAuthRouter);
@@ -51,6 +52,7 @@ router.use("/get-in-touch", GetInTouchRouter);
 router.use("/phone-pay", PhonePayrouter);
 router.use("/logo", LogoRouter);
 router.use("/admin-notification", AdminNotificationRouter);
+router.use("/template",TemplateRouter),
 
 
 module.exports = router;

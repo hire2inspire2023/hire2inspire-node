@@ -111,7 +111,7 @@ const CandidateSchema = new Schema(
       enum: {
         values: [0, 1, 2, 3, 4],
         message:
-          "only 0:(pending)/1:(reviewing)/2:(interviewing)/3:(offer)/4:(rejected) allowed.",
+          "only 0:(pending)/1:(reviewing)/2:(interviewing)/3:(offer)/4:(rejected)/5:(noshow)/6:(schedule)/7:(scheduled)/8:(reschedule) allowed.",
       },
       default: 0,
     },
@@ -151,6 +151,10 @@ const CandidateSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isUploadedFromexcel: {
+      type: Boolean,
+      default: false,
+    },
     updated_by: {
       type: String,
       enum: {
@@ -172,6 +176,37 @@ const CandidateSchema = new Schema(
         type: String,
       },
     },
+    reasonReject : {
+      type: String,
+    },
+    otherReason : {
+      type: String,
+    },
+    noShow : {
+      type: Boolean,
+      default: false,
+    },
+    noShowDate : {
+      type: Date
+    },
+    noShowReason : {
+      type : String
+    },
+    scheduleDate : {
+      type: Date
+    },
+    iScheduled : {
+      type: Boolean,
+    },
+    evaluation: {
+      diversityMatch:{ type : String},
+      locationMatch: { type : String},
+      totalMatchPercentage: { type: Number },
+      reason: { type : String },
+      skillMatch: { type : Array},
+      skillPercentage: { type : Number },
+      workExpPercentage: { type : Number}
+    }
   },
   { timestamps: true }
 );

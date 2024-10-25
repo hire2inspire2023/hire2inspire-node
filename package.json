@@ -24,6 +24,7 @@
     "crypto": "^1.0.1",
     "csv-parser": "^3.0.0",
     "dotenv": "^8.6.0",
+    "ejs": "^3.1.10",
     "express": "^4.18.2",
     "firebase-admin": "^11.5.0",
     "form-data": "^4.0.0",
@@ -39,8 +40,10 @@
     "node-fetch": "^2.x",
     "nodemailer": "^6.9.4",
     "pdfkit": "^0.13.0",
+    "puppeteer": "^10.4.0",
     "razorpay": "^2.9.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

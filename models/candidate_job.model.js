@@ -19,9 +19,9 @@ const CandidateJobSchema = mongoose.Schema(
     request: {
       type: String,
       enum: {
-        values: [0, 1, 2, 3, 4],
+        values: [0, 1, 2, 3, 4, 5],
         message:
-          "only 0:(pending)/1:(reviewing)/2:(interviewing)/3:(offer)/4:(rejected) allowed.",
+          "only 0:(pending)/1:(reviewing)/2:(interviewing)/3:(offer)/4:(rejected)/5:(noshow)/6:(schedule)/7:(scheduled)/8:(reschedule) allowed.",
         default: 0,
       },
     },

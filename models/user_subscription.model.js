@@ -37,6 +37,9 @@ const UserSubscriptionSchema = mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    subscription_invoice : {
+      type : String
+    }
   },
   { timestamps: true }
 );

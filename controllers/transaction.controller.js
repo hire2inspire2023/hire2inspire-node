@@ -4,6 +4,8 @@ const AgencyTransaction = require("../models/agency_transaction.model");
 const Agency = require("../models/agency.model");
 const { getUserViaToken, verifyAccessToken } = require("../helpers/jwt_helper");
 const sgMail = require("@sendgrid/mail");
+const pdfToBase64Helpers = require('../helpers/pdfbase64')
+const config = require('../config/config')
 
 module.exports = {
   list: async (req, res, next) => {
@@ -269,7 +271,7 @@ module.exports = {
         },
         {
           path: "passbook_amt.candidate",
-          select: "fname lname",
+          select: "fname lname status noShow noShowDate noShowReason",
           populate: {
             path: "agency",
             select: "name corporate_email gst agency_account_info",
@@ -297,7 +299,7 @@ module.exports = {
         },
         {
           path: "proforma_passbook_amt.candidate",
-          select: "fname lname",
+          select: "fname lname status noShow noShowDate noShowReason",
           populate: {
             path: "agency",
             select: "name corporate_email gst agency_account_info",
@@ -416,29 +418,40 @@ module.exports = {
       recipents = req.body.recipents;
       let file = req.body.file;
 
-      let transctionData = await Transaction.findOne({
-        "passbook_amt.transaction_id": transactionId,
+      let transctionData = await Transaction.findOneAndUpdate(
+        {
+          "passbook_amt.transaction_id": transactionId,
+        },
+        {
+          $set: { "passbook_amt.$.employer_invoice_file": file }
+        },
+        { new: true } 
+      ).populate({
+        path: "employer",
+        select: "email",
       });
 
-      console.log({ transctionData });
+      // console.log({ transctionData });
 
       let invoiceNo;
       transctionData.passbook_amt.forEach((transaction) => {
         if (transaction.transaction_id === transactionId) {
-          console.log("hii");
           invoiceNo = transaction?.invoice_No;
         }
       });
 
       // let invoiceNo = transctionData?.passbook_amt?.invoice_No;
 
-      console.log({ invoiceNo });
+      // console.log({ invoiceNo });
+
+      const base64File = await pdfToBase64Helpers(file);
 
       sgMail.setApiKey(process.env.SENDGRID);
       const newmsg = {
+        cc : `${transctionData?.employer?.email},${config.emailInfoHire2Inspire}`,
         to: recipents, // Change to your recipient
         from: "info@hire2inspire.com",
-        subject: `Invoice for Candidate hired ${invoiceNo}`,
+        subject: `Tax Invoice for Candidate hired ${invoiceNo}`,
         html: `
         <p>Hello,</p>
         <p>I hope this email finds you well. You can download the invoice for the [Product/Service] provided to you by clicking on the link below:</p>
@@ -448,6 +461,15 @@ module.exports = {
         <p>Thank you for your prompt attention to this matter.</p>
         <p>Regards,<br/>Hire2Inspire</p>
         `,
+        attachments: [
+          {
+            content: base64File,
+            filename: 'taxinvoice.pdf',
+            type: 'application/pdf',
+            disposition: 'attachment',
+          },
+        ],
+        
       };
 
       sgMail

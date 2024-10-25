@@ -2,6 +2,7 @@ const express = require("express");
 const AgencyController = require("../controllers/agency.controller");
 const { verifyAccessToken } = require("../helpers/jwt_helper");
 const AgencyRouter = express.Router();
+const fileUpload = require('./../utils/pdfUpload')
 
 AgencyRouter.get("/all-list", verifyAccessToken, AgencyController.allList);
 
@@ -62,5 +63,9 @@ AgencyRouter.patch("/update-logout", AgencyController.updateLogout);
 AgencyRouter.post("/resend-email", AgencyController.resendEmail);
 
 AgencyRouter.delete("/delete/:agId", AgencyController.agencydelete);
+
+AgencyRouter.post("/invoiceUpload/:id", fileUpload.single('invoiceRaised'), AgencyController.invoiceUpload);
+
+AgencyRouter.post("/creditNoteUploadAgency/:id", fileUpload.single('creditNoteUploadAgency'), AgencyController.creditNoteUploadAgency);
 
 module.exports = AgencyRouter;
