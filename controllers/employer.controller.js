@@ -679,7 +679,7 @@ module.exports = {
 
       return sendRes(res, "File Uploaded Succesfully", fileurl);
     } catch (err) {
-      console.log(err);
+      console.log(err,"error message");
       return sendError(res, 403, typeof err == "string" ? err : err.message);
     }
   },
