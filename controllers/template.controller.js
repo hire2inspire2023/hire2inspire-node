@@ -36,10 +36,12 @@ module.exports = {
       });
 
       // 2. Launch puppeteer and create PDF
+      console.log("herere")
       const browser = await puppeteer.launch({
         headless: "new",
         args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });    
+      });   
+      console.log(browser,"browser---------") 
       const page = await browser.newPage();
       console.log(page,"page---------------")
       // await page.setContent(htmlContent, { waitUntil: "load" });
