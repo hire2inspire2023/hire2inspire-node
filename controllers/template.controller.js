@@ -37,10 +37,13 @@ module.exports = {
 
       // 2. Launch puppeteer and create PDF
       const browser = await puppeteer.launch({
+        headless: "new",
         args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });  
+      });    
       const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: "load" });
+      // await page.setContent(htmlContent, { waitUntil: "load" });
+      await page.setContent(htmlContent, { waitUntil: "networkidle2", timeout: 60000 });
+
       const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
 
       console.log('PDF Buffer Length:', pdfBuffer.length);
