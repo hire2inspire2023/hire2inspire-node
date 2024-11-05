@@ -36,7 +36,9 @@ module.exports = {
       });
 
       // 2. Launch puppeteer and create PDF
-      const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });  
       const page = await browser.newPage();
       await page.setContent(htmlContent, { waitUntil: "load" });
       const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
