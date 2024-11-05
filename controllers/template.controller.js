@@ -31,22 +31,13 @@ module.exports = {
 
       const htmlContent = await ejs.renderFile(templatePath, {
         title: "Sample PDF Report",
-        date: new Date().toLocaleString(),
-        name: "John Doe",
       });
 
       // 2. Launch puppeteer and create PDF
-      console.log("herere")
-      const browser = await puppeteer.launch({
-        headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });   
-      console.log(browser,"browser---------") 
+      const browser = await puppeteer.launch();   
       const page = await browser.newPage();
-      console.log(page,"page---------------")
       // await page.setContent(htmlContent, { waitUntil: "load" });
-      const setContent = await page.setContent(htmlContent, { waitUntil: "networkidle2", timeout: 60000 });
-      console.log(setContent,"setContent----------")
+      await page.setContent(htmlContent, { waitUntil: "load" });
 
       const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
 
