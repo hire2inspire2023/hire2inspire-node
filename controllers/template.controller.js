@@ -41,8 +41,10 @@ module.exports = {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });    
       const page = await browser.newPage();
+      console.log(page,"page---------------")
       // await page.setContent(htmlContent, { waitUntil: "load" });
-      await page.setContent(htmlContent, { waitUntil: "networkidle2", timeout: 60000 });
+      const setContent = await page.setContent(htmlContent, { waitUntil: "networkidle2", timeout: 60000 });
+      console.log(setContent,"setContent----------")
 
       const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
 
