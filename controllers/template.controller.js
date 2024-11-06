@@ -31,8 +31,6 @@ module.exports = {
 
       const htmlContent = await ejs.renderFile(templatePath, {
         title: "Sample PDF Report",
-        date: new Date().toLocaleString(),
-        name: "John Doe",
       });
 
       // 2. Launch puppeteer and create PDF
