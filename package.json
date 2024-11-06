@@ -40,7 +40,7 @@
     "node-fetch": "^2.x",
     "nodemailer": "^6.9.4",
     "pdfkit": "^0.13.0",
-    "puppeteer": "^10.4.0",
+    "puppeteer": "^13.0.0",
     "razorpay": "^2.9.1",
     "uuid": "^9.0.0",
     "xlsx": "^0.18.5"
