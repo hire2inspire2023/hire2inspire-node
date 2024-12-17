@@ -410,7 +410,6 @@ module.exports = {
     try {
       let token = req.headers["authorization"]?.split(" ")[1];
       let { userId, dataModel } = await getUserViaToken(token);
-      console.log("{ userId, dataModel } >>> ", { userId, dataModel });
       const checkEmp = await Employer.findOne({ _id: userId });
       let empFName = checkEmp?.fname;
       let empLName = checkEmp?.lname;
@@ -433,7 +432,6 @@ module.exports = {
             { email: emails[index] }
           ]
         });
-        console.log({ checkInvitation })
         if (checkInvitation)
           return res
             .status(200)
@@ -447,6 +445,21 @@ module.exports = {
           employer: userId,
           token: uuidv4(),
         });
+      }
+
+      // Recruiter_issue
+
+      for (let j = 0 ; j < data.length ; j++) {
+        let createEmployerr = {
+          status: checkEmp?.status,
+          isDeleted: checkEmp?.isDeleted,
+          verified: checkEmp?.verified,
+          type : checkEmp?.type,
+          email: data[j]?.email,
+          password: data[j]?.password,
+          recruiter_id : userId || ""
+        }
+        await Employer.insertMany(createEmployerr);
       }
 
       const recruiterInvite = await RecruiterModel.insertMany(data);
@@ -489,7 +502,7 @@ module.exports = {
         every step.
     </p>
     <p>Find the link 
-    <a href="http://hire2inspire.com/recruiter/login" target="blank">Registration Link</a>
+    <a href="http://hire2inspire.com/employer/login" target="blank">Registration Link</a>
   </p>
   <p>
    password: secret

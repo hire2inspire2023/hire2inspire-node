@@ -210,14 +210,22 @@ module.exports = {
           .status(400)
           .send({ error: true, message: "Employer not found." });
 
-      const job_postings = await JobPosting.find({ employer: userId })
-        .populate([
-          {
-            path: "employer",
-            select: "fname lname email employer_image",
-          },
-        ])
-        .sort({ createdAt: -1 });
+          // Recruiter_issue old
+         // const job_postings = await JobPosting.find({ employer: userId }) 
+
+
+         // Recruiter_issue new
+         const job_postings = await JobPosting.find({
+           $or: [{ employer: userId, employer: checkEmployer?.recruiter_id }],
+         })
+
+           .populate([
+             {
+               path: "employer",
+               select: "fname lname email employer_image",
+             },
+           ])
+           .sort({ createdAt: -1 });
 
       let jobIds = job_postings.map((e) => e._id.toString());
       let refId = job_postings.map((e) => {

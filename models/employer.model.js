@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const EmployerSchema = new Schema(
   {
@@ -104,6 +105,11 @@ const EmployerSchema = new Schema(
         message: "only 0/1 allowed.",
       },
     },
+    recruiter_id : {
+      type: ObjectId,
+      ref: "employers",
+      trim: true,
+    }
   },
   { timestamps: true }
 );
