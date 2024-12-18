@@ -216,7 +216,7 @@ module.exports = {
 
          // Recruiter_issue new
          const job_postings = await JobPosting.find({
-           $or: [{ employer: userId } ,{ employer: checkEmployer?.recruiter_id }],
+           $or: [{ employer: userId } ,{ employer: checkEmployer?.recruiter_id } , { recruiter_id: userId }],
          })
 
            .populate([
@@ -542,6 +542,10 @@ module.exports = {
       req.body.expired_on = new Date(
         new Date().setDate(today.getDate() + (JobPosting ? 45 : 15))
       );
+
+      if (checkEmployer?.recruiter_id) {
+        req.body.recruiter_id = checkEmployer.recruiter_id
+      } 
 
       const jobPostingData = new JobPosting(req.body);
       const result = await jobPostingData.save();
