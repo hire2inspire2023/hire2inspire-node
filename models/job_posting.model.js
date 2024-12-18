@@ -200,6 +200,11 @@ const JobPostingSchema = mongoose.Schema(
     ref_id: {
       type: ObjectId,
     },
+    recruiter_id : {
+      type: ObjectId,
+      ref: "employers",
+      trim: true,
+    }
   },
   { timestamps: true }
 );
