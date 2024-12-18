@@ -216,7 +216,7 @@ module.exports = {
 
          // Recruiter_issue new
          const job_postings = await JobPosting.find({
-           $or: [{ employer: userId, employer: checkEmployer?.recruiter_id }],
+           $or: [{ employer: userId } ,{ employer: checkEmployer?.recruiter_id }],
          })
 
            .populate([
