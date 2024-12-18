@@ -457,6 +457,7 @@ module.exports = {
           type : checkEmp?.type,
           email: data[j]?.email,
           password: data[j]?.password,
+          comp_name : checkEmp?.comp_name,
           recruiter_id : userId || ""
         }
         await Employer.insertMany(createEmployerr);
